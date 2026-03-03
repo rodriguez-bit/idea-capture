@@ -17,7 +17,8 @@ app = Flask(__name__, static_folder='static')
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = not bool(os.environ.get('FLASK_DEBUG'))
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
@@ -43,9 +44,21 @@ def get_db():
     return DBConnection(DB_PATH)
 
 
-# ─── Security headers ─────────────────────────────────────────────────────────
+# ─── CORS + Security headers ──────────────────────────────────────────────────
+_ALLOWED_ORIGINS = {
+    'null',  # Electron file:// origin
+    'http://localhost:5000', 'http://localhost:5001',
+    'https://ridea.onrender.com',
+}
+
 @app.after_request
 def set_security_headers(response):
+    origin = request.headers.get('Origin', '')
+    if origin in _ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PATCH, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['X-XSS-Protection'] = '1; mode=block'
@@ -53,6 +66,10 @@ def set_security_headers(response):
     if not app.debug:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
+
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    return '', 204
 
 
 # ─── Auth decorator ───────────────────────────────────────────────────────────
