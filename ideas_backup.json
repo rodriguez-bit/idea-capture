@@ -43,8 +43,8 @@
     "ai_score": 2,
     "ai_analysis": "{\"score\": 2, \"clarity\": 1, \"feasibility\": 2, \"summary\": \"Nápad navrhuje prepustenie IT oddelenia s cieľom znížiť náklady o približne 90 000 EUR ročne, pričom sa spoliehať na cloudové riešenia. Nápad je vyslovený neformálne bez analýzy, zdôvodnenia alebo ohľadu na operačné dôsledky.\", \"strengths\": [\"Identifikuje potenciálne oblasti úspory nákladov\", \"Uznáva existenciu cloudových technológií ako alternatívy\"], \"weaknesses\": [\"Absentuje analýza skutočných nákladov a úspor\", \"Žiadne zhodnotenie rizík a operačných dopadov\", \"Nezohľadňuje potrebu prechodu a migrácie systémov\", \"Chýba osvetlenie znalostí a skúseností interných tímov\", \"Neexistuje plán implementácie ani časová os\", \"Formulácia je neformálna a nevhodná pre c-level rozhodovanie\"], \"next_steps\": [\"Požiadať o detailnú analýzu súčasného IT rozpočtu a nákladovej štruktúry\", \"Vypracovať porovnanie nákladov: interný tím vs. cloudové riešenia\", \"Zhodnotenie rizík a bezpečnostných implikácií prechodu na cloud\", \"Formálne predloženie nápadu s konkrétnym plánom transformácie\"], \"category\": \"cost_reduction\"}",
     "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
+    "reviewed_by": "Admin",
+    "reviewed_at": "2026-03-03T20:24:28.157575",
     "created_at": "2026-03-03 20:23:38"
   }
 ]
