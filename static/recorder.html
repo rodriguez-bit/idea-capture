@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nahrať nápad</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --surface: #1e293b; --surface2: #263348;
+  --border: #334155; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #6366f1; --red: #ef4444; --green: #22c55e;
+}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 440px; }
+.logo { font-size: 28px; margin-bottom: 8px; }
+h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+.form-group select { width: 100%; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; appearance: none; }
+.form-group select:focus { border-color: var(--primary); }
+
+.record-btn { width: 100%; padding: 18px; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.record-btn.idle { background: var(--primary); color: white; }
+.record-btn.idle:hover { background: #4f46e5; transform: scale(1.01); }
+.record-btn.recording { background: var(--red); color: white; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.85; } }
+.record-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+.timer { text-align: center; font-size: 36px; font-weight: 700; letter-spacing: 2px; margin: 20px 0; color: var(--text); display: none; }
+.timer.show { display: block; }
+.timer-dot { display: inline-block; width: 10px; height: 10px; background: var(--red); border-radius: 50%; margin-right: 10px; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.send-btn { width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; display: none; }
+.send-btn.show { display: block; }
+.send-btn:hover { background: #16a34a; }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.discard-btn { width: 100%; padding: 10px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 8px; display: none; }
+.discard-btn.show { display: block; }
+.discard-btn:hover { color: var(--red); border-color: var(--red); }
+
+.status-msg { text-align: center; padding: 12px; border-radius: 10px; font-size: 14px; margin-top: 12px; display: none; }
+.status-msg.success { background: rgba(34,197,94,0.1); color: var(--green); display: block; }
+.status-msg.error { background: rgba(239,68,68,0.1); color: var(--red); display: block; }
+.status-msg.info { background: rgba(99,102,241,0.1); color: #818cf8; display: block; }
+
+.audio-preview { margin-top: 12px; display: none; }
+.audio-preview.show { display: block; }
+audio { width: 100%; border-radius: 8px; }
+
+.progress-bar { height: 3px; background: var(--border); border-radius: 3px; margin-top: 16px; overflow: hidden; display: none; }
+.progress-bar.show { display: block; }
+.progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+
+.user-info-bar { font-size: 12px; color: var(--muted); text-align: right; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🎙️</div>
+  <h1>Nahrať nápad</h1>
+  <p class="subtitle">2 kliky — nahrať a odoslať</p>
+  <div class="user-info-bar" id="user-info-bar">Načítavanie...</div>
+
+  <div class="form-group">
+    <label>Oddelenie *</label>
+    <select id="department">
+      <option value="">— vyberte oddelenie —</option>
+      <option value="development">Vývoj</option>
+      <option value="marketing">Marketing</option>
+      <option value="production">Produkcia</option>
+      <option value="management">Manažment</option>
+      <option value="other">Iné</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Vaša rola *</label>
+    <select id="role">
+      <option value="">— vyberte rolu —</option>
+      <option value="c-level">C-level</option>
+      <option value="manager">Manažér</option>
+      <option value="employee">Zamestnanec</option>
+    </select>
+  </div>
+
+  <button class="record-btn idle" id="record-btn" onclick="toggleRecord()">
+    <span id="btn-icon">🔴</span>
+    <span id="btn-text">Nahrať nápad</span>
+  </button>
+
+  <div class="timer" id="timer"><span class="timer-dot"></span><span id="timer-text">0:00</span></div>
+
+  <div class="audio-preview" id="audio-preview">
+    <audio id="audio-player" controls></audio>
+  </div>
+
+  <button class="send-btn" id="send-btn" onclick="submitIdea()">
+    ✅ Odoslať nápad
+  </button>
+
+  <button class="discard-btn" id="discard-btn" onclick="discardRecording()">
+    × Zahodiť nahrávku
+  </button>
+
+  <div class="progress-bar" id="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="status-msg" id="status-msg"></div>
+</div>
+
+<script>
+let mediaRecorder = null;
+let audioChunks = [];
+let audioBlob = null;
+let timerInterval = null;
+let seconds = 0;
+let currentUser = null;
+
+const API_BASE = window.API_BASE || '';  // Electron sets this via preload
+
+async function init() {
+  // Check auth
+  try {
+    const r = await fetch(`${API_BASE}/api/current-user`);
+    if (!r.ok) {
+      if (!window.IS_ELECTRON) window.location.href = '/login';
+      else showStatus('Nie ste prihlásený', 'error');
+      return;
+    }
+    currentUser = await r.json();
+    document.getElementById('user-info-bar').textContent = `👤 ${currentUser.name} · ${currentUser.department || currentUser.role}`;
+
+    // Pre-select department if user has one set
+    if (currentUser.department) {
+      document.getElementById('department').value = currentUser.department;
+    }
+  } catch(e) {
+    showStatus('Chyba pripojenia k serveru', 'error');
+  }
+}
+
+async function toggleRecord() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    stopRecording();
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  const dept = document.getElementById('department').value;
+  const role = document.getElementById('role').value;
+  if (!dept || !role) {
+    showStatus('Vyberte oddelenie a rolu pred nahrávaním', 'error');
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+
+    // Use opus/webm if supported, fallback to whatever browser supports
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : '';
+
+    const options = mimeType ? { mimeType } : {};
+    mediaRecorder = new MediaRecorder(stream, options);
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      const url = URL.createObjectURL(audioBlob);
+      const player = document.getElementById('audio-player');
+      player.src = url;
+      document.getElementById('audio-preview').classList.add('show');
+      document.getElementById('send-btn').classList.add('show');
+      document.getElementById('discard-btn').classList.add('show');
+      stream.getTracks().forEach(t => t.stop());
+    };
+
+    mediaRecorder.start(1000);
+
+    // Update UI
+    const btn = document.getElementById('record-btn');
+    btn.className = 'record-btn recording';
+    document.getElementById('btn-icon').textContent = '⬛';
+    document.getElementById('btn-text').textContent = 'Zastaviť nahrávanie';
+
+    // Timer
+    seconds = 0;
+    document.getElementById('timer').classList.add('show');
+    timerInterval = setInterval(() => {
+      seconds++;
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      document.getElementById('timer-text').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    clearStatus();
+  } catch(e) {
+    if (e.name === 'NotAllowedError') {
+      showStatus('Prístup k mikrofónu bol odmietnutý. Povolte ho v nastaveniach prehliadača.', 'error');
+    } else {
+      showStatus(`Chyba mikrofónu: ${e.message}`, 'error');
+    }
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  clearInterval(timerInterval);
+  document.getElementById('timer').classList.remove('show');
+
+  const btn = document.getElementById('record-btn');
+  btn.className = 'record-btn idle';
+  document.getElementById('btn-icon').textContent = '🔴';
+  document.getElementById('btn-text').textContent = 'Nahrať znova';
+}
+
+function discardRecording() {
+  audioBlob = null;
+  audioChunks = [];
+  document.getElementById('audio-preview').classList.remove('show');
+  document.getElementById('send-btn').classList.remove('show');
+  document.getElementById('discard-btn').classList.remove('show');
+  document.getElementById('record-btn').className = 'record-btn idle';
+  document.getElementById('btn-icon').textContent = '🔴';
+  document.getElementById('btn-text').textContent = 'Nahrať nápad';
+  clearStatus();
+}
+
+async function submitIdea() {
+  if (!audioBlob) return;
+  const dept = document.getElementById('department').value;
+  const role = document.getElementById('role').value;
+  if (!dept || !role) { showStatus('Vyberte oddelenie a rolu', 'error'); return; }
+
+  const sendBtn = document.getElementById('send-btn');
+  const discardBtn = document.getElementById('discard-btn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = '⏳ Odosiela sa...';
+  discardBtn.disabled = true;
+
+  showStatus('Nahrávam a prepísujem... môže trvať 10–30 sekúnd', 'info');
+  document.getElementById('progress-bar').classList.add('show');
+  animateProgress();
+
+  try {
+    const ext = audioBlob.type.includes('ogg') ? 'ogg' : audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    const formData = new FormData();
+    formData.append('audio', audioBlob, `idea_${Date.now()}.${ext}`);
+    formData.append('department', dept);
+    formData.append('role', role);
+
+    const r = await fetch(`${API_BASE}/api/ideas/upload`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+
+    document.getElementById('progress-fill').style.width = '100%';
+
+    if (r.ok) {
+      const d = await r.json();
+      showStatus(`✅ Nápad zaznamenaný! Transkript: "${d.transcript.substring(0,80)}${d.transcript.length > 80 ? '...' : ''}"`, 'success');
+      setTimeout(() => {
+        discardRecording();
+        document.getElementById('progress-bar').classList.remove('show');
+        document.getElementById('progress-fill').style.width = '0%';
+      }, 4000);
+    } else {
+      const d = await r.json().catch(() => ({}));
+      showStatus(d.error || 'Chyba pri odosielaní', 'error');
+    }
+  } catch(e) {
+    showStatus(`Chyba: ${e.message}`, 'error');
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = '✅ Odoslať nápad';
+    discardBtn.disabled = false;
+  }
+}
+
+let progressInterval = null;
+function animateProgress() {
+  let w = 0;
+  clearInterval(progressInterval);
+  progressInterval = setInterval(() => {
+    w = Math.min(w + 2, 85);
+    document.getElementById('progress-fill').style.width = w + '%';
+    if (w >= 85) clearInterval(progressInterval);
+  }, 600);
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = `status-msg ${type}`;
+}
+function clearStatus() {
+  const el = document.getElementById('status-msg');
+  el.className = 'status-msg';
+}
+
+init();
+</script>
+</body>
+</html>

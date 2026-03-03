@@ -1,0 +1,26 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+venv/
+.venv/
+env/
+
+# Electron
+electron/node_modules/
+electron/dist/
+
+# Chrome extension
+chrome-extension/.env
+
+# Backups (committed separately to data-backups branch)
+ideas_backup.json
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp

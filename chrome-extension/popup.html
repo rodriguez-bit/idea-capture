@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>Idea Capture</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f172a; --surface: #1e293b; --surface2: #263348;
+  --border: #334155; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #6366f1; --red: #ef4444; --green: #22c55e;
+}
+body { width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 0; }
+
+/* LOGIN SCREEN */
+#login-screen { padding: 24px 20px; }
+#login-screen h2 { font-size: 16px; margin-bottom: 4px; }
+#login-screen p { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.input { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; margin-bottom: 10px; }
+.input:focus { border-color: var(--primary); }
+.btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #4f46e5; }
+.err { font-size: 12px; color: var(--red); margin-top: 8px; display: none; }
+.logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.logo-row .icon { font-size: 22px; }
+.logo-row h1 { font-size: 16px; font-weight: 700; }
+
+/* RECORDER SCREEN */
+#recorder-screen { padding: 20px; display: none; }
+.user-bar { font-size: 12px; color: var(--muted); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.user-bar button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; }
+.user-bar button:hover { color: var(--red); }
+.sel { width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; margin-bottom: 10px; appearance: none; }
+.sel:focus { border-color: var(--primary); }
+.record-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; transition: all 0.2s; }
+.record-btn.idle { background: var(--primary); color: white; }
+.record-btn.idle:hover { background: #4f46e5; }
+.record-btn.rec { background: var(--red); color: white; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.8} }
+.timer { text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 2px; padding: 12px 0; display: none; }
+.timer.show { display: block; }
+.dot { display: inline-block; width: 8px; height: 8px; background: var(--red); border-radius: 50%; margin-right: 8px; animation: blink 1s infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.send-btn { width: 100%; padding: 12px; background: var(--green); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; display: none; }
+.send-btn.show { display: block; }
+.send-btn:hover { background: #16a34a; }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.discard-lnk { text-align: center; font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 8px; display: none; }
+.discard-lnk.show { display: block; }
+.discard-lnk:hover { color: var(--red); }
+.status { font-size: 12px; text-align: center; padding: 8px 10px; border-radius: 8px; margin-top: 10px; display: none; }
+.status.success { background: rgba(34,197,94,.1); color: var(--green); display: block; }
+.status.error { background: rgba(239,68,68,.1); color: var(--red); display: block; }
+.status.info { background: rgba(99,102,241,.1); color: #818cf8; display: block; }
+.admin-lnk { text-align: center; margin-top: 14px; font-size: 12px; }
+.admin-lnk a { color: var(--muted); text-decoration: none; }
+.admin-lnk a:hover { color: var(--primary); }
+.progress { height: 2px; background: var(--border); border-radius: 2px; margin-top: 10px; display: none; }
+.progress.show { display: block; }
+.progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width .3s; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="logo-row"><span class="icon">💡</span><h1>Idea Capture</h1></div>
+  <h2>Prihlásenie</h2>
+  <p>Interný nástroj pre zachytávanie nápadov</p>
+  <input class="input" type="email" id="l-email" placeholder="E-mail">
+  <input class="input" type="password" id="l-pass" placeholder="Heslo">
+  <button class="btn btn-primary" onclick="doLogin()">Prihlásiť sa</button>
+  <div class="err" id="l-err"></div>
+</div>
+
+<!-- RECORDER -->
+<div id="recorder-screen">
+  <div class="user-bar">
+    <span id="user-label">—</span>
+    <button onclick="doLogout()">Odhlásiť</button>
+  </div>
+
+  <select class="sel" id="department">
+    <option value="">— oddelenie —</option>
+    <option value="development">Vývoj</option>
+    <option value="marketing">Marketing</option>
+    <option value="production">Produkcia</option>
+    <option value="management">Manažment</option>
+    <option value="other">Iné</option>
+  </select>
+
+  <select class="sel" id="role">
+    <option value="">— rola —</option>
+    <option value="c-level">C-level</option>
+    <option value="manager">Manažér</option>
+    <option value="employee">Zamestnanec</option>
+  </select>
+
+  <button class="record-btn idle" id="rec-btn" onclick="toggleRecord()">
+    <span id="btn-ic">🔴</span><span id="btn-tx">Nahrať nápad</span>
+  </button>
+
+  <div class="timer" id="timer"><span class="dot"></span><span id="timer-tx">0:00</span></div>
+
+  <button class="send-btn" id="send-btn" onclick="submitIdea()">✅ Odoslať nápad</button>
+  <div class="discard-lnk" id="discard-lnk" onclick="discardRecording()">× Zahodiť nahrávku</div>
+
+  <div class="progress" id="progress"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="status" id="status-msg"></div>
+
+  <div class="admin-lnk"><a href="#" onclick="openAdmin()">Otvoriť Admin konzolu ↗</a></div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
