@@ -1,10 +1,18 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain } = require('electron');
 const path = require('path');
-const Store = require('electron-store');
+const fs = require('fs');
 
-const store = new Store();
+// Simple JSON store (replaces electron-store to avoid ESM issues)
+let _storeData = {};
+let _storePath = null;
+function _loadStore() {
+  if (!_storePath) _storePath = path.join(app.getPath('userData'), 'ridea-config.json');
+  try { _storeData = JSON.parse(fs.readFileSync(_storePath, 'utf-8')); } catch {}
+}
+function storeGet(key, def) { _loadStore(); return _storeData[key] !== undefined ? _storeData[key] : def; }
+function storeSet(key, value) { _loadStore(); _storeData[key] = value; fs.writeFileSync(_storePath, JSON.stringify(_storeData)); }
 
-const API_BASE = store.get('apiBase', 'https://ridea.onrender.com');
+const API_BASE = storeGet('apiBase', 'https://ridea.onrender.com');
 
 let mainWindow = null;
 let tray = null;
@@ -79,8 +87,8 @@ function createTray() {
 
 // IPC handlers
 ipcMain.handle('get-api-base', () => API_BASE);
-ipcMain.handle('get-store', (event, key) => store.get(key));
-ipcMain.handle('set-store', (event, key, value) => store.set(key, value));
+ipcMain.handle('get-store', (event, key) => storeGet(key));
+ipcMain.handle('set-store', (event, key, value) => storeSet(key, value));
 
 app.whenReady().then(() => {
   createWindow();

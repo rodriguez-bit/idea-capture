@@ -187,7 +187,10 @@ class DBConnection:
         """Execute a multi-statement SQL script."""
         if self._is_pg:
             cur = self._conn.cursor()
-            cur.execute(sql_script)
+            for stmt in sql_script.split(';'):
+                stmt = stmt.strip()
+                if stmt:
+                    cur.execute(stmt)
             return CursorWrapper(cur)
         else:
             self._conn.executescript(sql_script)
