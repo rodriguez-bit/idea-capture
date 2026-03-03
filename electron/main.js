@@ -4,7 +4,7 @@ const Store = require('electron-store');
 
 const store = new Store();
 
-const API_BASE = store.get('apiBase', 'https://idea-capture.onrender.com');
+const API_BASE = store.get('apiBase', 'https://ridea.onrender.com');
 
 let mainWindow = null;
 let tray = null;
@@ -14,7 +14,7 @@ function createWindow() {
     width: 400,
     height: 620,
     resizable: false,
-    title: 'Idea Capture',
+    title: 'Ridea',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -64,7 +64,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('Idea Capture');
+  tray.setToolTip('Ridea');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {

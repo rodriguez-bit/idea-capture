@@ -1,5 +1,5 @@
 {
-  "name": "idea-capture",
+  "name": "ridea",
   "version": "1.0.0",
   "description": "Interný nástroj pre zachytávanie hlasových nápadov",
   "main": "main.js",
@@ -10,8 +10,8 @@
     "dist:win": "electron-builder --win"
   },
   "build": {
-    "appId": "com.dajanarodriguez.idea-capture",
-    "productName": "Idea Capture",
+    "appId": "com.dajanarodriguez.ridea",
+    "productName": "Ridea",
     "directories": {
       "output": "dist"
     },
@@ -41,7 +41,7 @@
       "createStartMenuShortcut": true
     },
     "dmg": {
-      "title": "Idea Capture ${version}",
+      "title": "Ridea ${version}",
       "contents": [
         { "x": 410, "y": 150, "type": "link", "path": "/Applications" },
         { "x": 130, "y": 150, "type": "file" }

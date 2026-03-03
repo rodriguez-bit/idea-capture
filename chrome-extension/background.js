@@ -1,8 +1,8 @@
-// Background service worker for Idea Capture Chrome Extension
+// Background service worker for Ridea Chrome Extension
 // Handles extension lifecycle events
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Idea Capture extension installed');
+  console.log('Ridea extension installed');
 });
 
 // Keep service worker alive if needed

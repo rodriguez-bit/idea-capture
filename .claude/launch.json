@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "idea-capture",
+      "name": "ridea",
       "runtimeExecutable": "C:\\Users\\Raul Rodriguez\\AppData\\Local\\Python\\bin\\python.exe",
       "runtimeArgs": ["app.py"],
       "port": 5001

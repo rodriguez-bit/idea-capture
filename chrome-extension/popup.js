@@ -1,4 +1,4 @@
-const API_BASE = 'https://idea-capture.onrender.com';
+const API_BASE = 'https://ridea.onrender.com';
 // For local dev, change to: const API_BASE = 'http://localhost:5001';
 
 let mediaRecorder = null;

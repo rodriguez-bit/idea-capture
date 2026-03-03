@@ -24,7 +24,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL', '')
 DB_PATH = 'ideas.db'
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
-GITHUB_REPO = os.environ.get('GITHUB_REPO', 'dajanarodriguez/idea-capture')
+GITHUB_REPO = os.environ.get('GITHUB_REPO', 'dajanarodriguez/ridea')
 BACKUP_BRANCH = 'data-backups'
 _branch_ready = False
 _backup_lock = threading.Lock()
@@ -290,7 +290,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Idea Capture — Prihlásenie</title>
+<title>Ridea — Prihlásenie</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -309,7 +309,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
 <body>
 <div class="card">
   <div class="logo">💡</div>
-  <h1>Idea Capture</h1>
+  <h1>Ridea</h1>
   <p>Interný nástroj pre zachytávanie nápadov</p>
   <label>E-mail</label>
   <input type="email" id="email" placeholder="vas@email.com" autofocus>

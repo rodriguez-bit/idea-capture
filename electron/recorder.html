@@ -2,8 +2,8 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src https://idea-capture.onrender.com http://localhost:5001; media-src *">
-<title>Idea Capture</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src https://ridea.onrender.com http://localhost:5001; media-src *">
+<title>Ridea</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -69,13 +69,13 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 </head>
 <body>
 
-<div class="drag-region"><span>💡 Idea Capture</span></div>
+<div class="drag-region"><span>💡 Ridea</span></div>
 
 <div class="content">
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="logo-row"><span class="icon">💡</span><h1>Idea Capture</h1></div>
+  <div class="logo-row"><span class="icon">💡</span><h1>Ridea</h1></div>
   <p class="subtitle">Interný nástroj pre zachytávanie nápadov</p>
   <input class="input" type="email" id="l-email" placeholder="E-mail">
   <input class="input" type="password" id="l-pass" placeholder="Heslo">
@@ -121,7 +121,7 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 </div>
 
 <script>
-let API_BASE = 'https://idea-capture.onrender.com';
+let API_BASE = 'https://ridea.onrender.com';
 let mediaRecorder = null;
 let audioChunks = [];
 let audioBlob = null;

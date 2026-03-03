@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Idea Capture",
+  "name": "Ridea",
   "version": "1.0.0",
   "description": "Interný nástroj pre zachytávanie hlasových nápadov",
   "permissions": [
@@ -9,11 +9,11 @@
   ],
   "host_permissions": [
     "http://localhost:5001/*",
-    "https://idea-capture.onrender.com/*"
+    "https://ridea.onrender.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Idea Capture",
+    "default_title": "Ridea",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -29,6 +29,6 @@
     "service_worker": "background.js"
   },
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; script-src 'self'; connect-src http://localhost:5001 https://idea-capture.onrender.com"
+    "extension_pages": "default-src 'self'; script-src 'self'; connect-src http://localhost:5001 https://ridea.onrender.com"
   }
 }
