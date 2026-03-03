@@ -33,7 +33,7 @@ _backup_lock = threading.Lock()
 ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.webm', '.mpeg', '.opus'}
 
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
-ROLES = ['c-level', 'manager', 'employee']
+ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
 
 # ─── Failed login tracking ───────────────────────────────────────────────────
 _failed_logins = {}

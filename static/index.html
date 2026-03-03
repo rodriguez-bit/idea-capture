@@ -172,6 +172,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <option value="c-level">C-level</option>
         <option value="manager">Manažér</option>
         <option value="employee">Zamestnanec</option>
+        <option value="majo-markech">Majo markech je kral</option>
       </select>
       <input class="filter-input" id="f-search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()">
     </div>
@@ -611,7 +612,7 @@ function deptLabel(d) {
 }
 
 function roleLabel(r) {
-  return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec'}[r] || r || '—';
+  return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec','majo-markech':'Majo markech je kral'}[r] || r || '—';
 }
 
 function formatDate(s) {
