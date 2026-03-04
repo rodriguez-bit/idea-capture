@@ -422,13 +422,13 @@
     "duration_seconds": 30,
     "transcript": "Mám nápad na voňavku, ktorú som odovzdal. Chce mi zahrnúť do Raudeu Fuego značky, ktorú vlastne tvoríme a dal som si ju teda nazorkovať do Prahy a čakám na tie vzorky, no a potom by sme mohli spraviť nejaký veľmi zajímavý obal na to a bla, bla, bla.",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 5,
+    "ai_analysis": "{\"score\": 5, \"clarity\": 3, \"feasibility\": 6, \"summary\": \"Nápad spočíva v zavedení novej voňavky do značky Raudeu Fuego s inovatívnym obalom. Autor čaká na vzorky z Prahy, no prezentácia nápadu je nejasná a chýbajú konkrétne detaily o stratégii a cieľoch.\", \"strengths\": [\"Nápad je už v štádiu vývoja - vzorky boli už objednané\", \"Potenciál pre rozšírenie produktového portfólia značky\", \"Zmienka o pútavom obale naznačuje záujem o komplexný prístup\"], \"weaknesses\": [\"Veľmi nejasná a nestrukturovaná prezentácia nápadu\", \"Chýbajú kľúčové informácie: trhový potenciál, cieľová skupina, rozpočet, časový plán\", \"Vágne vyjadrenie (\\\"bla, bla, bla\\\") naznačuje nedostatočnú prípravu\", \"Nejasná úloha manažéra v implementácii nápadu\"], \"next_steps\": [\"Pripraviť detailný project brief s jasným cieľom, rozpočtom a harmonogramom\", \"Definovať cieľovú skupinu spotrebiteľov a analýzu trhu\", \"Vytvoriť konkrétny plán pre design obalu a marketing kampáňu\", \"Naplánovat stretnutie s relevantnými oddeleniami (marketing, produktový výskum)\"], \"category\": \"product\", \"tags\": [\"product\", \"innovation\", \"marketing\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 16:46:23.861249+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[\"product\", \"innovation\", \"marketing\"]"
   }
 ]
