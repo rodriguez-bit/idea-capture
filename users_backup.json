@@ -43,5 +43,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 13:36:10.285752+00"
+  },
+  {
+    "email": "vighova@dajanarodriguez.com",
+    "display_name": "Veronika Víghová",
+    "password_hash": "scrypt:32768:8:1$cvu7rgPmpn6QRWX9$bc5812f099acaf47f64f123292dd9c03ef16715b673f5a7bfa21cddd9f29c9e5fe1fd3c3293dc65dbbbb5b7f03a0902fac3b5d89340425ebe5d6cc1106204058",
+    "role": "submitter",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 13:37:59.823531+00"
   }
 ]
