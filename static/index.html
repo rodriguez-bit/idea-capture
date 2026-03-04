@@ -756,6 +756,8 @@ async function doLogout() {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
+  const s = document.getElementById('f-search');
+  if (s) s.value = '';
 }
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
