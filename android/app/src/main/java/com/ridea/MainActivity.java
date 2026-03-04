@@ -12,7 +12,7 @@ import android.webkit.PermissionRequest;
 public class MainActivity extends Activity {
 
     private WebView webView;
-    private static final String APP_URL = "https://ridea.onrender.com";
+    private static final String APP_URL = "https://ridea.onrender.com/recorder";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
