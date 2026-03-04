@@ -883,6 +883,12 @@ def api_stats():
 @app.route('/')
 @login_required
 def index():
+    return redirect(url_for('recorder_page'))
+
+
+@app.route('/admin')
+@login_required
+def admin_page():
     return send_from_directory('static', 'index.html')
 
 
