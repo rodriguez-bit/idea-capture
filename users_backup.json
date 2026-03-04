@@ -70,5 +70,14 @@
     "department": "management",
     "active": 1,
     "created_at": "2026-03-04 13:45:31.829027+00"
+  },
+  {
+    "email": "gubova@dajanarodriguez.com",
+    "display_name": "Lenka Gubova",
+    "password_hash": "scrypt:32768:8:1$RgfUgWedd3cosqCc$5b86669319cf7d40319bf848edda80fe4a4e01634a15e95d26c87e8c37f0dfc468053a6f8784aad78d32dc538eb1d9edc6dd65dffcb4887876a526efe4fb5d6d",
+    "role": "submitter",
+    "department": "management",
+    "active": 1,
+    "created_at": "2026-03-04 13:54:28.817438+00"
   }
 ]
