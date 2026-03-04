@@ -1,0 +1,38 @@
+[
+  {
+    "email": "admin@dajanarodriguez.com",
+    "display_name": "Admin",
+    "password_hash": "scrypt:32768:8:1$2oauhBC0Ul4gjql1$89ed4fb5d366c8ab127eafe4a90928190901a53eb41387d9333db9de6e68397c0a53ffe8a96ce1a4a4950f3361d9daee16d54cd9a93d93354ffe684e0ee1dbd7",
+    "role": "admin",
+    "department": "",
+    "active": 1,
+    "created_at": "2026-03-04 11:58:18.627611+00"
+  },
+  {
+    "email": "raul@dajanarodriguez.com",
+    "display_name": "Raul",
+    "password_hash": "scrypt:32768:8:1$nFF6fY6ui2fU19Ah$1fa1d20f7827c8d514bdcd29eab95de934f4e17b6f08414f62018c0954e3e8ed399c4d328dbb373eafe3475fa0c0c172ba4af1cea044e525ba18f6e07af81895",
+    "role": "reviewer",
+    "department": "management",
+    "active": 1,
+    "created_at": "2026-03-04 11:58:18.627611+00"
+  },
+  {
+    "email": "dajana@dajanarodriguez.com",
+    "display_name": "Dajana",
+    "password_hash": "scrypt:32768:8:1$nFF6fY6ui2fU19Ah$1fa1d20f7827c8d514bdcd29eab95de934f4e17b6f08414f62018c0954e3e8ed399c4d328dbb373eafe3475fa0c0c172ba4af1cea044e525ba18f6e07af81895",
+    "role": "reviewer",
+    "department": "management",
+    "active": 1,
+    "created_at": "2026-03-04 11:58:18.627611+00"
+  },
+  {
+    "email": "kovacovicova@dajanarodriguez.com",
+    "display_name": "Dominika",
+    "password_hash": "scrypt:32768:8:1$t4gJj9ByM27G7CY1$8f22464128a2286e3ce0af922770c887e2807c796d599e667a34c780f7dfb526b5b525c089409f280af0f6ebb8bb9217cdfecf8d9d5c17eb8fb891dea28c9ffd",
+    "role": "admin",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 13:27:39.789983+00"
+  }
+]
