@@ -430,5 +430,23 @@
     "created_at": "2026-03-04 16:46:23.861249+00",
     "visibility": "personal",
     "tags": "[\"product\", \"innovation\", \"marketing\"]"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 4,
+    "transcript": "Ahoj, ahoj, ahoj, samochod, práco 34567.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 17:01:03.544292+00",
+    "visibility": "personal",
+    "tags": "[]"
   }
 ]
