@@ -610,5 +610,23 @@
     "created_at": "2026-03-04 20:40:39.247102+00",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 5,
+    "transcript": "Dobre, ja mám takýto napad, blá, blá, blá blá, blá blá blá blá blá",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 21:29:27.841082+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
