@@ -10,85 +10,205 @@ Usage:
     conn.commit()
     conn.close()
 
-Features:
-    - Auto-detects DATABASE_URL env var for PostgreSQL
-    - Translates ? placeholders to %s for psycopg2
-    - Provides get_column_names() helper for both backends
-    - lastrowid() normalised across backends
+When DATABASE_URL is set, all queries are automatically translated:
+    ? -> %s, datetime('now') -> CURRENT_TIMESTAMP, LIKE -> ILIKE, etc.
 """
 
 import os
 import re
+import sqlite3
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
-
-# Render gives postgres:// but psycopg2 needs postgresql://
+# Render/Heroku provide postgres:// but psycopg2 requires postgresql://
 if DATABASE_URL.startswith('postgres://'):
-    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-
+    DATABASE_URL = 'postgresql://' + DATABASE_URL[len('postgres://'):]
 USE_PG = bool(DATABASE_URL)
+
+# PostgreSQL connection pool (lazy init)
+_pool = None
+
+if USE_PG:
+    try:
+        import psycopg2
+        import psycopg2.pool
+        import psycopg2.extras
+    except ImportError:
+        print("WARNING: DATABASE_URL is set but psycopg2 not installed. Falling back to SQLite.")
+        USE_PG = False
+
+
+def _get_pool():
+    """Lazy-initialize the PostgreSQL connection pool."""
+    global _pool
+    if _pool is None and USE_PG:
+        _pool = psycopg2.pool.ThreadedConnectionPool(1, 10, DATABASE_URL)
+    return _pool
+
+
+def _translate_query(sql):
+    """Translate SQLite-style SQL to PostgreSQL-compatible SQL."""
+    if not USE_PG:
+        return sql
+
+    # ? -> %s (parameter placeholders)
+    sql = sql.replace('?', '%s')
+
+    # datetime('now') -> CURRENT_TIMESTAMP, date('now') -> CURRENT_DATE
+    sql = sql.replace("datetime('now')", 'CURRENT_TIMESTAMP')
+    sql = sql.replace("date('now')", 'CURRENT_DATE')
+
+    # date(column) -> column::date (SQLite date() cast -> PG cast)
+    sql = re.sub(r'\bdate\((\w+)\)', r'\1::date', sql)
+
+    # TEXT >= CURRENT_DATE comparisons
+    sql = re.sub(r'(\w+_datum)\s*>=\s*CURRENT_DATE', r"NULLIF(\1, '')::date >= CURRENT_DATE", sql)
+    sql = re.sub(r'(\w+_datum)\s*<=\s*CURRENT_DATE', r"NULLIF(\1, '')::date <= CURRENT_DATE", sql)
+
+    # INSERT OR REPLACE -> ON CONFLICT DO UPDATE
+    if 'INSERT OR REPLACE INTO app_meta' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value'
+    elif 'INSERT OR REPLACE INTO users' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT (email) DO UPDATE SET display_name=EXCLUDED.display_name, password_hash=EXCLUDED.password_hash, role=EXCLUDED.role, department=EXCLUDED.department'
+    elif 'INSERT OR REPLACE INTO company_context' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value'
+    elif 'INSERT OR REPLACE INTO' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT DO NOTHING'
+
+    # INSERT OR IGNORE -> ON CONFLICT DO NOTHING
+    if 'INSERT OR IGNORE INTO' in sql:
+        sql = sql.replace('INSERT OR IGNORE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT DO NOTHING'
+
+    # LIKE -> ILIKE (case-insensitive for Slovak names)
+    sql = sql.replace(' LIKE ', ' ILIKE ')
+
+    # last_insert_rowid() -> lastval()
+    sql = sql.replace('last_insert_rowid()', 'lastval()')
+
+    # AUTOINCREMENT -> (remove, handled in schema_pg.sql)
+    sql = sql.replace('AUTOINCREMENT', '')
+
+    return sql
+
+
+class DualAccessRow(dict):
+    """Row that supports both row['column'] and row[0] index access.
+    Compatible with sqlite3.Row interface used throughout the app."""
+
+    def __init__(self, columns, values):
+        super().__init__(zip(columns, values))
+        self._columns = columns
+        self._values = list(values)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._values[key]
+        return super().__getitem__(key)
+
+    def keys(self):
+        return self._columns
+
+    def get(self, key, default=None):
+        return super().get(key, default)
+
+
+class CursorWrapper:
+    """Wraps psycopg2 cursor to return DualAccessRow objects."""
+
+    def __init__(self, cursor):
+        self._cur = cursor
+        self._description = None
+
+    def _wrap_row(self, row):
+        if row is None:
+            return None
+        cols = [desc[0] for desc in self._cur.description]
+        return DualAccessRow(cols, row)
+
+    def fetchone(self):
+        row = self._cur.fetchone()
+        return self._wrap_row(row)
+
+    def fetchall(self):
+        rows = self._cur.fetchall()
+        if not rows:
+            return []
+        cols = [desc[0] for desc in self._cur.description]
+        return [DualAccessRow(cols, r) for r in rows]
+
+    @property
+    def lastrowid(self):
+        """Get last inserted row ID via PostgreSQL lastval()."""
+        try:
+            self._cur.execute("SELECT lastval()")
+            return self._cur.fetchone()[0]
+        except Exception:
+            return None
+
+    @property
+    def rowcount(self):
+        return self._cur.rowcount
+
+    @property
+    def description(self):
+        return self._cur.description
 
 
 class DBConnection:
-    """Thin wrapper around sqlite3 / psycopg2 that exposes a uniform API."""
+    """Unified database connection that works with both SQLite and PostgreSQL."""
 
-    def __init__(self, sqlite_path: str = 'ideas.db'):
-        self.use_pg = USE_PG
-        self._cursor = None
-        self._lastrowid = None
-
+    def __init__(self, db_path=None):
         if USE_PG:
-            import psycopg2
-            import psycopg2.extras
-            self._conn = psycopg2.connect(DATABASE_URL)
+            pool = _get_pool()
+            self._conn = pool.getconn()
             self._conn.autocommit = False
+            self._is_pg = True
         else:
-            import sqlite3
-            self._conn = sqlite3.connect(sqlite_path)
+            self._conn = sqlite3.connect(db_path or ':memory:')
             self._conn.row_factory = sqlite3.Row
-            self._conn.execute('PRAGMA journal_mode=WAL')
-            self._conn.execute('PRAGMA foreign_keys=ON')
+            self._conn.execute("PRAGMA journal_mode=WAL")
+            self._conn.execute("PRAGMA foreign_keys=ON")
+            self._is_pg = False
 
-    # ── Core API ──────────────────────────────────────────────────────────────
-
-    def execute(self, sql: str, params=()):
-        """Execute a single SQL statement.  Returns self for chaining."""
-        if self.use_pg:
-            sql = _to_pg(sql)
+    def execute(self, sql, params=None):
+        sql = _translate_query(sql)
+        if self._is_pg:
             cur = self._conn.cursor()
-            cur.execute(sql, params)
-            self._cursor = cur
-            # For INSERT … RETURNING id we grab it here
-            if cur.description:
-                try:
-                    row = cur.fetchone()
-                    if row:
-                        self._lastrowid = row[0]
-                except Exception:
-                    pass
+            try:
+                cur.execute(sql, params or ())
+            except Exception as e:
+                # Auto-rollback on error to keep connection usable
+                self._conn.rollback()
+                raise e
+            return CursorWrapper(cur)
         else:
-            cur = self._conn.execute(sql, params)
-            self._cursor = cur
-            self._lastrowid = cur.lastrowid
-        return self
+            return self._conn.execute(sql, params or ())
 
-    def fetchone(self):
-        if self._cursor is None:
-            return None
-        row = self._cursor.fetchone()
-        if self.use_pg and row is not None:
-            return tuple(row)
-        if not self.use_pg and row is not None:
-            return tuple(row)  # sqlite3.Row → plain tuple
-        return row
-
-    def fetchall(self):
-        if self._cursor is None:
-            return []
-        rows = self._cursor.fetchall()
-        if self.use_pg:
-            return [tuple(r) for r in rows]
-        return [tuple(r) for r in rows]
+    def executescript(self, sql_script):
+        """Execute a multi-statement SQL script."""
+        if self._is_pg:
+            cur = self._conn.cursor()
+            for stmt in sql_script.split(';'):
+                stmt = stmt.strip()
+                if stmt:
+                    cur.execute(stmt)
+            return CursorWrapper(cur)
+        else:
+            self._conn.executescript(sql_script)
 
     def commit(self):
         self._conn.commit()
@@ -97,100 +217,22 @@ class DBConnection:
         self._conn.rollback()
 
     def close(self):
-        try:
-            self._conn.close()
-        except Exception:
-            pass
-
-    def lastrowid(self) -> int:
-        """Return the last inserted row-id (works for both backends)."""
-        if self.use_pg:
-            if self._lastrowid is not None:
-                return self._lastrowid
-            # Fallback: ask the cursor
-            if self._cursor:
-                try:
-                    row = self._cursor.fetchone()
-                    if row:
-                        return row[0]
-                except Exception:
-                    pass
-        return self._lastrowid or 0
-
-    # ── Context manager ───────────────────────────────────────────────────────
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        if exc_type:
-            self.rollback()
+        if self._is_pg:
+            pool = _get_pool()
+            if pool:
+                pool.putconn(self._conn)
         else:
-            self.commit()
-        self.close()
+            self._conn.close()
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _to_pg(sql: str) -> str:
-    """Replace SQLite ? placeholders with PostgreSQL $1, $2, … and adapt syntax."""
-    # Replace ? with $n
-    counter = 0
-
-    def replacer(m):
-        nonlocal counter
-        counter += 1
-        return f'${counter}'
-
-    sql = re.sub(r'\?', replacer, sql)
-
-    # SQLite-specific pragmas → no-op in PG
-    if sql.strip().upper().startswith('PRAGMA'):
-        return 'SELECT 1'
-
-    # INSERT OR IGNORE → INSERT … ON CONFLICT DO NOTHING
-    sql = re.sub(r'(?i)INSERT OR IGNORE', 'INSERT', sql)
-    sql = re.sub(
-        r'(?i)(INSERT INTO \w+\s*\([^)]+\)\s*VALUES\s*\([^)]+\))(?!.*ON CONFLICT)',
-        lambda m: m.group(0) + ' ON CONFLICT DO NOTHING',
-        sql
-    )
-
-    # INSERT OR REPLACE → INSERT … ON CONFLICT DO UPDATE (simplistic)
-    sql = re.sub(r'(?i)INSERT OR REPLACE', 'INSERT', sql)
-
-    # AUTOINCREMENT → handled via SERIAL/BIGSERIAL in schema
-    sql = sql.replace('AUTOINCREMENT', '')
-
-    # strftime('%Y-%m', col) → to_char(col, 'YYYY-MM')
-    sql = re.sub(
-        r"strftime\('([^']+)',\s*([^)]+)\)",
-        lambda m: f"to_char({m.group(2).strip()}, '{_strftime_to_pg(m.group(1))}')",
-        sql
-    )
-
-    # date('now', ...) → NOW() (simplified)
-    sql = re.sub(r"date\('now'[^)]*\)", 'NOW()', sql)
-
-    # CURRENT_TIMESTAMP is valid in both, leave it
-    return sql
-
-
-def _strftime_to_pg(fmt: str) -> str:
-    mapping = {'%Y': 'YYYY', '%m': 'MM', '%d': 'DD', '%H': 'HH24', '%M': 'MI', '%S': 'SS'}
-    for k, v in mapping.items():
-        fmt = fmt.replace(k, v)
-    return fmt
-
-
-def get_column_names(conn: DBConnection, table: str):
-    """Return column names for a table (works for both backends)."""
-    if conn.use_pg:
-        rows = conn.execute(
-            'SELECT column_name FROM information_schema.columns WHERE table_name = $1 ORDER BY ordinal_position',
-            (table,)
+def get_column_names(db, table_name):
+    """Get column names for a table. Works with both SQLite and PostgreSQL."""
+    if USE_PG:
+        rows = db.execute(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = ?",
+            (table_name,)
         ).fetchall()
         return [r[0] for r in rows]
     else:
-        rows = conn.execute(f'PRAGMA table_info({table})').fetchall()
+        rows = db.execute(f"PRAGMA table_info({table_name})").fetchall()
         return [r[1] for r in rows]
