@@ -79,5 +79,14 @@
     "department": "management",
     "active": 1,
     "created_at": "2026-03-04 13:54:28.817438+00"
+  },
+  {
+    "email": "olha kolodiazhna <kolodiazhna@dajanarodriguez.com>",
+    "display_name": "Olha Patrová",
+    "password_hash": "scrypt:32768:8:1$6cjYHOTPI9uZ8au9$50cab21a0abd0fa91ed724ed320591ffae9e526b8cc9f1e4aa5e80334362c8ac824e0b52582e0031d208e41416b62332242b2d88be741ec115c9ba4ed731e487",
+    "role": "submitter",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 14:04:59.737641+00"
   }
 ]
