@@ -265,9 +265,12 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Poznámka recenzenta</label>
         <textarea id="modal-note" placeholder="Voliteľná poznámka..."></textarea>
       </div>
-      <div style="display:flex;gap:10px;width:100%">
-        <button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button>
-        <button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button>
+      <div style="display:flex;gap:10px;width:100%;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:10px">
+          <button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button>
+          <button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button>
+        </div>
+        <button class="btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);display:none">🗑 Vymazať</button>
       </div>
     </div>
   </div>
@@ -451,7 +454,24 @@ async function openIdea(id) {
     actions.style.display = 'none';
   }
 
+  // Show delete button only for admins
+  document.getElementById('btn-delete-idea').style.display =
+    currentUser.role === 'admin' ? '' : 'none';
+
   document.getElementById('idea-modal').classList.add('open');
+}
+
+async function deleteIdea() {
+  if (!currentIdea) return;
+  if (!confirm(`Naozaj vymazať nápad #${currentIdea.id}? Táto akcia je nevratná.`)) return;
+  const r = await fetch(`/api/ideas/${currentIdea.id}`, { method: 'DELETE' });
+  if (r.ok) {
+    closeModal('idea-modal');
+    loadIdeas();
+    showToast('Nápad vymazaný', 'success');
+  } else {
+    showToast('Chyba pri mazaní', 'error');
+  }
 }
 
 async function saveIdea() {
