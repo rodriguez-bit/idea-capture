@@ -19,6 +19,9 @@ import re
 import sqlite3
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
+# Render/Heroku provide postgres:// but psycopg2 requires postgresql://
+if DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = 'postgresql://' + DATABASE_URL[len('postgres://'):]
 USE_PG = bool(DATABASE_URL)
 
 # PostgreSQL connection pool (lazy init)
