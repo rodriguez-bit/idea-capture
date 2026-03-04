@@ -250,5 +250,23 @@
     "created_at": "2026-03-04 13:49:55.036189+00",
     "visibility": "company",
     "tags": "[\"hr\", \"team_building\"]"
+  },
+  {
+    "author_id": 6,
+    "author_name": "Veronika Víghová",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 7,
+    "transcript": "Čaute firma. Mám taký nápad, že by sme mohli o trete chodit domov.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 14:02:35.06182+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
