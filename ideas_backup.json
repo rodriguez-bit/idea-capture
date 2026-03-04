@@ -46,5 +46,21 @@
     "reviewed_by": "Admin",
     "reviewed_at": "2026-03-03T20:24:28.157575",
     "created_at": "2026-03-03 20:23:38"
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 7,
+    "transcript": "2 3 4 5 6 7 8 9 10 11 12 13 14 15",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 07:31:21"
   }
 ]
