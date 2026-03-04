@@ -188,13 +188,13 @@
     "duration_seconds": 6,
     "transcript": "Navrhujem, aby sme mali 30 dní dovolenky.",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 4,
+    "ai_analysis": "{\"score\": 4, \"clarity\": 7, \"feasibility\": 3, \"summary\": \"Nápad navrhuje zvýšenie počtu dní dovolenky na 30 dní ročne. Ide o politiku HR, ktorá môže mať vplyv na atraktivitu firmy ako zamestnávateľa, ale bez konkrétneho zdôvodnenia a analýzy finančného dopadu.\", \"strengths\": [\"Jasne a stručne formulovaný nápad\", \"Potenciálne zvýšenie spokojnosti a retencie zamestnancov\", \"Trend v moderných firmách, ktorý môže zlepšiť imidž zamestnávateľa\"], \"weaknesses\": [\"Chýba finančná analýza a dopady na rozpočet\", \"Nie je jasné, či má nápad podporu tímu alebo je osobným želaním\", \"Chýbajú porovnania s konkurenciou a zdôvodnenie konkrétnej číslice 30 dní\", \"Nie je uvedený plán implementácie alebo časový rámec\"], \"next_steps\": [\"Vypracovať detailnú finančnú analýzu nákladov na zvýšenie dovolenky\", \"Zhromaždiť benchmarking údaje o dovolenke v konkurenčných firmách a priemysle\", \"Zrealizovať prieskum medzi zamestnancami o vplyve na motiváciu a retenciu\", \"Predložiť nápad HR oddeleniu na formálne vyhodnotenie\"], \"category\": \"other\", \"tags\": [\"hr\", \"cost_reduction\", \"quick_win\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 13:29:04.083134+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[\"hr\", \"cost_reduction\", \"quick_win\"]"
   }
 ]
