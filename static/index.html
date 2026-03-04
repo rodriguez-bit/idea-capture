@@ -69,6 +69,15 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; }
 .badge-dept { background: var(--surface2); color: var(--muted); }
 .badge-score { background: rgba(99,102,241,0.15); color: #818cf8; }
+.badge-tag { background: rgba(168,85,247,0.15); color: #c084fc; font-size: 11px; }
+.tag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25); border-radius: 20px; font-size: 12px; color: #c084fc; cursor: pointer; transition: all 0.15s; }
+.tag-chip:hover, .tag-chip.selected { background: rgba(168,85,247,0.3); border-color: rgba(168,85,247,0.6); }
+.tag-chip .tag-x { opacity: 0.6; font-size: 11px; margin-left: 2px; }
+.tag-chip .tag-x:hover { opacity: 1; }
+.tag-add-row { display: flex; gap: 8px; margin-top: 8px; }
+.tag-add-input { flex: 1; padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
+.tag-add-input:focus { border-color: rgba(168,85,247,0.5); }
 
 /* MODAL */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
@@ -187,6 +196,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
             <th>Rola</th>
             <th>Transkript</th>
             <th>AI</th>
+            <th>Tagy</th>
             <th>Status</th>
             <th>Viditeľnosť</th>
             <th>Dátum</th>
@@ -268,6 +278,17 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
           <option value="personal">🔒 Osobný</option>
           <option value="company">🌐 Firemný</option>
         </select>
+      </div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Tagy</label>
+        <div class="tag-chips" id="modal-tag-chips"></div>
+        <div style="margin-top:8px">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="modal-tag-presets"></div>
+          <div class="tag-add-row">
+            <input class="tag-add-input" id="modal-tag-input" placeholder="Vlastný tag..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}">
+            <button class="btn-sm btn-ghost" onclick="addCustomTag()">Pridať</button>
+          </div>
+        </div>
       </div>
       <div style="width:100%">
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Poznámka recenzenta</label>
@@ -386,10 +407,18 @@ async function loadIdeas() {
   renderPagination(data.total);
 }
 
+function renderTags(tagsJson) {
+  try {
+    const tags = JSON.parse(tagsJson || '[]');
+    if (!tags.length) return '<span style="color:var(--muted);font-size:12px">—</span>';
+    return tags.map(t => `<span class="badge badge-tag">${esc(t)}</span>`).join(' ');
+  } catch { return '—'; }
+}
+
 function renderIdeas(ideas) {
   const tbody = document.getElementById('ideas-tbody');
   if (!ideas.length) {
-    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
     return;
   }
   tbody.innerHTML = ideas.map(i => `
@@ -400,6 +429,7 @@ function renderIdeas(ideas) {
       <td style="color:var(--muted);font-size:13px">${roleLabel(i.role)}</td>
       <td class="truncate" style="color:var(--muted)">${esc(i.transcript) || '—'}</td>
       <td>${i.ai_score > 0 ? `<span class="badge badge-score">⭐ ${i.ai_score}/10</span>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
+      <td>${renderTags(i.tags)}</td>
       <td><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
       <td>${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(i.created_at)}</td>
@@ -434,6 +464,7 @@ async function openIdea(id) {
     <span class="badge badge-dept">👤 ${esc(i.author_name)}</span>
     ${i.duration_seconds > 0 ? `<span class="badge badge-dept">⏱ ${i.duration_seconds}s</span>` : ''}
     <span class="badge badge-dept">${i.visibility === 'company' ? '🌐 Firemný' : '🔒 Osobný'}</span>
+    ${(() => { try { const t = JSON.parse(i.tags||'[]'); return t.map(tag=>`<span class="badge badge-tag">${esc(tag)}</span>`).join(''); } catch{return '';} })()}
   `;
   document.getElementById('modal-transcript').textContent = i.transcript || '(prázdny transkript)';
 
@@ -461,6 +492,7 @@ async function openIdea(id) {
     document.getElementById('modal-status-select').value = i.status;
     document.getElementById('modal-visibility-select').value = i.visibility || 'personal';
     document.getElementById('modal-note').value = i.reviewer_note || '';
+    initTagEditor(i.tags);
   } else {
     actions.style.display = 'none';
   }
@@ -485,6 +517,47 @@ async function deleteIdea() {
   }
 }
 
+const PRESET_TAGS = ['quick_win','cost_reduction','product','process','customer','technical','innovation','urgent','automation','hr','marketing','quality'];
+let currentTags = [];
+
+function initTagEditor(tagsJson) {
+  try { currentTags = JSON.parse(tagsJson || '[]'); } catch { currentTags = []; }
+  renderTagEditor();
+}
+
+function renderTagEditor() {
+  const chips = document.getElementById('modal-tag-chips');
+  chips.innerHTML = currentTags.map((t, i) =>
+    `<span class="tag-chip">${esc(t)} <span class="tag-x" onclick="removeTag(${i})">×</span></span>`
+  ).join('');
+  const presets = document.getElementById('modal-tag-presets');
+  presets.innerHTML = PRESET_TAGS.map(t =>
+    `<button type="button" class="tag-chip${currentTags.includes(t) ? ' selected' : ''}" onclick="togglePresetTag('${t}')" style="font-size:11px">${t}</button>`
+  ).join('');
+}
+
+function togglePresetTag(tag) {
+  const idx = currentTags.indexOf(tag);
+  if (idx >= 0) currentTags.splice(idx, 1);
+  else if (currentTags.length < 10) currentTags.push(tag);
+  renderTagEditor();
+}
+
+function removeTag(idx) {
+  currentTags.splice(idx, 1);
+  renderTagEditor();
+}
+
+function addCustomTag() {
+  const input = document.getElementById('modal-tag-input');
+  const val = input.value.trim().toLowerCase().replace(/\s+/g, '_');
+  if (val && !currentTags.includes(val) && currentTags.length < 10) {
+    currentTags.push(val);
+    renderTagEditor();
+  }
+  input.value = '';
+}
+
 async function saveIdea() {
   if (!currentIdea) return;
   const status = document.getElementById('modal-status-select').value;
@@ -493,7 +566,7 @@ async function saveIdea() {
   const r = await fetch(`/api/ideas/${currentIdea.id}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({status, reviewer_note: note, visibility})
+    body: JSON.stringify({status, reviewer_note: note, visibility, tags: JSON.stringify(currentTags)})
   });
   if (r.ok) {
     showToast('Uložené', 'success');

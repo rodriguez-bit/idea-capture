@@ -228,7 +228,8 @@ def init_db():
                 reviewed_by TEXT DEFAULT '',
                 reviewed_at TEXT DEFAULT '',
                 created_at TEXT DEFAULT (datetime('now')),
-                visibility TEXT NOT NULL DEFAULT 'personal'
+                visibility TEXT NOT NULL DEFAULT 'personal',
+                tags TEXT DEFAULT '[]'
             );
 
             CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
@@ -251,6 +252,27 @@ def init_db():
                     WHERE table_name='ideas' AND column_name='visibility'
                   ) THEN
                     ALTER TABLE ideas ADD COLUMN visibility TEXT NOT NULL DEFAULT 'personal';
+                  END IF;
+                END $$;
+            """)
+            db.commit()
+        except Exception:
+            pass
+
+    # Idempotent migration: add tags column if missing
+    existing_cols2 = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
+    if not DATABASE_URL and 'tags' not in existing_cols2:
+        db.execute("ALTER TABLE ideas ADD COLUMN tags TEXT DEFAULT '[]'")
+        db.commit()
+    elif DATABASE_URL:
+        try:
+            db.execute("""
+                DO $$ BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='ideas' AND column_name='tags'
+                  ) THEN
+                    ALTER TABLE ideas ADD COLUMN tags TEXT DEFAULT '[]';
                   END IF;
                 END $$;
             """)
@@ -501,10 +523,16 @@ def api_idea_detail(idea_id):
 @reviewer_required
 def api_idea_update(idea_id):
     data = request.get_json() or {}
-    allowed = {'status', 'reviewer_note', 'visibility'}
+    allowed = {'status', 'reviewer_note', 'visibility', 'tags'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if 'visibility' in updates and updates['visibility'] not in ('personal', 'company'):
         return jsonify({'error': 'Neplatná hodnota viditeľnosti'}), 400
+    if 'tags' in updates:
+        try:
+            parsed = json.loads(updates['tags']) if isinstance(updates['tags'], str) else updates['tags']
+            updates['tags'] = json.dumps([str(t) for t in parsed[:10]], ensure_ascii=False)
+        except Exception:
+            return jsonify({'error': 'Neplatný formát tagov'}), 400
     if not updates:
         return jsonify({'error': 'Nič na aktualizáciu'}), 400
 
@@ -646,10 +674,12 @@ Vráť JSON s týmto formátom (iba JSON, bez markdown):
   "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
   "weaknesses": ["<slabá stránka 1>"],
   "next_steps": ["<konkrétny krok 1>", "<konkrétny krok 2>"],
-  "category": "<one of: process_improvement|cost_reduction|revenue|product|other>"
+  "category": "<one of: process_improvement|cost_reduction|revenue|product|other>",
+  "tags": ["<tag1>", "<tag2>"]
 }}
 
-Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu."""
+Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
 
     try:
         client = anthropic_sdk.Anthropic(api_key=api_key)
@@ -666,9 +696,10 @@ Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu."""
                 raw = raw[4:]
         analysis = json.loads(raw)
         score = int(analysis.get('score', 0))
+        tags = json.dumps(analysis.get('tags', []), ensure_ascii=False)
 
-        db.execute('UPDATE ideas SET ai_score = ?, ai_analysis = ? WHERE id = ?',
-                   (score, json.dumps(analysis, ensure_ascii=False), idea_id))
+        db.execute('UPDATE ideas SET ai_score = ?, ai_analysis = ?, tags = ? WHERE id = ?',
+                   (score, json.dumps(analysis, ensure_ascii=False), tags, idea_id))
         db.commit()
         db.close()
         save_ideas_backup()

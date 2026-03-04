@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS ideas (
     reviewed_by TEXT DEFAULT '',
     reviewed_at TEXT DEFAULT '',
     created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text),
-    visibility TEXT NOT NULL DEFAULT 'personal'
+    visibility TEXT NOT NULL DEFAULT 'personal',
+    tags TEXT DEFAULT '[]'
 );
 
 CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
