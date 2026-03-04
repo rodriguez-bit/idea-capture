@@ -151,6 +151,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
     <button class="nav-link active" onclick="showPage('ideas')">Nápady</button>
     <button class="nav-link" onclick="showPage('stats')">Štatistiky</button>
     <button class="nav-link" id="nav-users" style="display:none" onclick="showPage('users')">Používatelia</button>
+    <button class="nav-link" id="nav-settings" style="display:none" onclick="showPage('settings')">Nastavenia</button>
   </div>
   <div class="nav-right">
     <span class="user-badge" id="user-badge"></span>
@@ -244,6 +245,36 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
     </div>
     <div class="users-grid" id="users-grid">
       <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="section-header">
+      <h2>⚙ Nastavenia firmy</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Tieto informácie používa AI pri analýze nápadov. Čím lepšie opíšete firmu, tým presnejšie bude hodnotenie.</p>
+
+    <div style="display:grid;gap:20px;max-width:720px">
+      <div class="form-group">
+        <label>O firme</label>
+        <textarea id="ctx-company" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Dajana Rodriguez je firma zameraná na výrobu luxusných kabeliek a módnych doplnkov. Pôsobíme v Česku a Španielsku..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ciele a priority</label>
+        <textarea id="ctx-goals" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Expandovať do 3 nových krajov, znížiť náklady výroby o 15%, spustiť nový e-shop..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Hodnoty značky</label>
+        <textarea id="ctx-brand" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Kvalita, udržateľnosť, originálny dizajn, osobný prístup k zákazníkom..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Čo hľadáme v nápadoch</label>
+        <textarea id="ctx-criteria" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Uprednostňujeme nápady na zníženie nákladov, zlepšenie zákazníckej skúsenosti a inovácie v produkte..."></textarea>
+      </div>
+      <div>
+        <button class="btn-sm btn-primary" style="padding:12px 32px" onclick="saveCompanyContext()">Uložiť nastavenia</button>
+      </div>
     </div>
   </div>
 </main>
@@ -382,6 +413,7 @@ async function init() {
   _old.replaceWith(_fresh);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
+    document.getElementById('nav-settings').style.display = '';
   }
   loadIdeas();
 }
@@ -394,6 +426,7 @@ function showPage(name) {
   event.target.classList.add('active');
   if (name === 'stats') loadStats();
   if (name === 'users') loadUsers();
+  if (name === 'settings') loadCompanyContext();
 }
 
 // ─── Ideas ───────────────────────────────────────────────────────────────────
@@ -491,6 +524,7 @@ async function openIdea(id) {
         <div class="ai-row"><span>Celkové hodnotenie</span><strong>⭐ ${a.score}/10</strong></div>
         <div class="ai-row"><span>Jasnosť</span><strong>${a.clarity}/10</strong></div>
         <div class="ai-row"><span>Realizovateľnosť</span><strong>${a.feasibility}/10</strong></div>
+        ${a.relevance ? `<div class="ai-row"><span>Relevancia pre firmu</span><strong>${a.relevance}/10</strong></div>` : ''}
         ${a.summary ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">${esc(a.summary)}</div>` : ''}
         ${a.strengths?.length ? `<div style="margin-top:10px"><strong style="font-size:12px;color:var(--green)">✓ Silné stránky</strong><ul class="ai-list" style="margin-top:6px">${a.strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
         ${a.next_steps?.length ? `<div style="margin-top:10px"><strong style="font-size:12px;color:var(--primary)">→ Ďalšie kroky</strong><ul class="ai-list" style="margin-top:6px">${a.next_steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
@@ -791,6 +825,44 @@ function formatDate(s) {
     const d = new Date(s);
     return d.toLocaleDateString('sk-SK', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
   } catch { return s; }
+}
+
+// ─── Company Context ──────────────────────────────────────────────────────────
+async function loadCompanyContext() {
+  try {
+    const r = await fetch('/api/company-context');
+    if (!r.ok) return;
+    const data = await r.json();
+    document.getElementById('ctx-company').value = data.company_description || '';
+    document.getElementById('ctx-goals').value = data.goals_priorities || '';
+    document.getElementById('ctx-brand').value = data.brand_values || '';
+    document.getElementById('ctx-criteria').value = data.idea_criteria || '';
+  } catch(e) {
+    showToast('Chyba pri načítaní nastaveni', 'error');
+  }
+}
+
+async function saveCompanyContext() {
+  try {
+    const body = {
+      company_description: document.getElementById('ctx-company').value,
+      goals_priorities: document.getElementById('ctx-goals').value,
+      brand_values: document.getElementById('ctx-brand').value,
+      idea_criteria: document.getElementById('ctx-criteria').value,
+    };
+    const r = await fetch('/api/company-context', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('Nastavenia uložené', 'success');
+    } else {
+      showToast('Chyba pri ukladaní', 'error');
+    }
+  } catch(e) {
+    showToast('Chyba: ' + e.message, 'error');
+  }
 }
 
 init();

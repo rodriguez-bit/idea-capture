@@ -39,7 +39,7 @@ ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.w
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
 ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
 
-# ─── Failed login tracking ────────────────────────────────────────────────
+# ─── Failed login tracking ───────────────────────────────────────────────────
 _failed_logins = {}
 _failed_logins_lock = threading.Lock()
 
@@ -48,7 +48,7 @@ def get_db():
     return DBConnection(DB_PATH)
 
 
-# ─── CORS + Security headers ───────────────────────────────────────────────
+# ─── CORS + Security headers ──────────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
     'null',  # Electron file:// origin
     'http://localhost:5000', 'http://localhost:5001',
@@ -76,7 +76,7 @@ def handle_options(path):
     return '', 204
 
 
-# ─── Auth decorator ─────────────────────────────────────────────────────────────────
+# ─── Auth decorator ───────────────────────────────────────────────────────────
 def login_required(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -110,7 +110,7 @@ def admin_required(f):
     return decorated
 
 
-# ─── GitHub backup ───────────────────────────────────────────────────────────────
+# ─── GitHub backup ────────────────────────────────────────────────────────────
 def _github_ensure_branch():
     global _branch_ready
     if _branch_ready or not GITHUB_TOKEN:
@@ -207,7 +207,7 @@ def save_users_backup():
         print(f'Users backup error: {e}')
 
 
-# ─── DB init ────────────────────────────────────────────────────────────────────────
+# ─── DB init ──────────────────────────────────────────────────────────────────
 def init_db():
     db = get_db()
 
@@ -257,6 +257,11 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
             CREATE INDEX IF NOT EXISTS idx_ideas_created ON ideas (created_at DESC);
             CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
+
+            CREATE TABLE IF NOT EXISTS company_context (
+                key TEXT PRIMARY KEY,
+                value TEXT DEFAULT ''
+            );
         ''')
         db.commit()
 
@@ -390,7 +395,7 @@ def _restore_users_from_backup(db):
         print(f'Users restore error: {e}')
 
 
-# ─── Login page ────────────────────────────────────────────────────────────────────
+# ─── Login page ───────────────────────────────────────────────────────────────
 LOGIN_HTML = '''<!DOCTYPE html>
 <html lang="sk">
 <head>
@@ -440,7 +445,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
       window.location.href = '/';
     } else {
       const d = await r.json();
-      err.textContent = d.error || 'Neprávne prihlasovacie údaje';
+      err.textContent = d.error || 'Nesprávne prihlasovacie údaje';
       err.style.display = 'block';
     }
   }
@@ -449,7 +454,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
 </html>'''
 
 
-# ─── Routes: Auth ───────────────────────────────────────────────────────────────────
+# ─── Routes: Auth ─────────────────────────────────────────────────────────────
 @app.route('/login')
 def login_page():
     if session.get('authenticated'):
@@ -507,7 +512,7 @@ def api_current_user():
     })
 
 
-# ─── Routes: Ideas ──────────────────────────────────────────────────────────────────
+# ─── Routes: Ideas ────────────────────────────────────────────────────────────
 @app.route('/api/ideas', methods=['GET'])
 @login_required
 def api_ideas():
@@ -631,7 +636,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
                 'id': idea_id,
                 'transcript': transcript_text,
                 'duration_seconds': duration,
-                'message': 'Nápad úspecne zaznamenaý'
+                'message': 'Nápad úspešne zaznamenaný'
             }
         }
     except Exception as e:
@@ -731,8 +736,11 @@ def api_idea_analyze(idea_id):
         db.close()
         return jsonify({'error': 'Chýba transkript'}), 400
 
+    company_context = _get_company_context_for_prompt()
+
     prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
 Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
@@ -743,6 +751,7 @@ Vráť JSON s týmto formátom (iba JSON, bez markdown):
   "score": <1-10>,
   "clarity": <1-10>,
   "feasibility": <1-10>,
+  "relevance": <1-10>,
   "summary": "<2-3 vety zhrnutie nápadu>",
   "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
   "weaknesses": ["<slabá stránka 1>"],
@@ -752,6 +761,7 @@ Vráť JSON s týmto formátom (iba JSON, bez markdown):
 }}
 
 Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+relevance je hodnotenie relevancie nápadu pre firmu (ak je k dispozícii kontext firmy, zohľadni ciele, priority a hodnoty firmy).
 Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
 
     try:
@@ -794,7 +804,7 @@ def api_idea_delete(idea_id):
     return jsonify({'ok': True})
 
 
-# ─── Routes: Users (admin) ──────────────────────────────────────────────────────────
+# ─── Routes: Users (admin) ────────────────────────────────────────────────────
 @app.route('/api/users', methods=['GET'])
 @admin_required
 def api_users_list():
@@ -853,7 +863,7 @@ def api_users_update(user_id):
     return jsonify({'ok': True})
 
 
-# ─── Routes: Stats ──────────────────────────────────────────────────────────────────
+# ─── Routes: Stats ────────────────────────────────────────────────────────────
 @app.route('/api/stats')
 @login_required
 def api_stats():
@@ -879,7 +889,64 @@ def api_stats():
     })
 
 
-# ─── Routes: Pages ──────────────────────────────────────────────────────────────────
+# ─── Routes: Company Context ──────────────────────────────────────────────────
+COMPANY_CONTEXT_KEYS = [
+    'company_description',   # O firme
+    'goals_priorities',      # Ciele a priority
+    'brand_values',          # Brand hodnoty
+    'idea_criteria',         # Čo hľadáme v nápadoch
+]
+
+
+@app.route('/api/company-context', methods=['GET'])
+@login_required
+def api_company_context_get():
+    db = get_db()
+    rows = db.execute('SELECT key, value FROM company_context').fetchall()
+    db.close()
+    result = {k: '' for k in COMPANY_CONTEXT_KEYS}
+    for row in rows:
+        result[row['key']] = row['value']
+    return jsonify(result)
+
+
+@app.route('/api/company-context', methods=['POST'])
+@admin_required
+def api_company_context_save():
+    data = request.get_json() or {}
+    db = get_db()
+    for key in COMPANY_CONTEXT_KEYS:
+        if key in data:
+            value = str(data[key])[:5000]  # max 5000 chars per field
+            db.execute(
+                'INSERT OR REPLACE INTO company_context (key, value) VALUES (?, ?)',
+                (key, value)
+            )
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+def _get_company_context_for_prompt():
+    """Build company context string for AI analysis prompt."""
+    db = get_db()
+    rows = db.execute('SELECT key, value FROM company_context').fetchall()
+    db.close()
+    context_parts = []
+    labels = {
+        'company_description': 'O firme',
+        'goals_priorities': 'Ciele a priority firmy',
+        'brand_values': 'Hodnoty značky',
+        'idea_criteria': 'Čo hľadáme v nápadoch',
+    }
+    for row in rows:
+        if row['value'] and row['value'].strip():
+            label = labels.get(row['key'], row['key'])
+            context_parts.append(f"{label}: {row['value'].strip()}")
+    return '\n'.join(context_parts)
+
+
+# ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
 @login_required
 def index():
@@ -911,7 +978,7 @@ def health():
     return jsonify({'status': 'ok', 'time': datetime.now().isoformat()})
 
 
-# ─── Start ────────────────────────────────────────────────────────────────────────────
+# ─── Start ────────────────────────────────────────────────────────────────────
 with app.app_context():
     init_db()
 

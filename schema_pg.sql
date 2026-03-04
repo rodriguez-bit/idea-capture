@@ -35,3 +35,8 @@ CREATE TABLE IF NOT EXISTS ideas (
 CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
 CREATE INDEX IF NOT EXISTS idx_ideas_created ON ideas (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
+
+CREATE TABLE IF NOT EXISTS company_context (
+    key TEXT PRIMARY KEY,
+    value TEXT DEFAULT ''
+);
