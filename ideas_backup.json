@@ -314,13 +314,13 @@
     "duration_seconds": 26,
     "transcript": "Takže chcel by som navrhnúť nápad na zvýšenie využitelnosti po ukazov, kde by sme každý týždeň vybrali jedného človeka, ktorý by po využití po ukazu mal objednávku zadarmo. Musíme iba vymyslieť, ako toto odkomunikovať. Takýto je návrh. Prajem pekný deň.",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 6,
+    "ai_analysis": "{\"score\": 6, \"clarity\": 5, \"feasibility\": 7, \"summary\": \"Návrh zaviesť týždennú lotériu, kde jeden zákazník získa bezplatnú objednávku po využití demo produktu s cieľom zvýšiť konverziu. Ide o motivačný program s nejasnou komunikačnou stratégiou a potenciálom na zvýšenie predajov.\", \"strengths\": [\"Jasný zámerom zvýšiť konverziu z demo verzií na platené objednávky\", \"Relatívne jednoduchá na implementáciu z technického hľadiska\", \"Gamifikácia môže zvýšiť angažovanosť zákazníkov\"], \"weaknesses\": [\"Vágne formulovaný nápad s nejasným komunikačným plánom\", \"Chýbajú údaje o finančnom dopad a ROI\", \"Nie je jasné, ako sa vyberá výherca a aké sú kritériá\", \"Riziko zníženia hodnoty produktu kvôli bezplatným objednávkam\", \"Chýba analýza konkurenčných podobných kampaní\"], \"next_steps\": [\"Detailne definovať pravidlá lotérie (kritériá výberu, frekvencia, čas platnosti)\", \"Vypracovať komunikačný plán a marketingové materiály\", \"Odhadnúť finančný dopad a očakávaný ROI\", \"Konzultovať s finančným oddelením ohľadom rozpočtu na bezplatné objednávky\"], \"category\": \"revenue\", \"tags\": [\"marketing\", \"customer\", \"quick_win\", \"innovation\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 14:12:16.909988+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[\"marketing\", \"customer\", \"quick_win\", \"innovation\"]"
   }
 ]
