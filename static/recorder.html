@@ -217,10 +217,9 @@ async function submitIdea() {
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
   const btn = document.getElementById('bsend');
   btn.disabled = true; btn.textContent = 'Odosiela sa...';
-  setMsg('Prepísujem... 10–30 sekúnd', 'inf');
+  setMsg('Nahrávam súbor...', 'inf');
   const fill = document.getElementById('bfill');
-  let w = 0;
-  const p = setInterval(() => { w = Math.min(w + 2, 85); fill.style.width = w + '%'; if (w >= 85) clearInterval(p); }, 600);
+  fill.style.width = '15%';
   try {
     const ext = audioBlob.type.includes('ogg') ? 'ogg' : audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
     const fd = new FormData();
@@ -229,21 +228,61 @@ async function submitIdea() {
     fd.append('role', role);
     fd.append('visibility', currentVisibility);
     const r = await fetch(`${API_BASE}/api/ideas/upload`, { method: 'POST', body: fd, credentials: 'include' });
-    clearInterval(p); fill.style.width = '100%';
-    if (r.ok) {
-      const d = await r.json();
-      setMsg('✓ Nápad odoslaný!', 'ok');
-      setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
-    } else {
+    if (!r.ok) {
       const d = await r.json().catch(() => ({}));
       setMsg(d.error || 'Chyba', 'err');
+      btn.disabled = false; btn.textContent = 'Odoslať nápad';
+      fill.style.width = '0%';
+      return;
+    }
+    const data = await r.json();
+    if (data.job_id) {
+      setMsg('Prepísujem... 10–30 sekúnd', 'inf');
+      fill.style.width = '40%';
+      await pollJob(data.job_id, fill, btn);
+    } else {
+      fill.style.width = '100%';
+      setMsg('✓ Nápad odoslaný!', 'ok');
+      setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
+      btn.disabled = false; btn.textContent = 'Odoslať nápad';
     }
   } catch(e) {
     setMsg('Chyba: ' + e.message, 'err');
-  } finally {
     btn.disabled = false; btn.textContent = 'Odoslať nápad';
-    setTimeout(() => { fill.style.width = '0%'; }, 2000);
+    fill.style.width = '0%';
   }
+}
+
+async function pollJob(jobId, fill, btn) {
+  let attempts = 0;
+  while (attempts < 40) {
+    await new Promise(r => setTimeout(r, 3000));
+    attempts++;
+    try {
+      const r = await fetch(`${API_BASE}/api/ideas/job/${jobId}`, { credentials: 'include' });
+      if (r.status === 202) {
+        fill.style.width = Math.min(40 + attempts * 3, 90) + '%';
+        continue;
+      }
+      if (r.ok) {
+        fill.style.width = '100%';
+        setMsg('✓ Nápad odoslaný!', 'ok');
+        setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
+      } else {
+        const d = await r.json().catch(() => ({}));
+        setMsg(d.error || 'Chyba pri spracovaní', 'err');
+        fill.style.width = '0%';
+      }
+      break;
+    } catch(e) {
+      continue;
+    }
+  }
+  if (attempts >= 40) {
+    setMsg('Timeout — skús znova', 'err');
+    fill.style.width = '0%';
+  }
+  btn.disabled = false; btn.textContent = 'Odoslať nápad';
 }
 
 function setMsg(t, c) { const e = document.getElementById('smsg'); e.textContent = t; e.className = 'smsg ' + c; }

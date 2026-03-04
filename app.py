@@ -5,6 +5,7 @@ import tempfile
 import threading
 import time
 import functools
+import uuid
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, session, send_from_directory, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,6 +24,9 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 DB_PATH = 'ideas.db'
+
+# Async upload jobs: job_id -> {'status': 'processing'|'done'|'error', ...}
+_upload_jobs = {}
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 GITHUB_REPO = os.environ.get('GITHUB_REPO', 'dajanarodriguez/ridea')
@@ -596,11 +600,54 @@ def api_idea_update(idea_id):
     return jsonify({'ok': True})
 
 
+def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
+    import openai
+    try:
+        client = openai.OpenAI(api_key=api_key)
+        with open(tmp_path, 'rb') as f:
+            transcription = client.audio.transcriptions.create(
+                model='whisper-1',
+                file=f,
+                language='sk',
+                response_format='verbose_json'
+            )
+        transcript_text = transcription.text or ''
+        duration = int(getattr(transcription, 'duration', 0) or 0)
+
+        with app.app_context():
+            db = get_db()
+            cursor = db.execute('''
+                INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+                VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
+            ''', (user_id, user_name, department, role, duration, transcript_text, visibility))
+            idea_id = cursor.lastrowid
+            db.commit()
+            db.close()
+            save_ideas_backup()
+
+        _upload_jobs[job_id] = {
+            'status': 'done',
+            'result': {
+                'id': idea_id,
+                'transcript': transcript_text,
+                'duration_seconds': duration,
+                'message': 'Nápad úspešne zaznamenaný'
+            }
+        }
+    except Exception as e:
+        print(f'Upload job {job_id} error: {e}')
+        _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
+    finally:
+        if os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+
 @app.route('/api/ideas/upload', methods=['POST'])
 @login_required
 def api_ideas_upload():
-    import openai
-
     api_key = os.environ.get('OPENAI_API_KEY')
     if not api_key:
         return jsonify({'error': 'OpenAI API kľúč nie je nastavený'}), 500
@@ -625,58 +672,43 @@ def api_ideas_upload():
     if not department or not role:
         return jsonify({'error': 'Oddelenie a rola sú povinné'}), 400
 
-    tmp_path = None
     try:
         with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
             file.save(tmp)
             tmp_path = tmp.name
-
-        client = openai.OpenAI(api_key=api_key)
-        with open(tmp_path, 'rb') as f:
-            transcription = client.audio.transcriptions.create(
-                model='whisper-1',
-                file=f,
-                language='sk',
-                response_format='verbose_json'
-            )
-
-        transcript_text = transcription.text or ''
-        duration = int(getattr(transcription, 'duration', 0) or 0)
-
-        db = get_db()
-        cursor = db.execute('''
-            INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
-            VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
-        ''', (
-            session['user_id'],
-            session['user_name'],
-            department,
-            role,
-            duration,
-            transcript_text,
-            visibility
-        ))
-        idea_id = cursor.lastrowid
-        db.commit()
-        db.close()
-        save_ideas_backup()
-
-        return jsonify({
-            'id': idea_id,
-            'transcript': transcript_text,
-            'duration_seconds': duration,
-            'message': 'Nápad úspešne zaznamenaný'
-        })
-
     except Exception as e:
-        print(f'Upload error: {e}')
-        return jsonify({'error': f'Chyba pri spracovaní: {str(e)}'}), 500
-    finally:
-        if tmp_path and os.path.exists(tmp_path):
-            try:
-                os.unlink(tmp_path)
-            except Exception:
-                pass
+        return jsonify({'error': f'Chyba pri ukladaní: {str(e)}'}), 500
+
+    job_id = str(uuid.uuid4())
+    user_id = session['user_id']
+    user_name = session['user_name']
+    _upload_jobs[job_id] = {'status': 'processing'}
+
+    t = threading.Thread(
+        target=_process_upload,
+        args=(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key),
+        daemon=True
+    )
+    t.start()
+
+    return jsonify({'job_id': job_id, 'status': 'processing'})
+
+
+@app.route('/api/ideas/job/<job_id>', methods=['GET'])
+@login_required
+def api_ideas_job(job_id):
+    job = _upload_jobs.get(job_id)
+    if not job:
+        return jsonify({'error': 'Job nenájdený'}), 404
+    if job['status'] == 'done':
+        del _upload_jobs[job_id]
+        return jsonify(job['result'])
+    elif job['status'] == 'error':
+        err = job.get('error', 'Neznáma chyba')
+        del _upload_jobs[job_id]
+        return jsonify({'error': err}), 500
+    else:
+        return jsonify({'status': 'processing'}), 202
 
 
 @app.route('/api/ideas/<int:idea_id>/analyze', methods=['POST'])
