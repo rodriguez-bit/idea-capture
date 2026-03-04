@@ -51,6 +51,8 @@ main { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
 .filter-select, .filter-input { padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
 .filter-select:focus, .filter-input:focus { border-color: var(--primary); }
 .filter-input { flex: 1; min-width: 200px; }
+@keyframes _noAutofill { from { opacity:1; } to { opacity:1; } }
+#f-search:-webkit-autofill { animation-name: _noAutofill; animation-duration: 1ms; }
 
 /* IDEAS TABLE */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -183,6 +185,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <option value="employee">Zamestnanec</option>
         <option value="majo-markech">Majo markech je kral</option>
       </select>
+      <input type="email" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" aria-hidden="true" autocomplete="email">
       <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." autocomplete="off" data-lpignore="true">
     </div>
 
@@ -376,6 +379,7 @@ async function init() {
   _fresh.setAttribute('autocomplete', 'off');
   _fresh.setAttribute('data-lpignore', 'true');
   _fresh.addEventListener('input', debounceSearch);
+  _fresh.addEventListener('animationstart', e => { if (e.animationName === '_noAutofill') _fresh.value = ''; });
   _old.replaceWith(_fresh);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
