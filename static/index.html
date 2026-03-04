@@ -378,8 +378,12 @@ async function init() {
   _fresh.placeholder = _old.placeholder;
   _fresh.setAttribute('autocomplete', 'off');
   _fresh.setAttribute('data-lpignore', 'true');
-  _fresh.addEventListener('input', debounceSearch);
+  let _searchUserTyped = false;
+  _fresh.addEventListener('keydown', () => { _searchUserTyped = true; });
+  _fresh.addEventListener('input', () => { debounceSearch(); if (!_fresh.value) _searchUserTyped = false; });
   _fresh.addEventListener('animationstart', e => { if (e.animationName === '_noAutofill') _fresh.value = ''; });
+  // Guard: clear if Chrome autofills (value set without user typing)
+  setInterval(() => { if (!_searchUserTyped && _fresh.value) _fresh.value = ''; }, 200);
   _old.replaceWith(_fresh);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
@@ -757,7 +761,7 @@ async function doLogout() {
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   const s = document.getElementById('f-search');
-  if (s) s.value = '';
+  if (s) { s.value = ''; setTimeout(() => { s.value = ''; }, 300); }
 }
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
