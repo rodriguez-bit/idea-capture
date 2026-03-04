@@ -183,7 +183,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <option value="employee">Zamestnanec</option>
         <option value="majo-markech">Majo markech je kral</option>
       </select>
-      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()" autocomplete="off" readonly onkeydown="this.removeAttribute('readonly')" onpaste="this.removeAttribute('readonly')" data-lpignore="true">
+      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." autocomplete="off" data-lpignore="true">
     </div>
 
     <div class="table-wrap">
@@ -366,9 +366,17 @@ async function init() {
   if (!r.ok) { window.location.href = '/login'; return; }
   currentUser = await r.json();
   document.getElementById('user-badge').textContent = `${currentUser.name} (${currentUser.role})`;
-  const _s = document.getElementById('f-search');
-  const _clearSearch = () => { if (_s !== document.activeElement) _s.value = ''; };
-  [0, 100, 300, 700, 1500].forEach(t => setTimeout(_clearSearch, t));
+  // Replace search input dynamically — Chrome does not autofill dynamically inserted elements
+  const _old = document.getElementById('f-search');
+  const _fresh = document.createElement('input');
+  _fresh.className = _old.className;
+  _fresh.id = 'f-search';
+  _fresh.type = 'search';
+  _fresh.placeholder = _old.placeholder;
+  _fresh.setAttribute('autocomplete', 'off');
+  _fresh.setAttribute('data-lpignore', 'true');
+  _fresh.addEventListener('input', debounceSearch);
+  _old.replaceWith(_fresh);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
   }
