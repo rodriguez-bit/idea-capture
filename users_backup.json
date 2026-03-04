@@ -61,5 +61,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 13:39:28.691932+00"
+  },
+  {
+    "email": "rodriguez@dajanarodriguez.com",
+    "display_name": "Raul Rodriguez",
+    "password_hash": "scrypt:32768:8:1$TNeWtbkqCcAwGxSL$cab95bba647b8ec3196f4513f0aa7c10ac1b4a88242cbce5e2368ecf1b0d82d541181f449e635d9e68f559038c790b65374c0fcc3110c9ca1e0aaded73f1c6f6",
+    "role": "admin",
+    "department": "management",
+    "active": 1,
+    "created_at": "2026-03-04 13:45:31.829027+00"
   }
 ]
