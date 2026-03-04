@@ -304,5 +304,23 @@
     "created_at": "2026-03-04 14:11:27.993142+00",
     "visibility": "company",
     "tags": "[]"
+  },
+  {
+    "author_id": 32,
+    "author_name": "Jakub Martiska",
+    "department": "marketing",
+    "role": "employee",
+    "audio_filename": "",
+    "duration_seconds": 26,
+    "transcript": "Takže chcel by som navrhnúť nápad na zvýšenie využitelnosti po ukazov, kde by sme každý týždeň vybrali jedného človeka, ktorý by po využití po ukazu mal objednávku zadarmo. Musíme iba vymyslieť, ako toto odkomunikovať. Takýto je návrh. Prajem pekný deň.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 14:12:16.909988+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
