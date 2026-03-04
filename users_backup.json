@@ -133,5 +133,14 @@
     "department": "other",
     "active": 1,
     "created_at": "2026-03-04 14:13:15.413219+00"
+  },
+  {
+    "email": "daniela víghová <d.vighova@dajanarodriguez.com>",
+    "display_name": "Daniela Víghová",
+    "password_hash": "scrypt:32768:8:1$R89LgJ0UiA5L95np$97db1cabaf3d2d871e9737e0d8927cb446d6e0c1fa55578e285f1686ca11370a3911a6edd6fe36fce78433dcb4f1012cd689ad6191fc56bf9750dea5c9a59dd1",
+    "role": "submitter",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 14:14:23.681429+00"
   }
 ]
