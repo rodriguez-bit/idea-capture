@@ -73,6 +73,16 @@ def _translate_query(sql):
         if 'ON CONFLICT' not in sql:
             sql = sql.rstrip().rstrip(';')
             sql += ' ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value'
+    elif 'INSERT OR REPLACE INTO users' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT (email) DO UPDATE SET display_name=EXCLUDED.display_name, password_hash=EXCLUDED.password_hash, role=EXCLUDED.role, department=EXCLUDED.department'
+    elif 'INSERT OR REPLACE INTO' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT DO NOTHING'
 
     # INSERT OR IGNORE -> ON CONFLICT DO NOTHING
     if 'INSERT OR IGNORE INTO' in sql:
