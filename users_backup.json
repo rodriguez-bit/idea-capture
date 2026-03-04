@@ -106,5 +106,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 14:08:15.083345+00"
+  },
+  {
+    "email": "vaclavova@dajanarodriguez.com",
+    "display_name": "Mirka Vaclavova",
+    "password_hash": "scrypt:32768:8:1$KMU7HZYbRhvQOvrl$45a931e8aec777f8a6007f8f0dcf13fb97d1e009023ff7ada25db0006eafebadb9f881ccac7f4bd6bc1772e5c42e02aa54f685f7276ed39e4f91db54cb1ccdd5",
+    "role": "admin",
+    "department": "development",
+    "active": 1,
+    "created_at": "2026-03-04 14:10:15.787578+00"
   }
 ]
