@@ -62,5 +62,21 @@
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 07:31:21"
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 13,
+    "transcript": "Ahoj, aký máš nápad? Že... pôjdeme... neviem, na dovolenku. Neviem nápad, neviem, že sa ma takto opýtaj rýchlo.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 07:36:58"
   }
 ]
