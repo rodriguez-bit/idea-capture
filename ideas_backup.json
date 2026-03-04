@@ -394,5 +394,23 @@
     "created_at": "2026-03-04 15:28:38.788137+00",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 30,
+    "transcript": "Mám nápad na voňavku, ktorú som odovzdal. Chce mi zahrnúť do Raudeu Fuego značky, ktorú vlastne tvoríme. Dal som si ju teda nazorkovať do Prahy a čakám na tie vzorky. No a potom by sme mohli spraviť nejaký veľmi zajímavý obal na to. A blá, blá, blá.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 16:46:15.392415+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
