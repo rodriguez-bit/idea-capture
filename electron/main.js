@@ -142,48 +142,26 @@ ipcMain.handle('get-api-base', () => API_BASE);
 ipcMain.handle('get-store', (event, key) => storeGet(key));
 ipcMain.handle('set-store', (event, key, value) => storeSet(key, value));
 
-function isNewer(latest, current) {
-  const a = latest.split('.').map(Number);
-  const b = current.split('.').map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((a[i]||0) > (b[i]||0)) return true;
-    if ((a[i]||0) < (b[i]||0)) return false;
-  }
-  return false;
-}
-
 function checkForUpdates() {
-  const https = require('https');
-  const currentVersion = app.getVersion();
-  setTimeout(() => {
-    const req = https.get(
-      'https://api.github.com/repos/rodriguez-bit/idea-capture/releases/latest',
-      { headers: { 'User-Agent': 'Ridea-App' } },
-      (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => {
-          try {
-            const latest = JSON.parse(data).tag_name?.replace('v', '');
-            if (latest && isNewer(latest, currentVersion)) {
-              dialog.showMessageBox(mainWindow, {
-                type: 'info',
-                title: 'Dostupná aktualizácia',
-                message: `Verzia ${latest} je dostupná. Chcete otvoriť stránku na stiahnutie?`,
-                detail: `Vaša verzia: ${currentVersion}`,
-                buttons: ['Stiahnuť', 'Neskôr'],
-                defaultId: 0
-              }).then(({ response }) => {
-                if (response === 0)
-                  shell.openExternal('https://github.com/rodriguez-bit/idea-capture/releases/latest');
-              });
-            }
-          } catch(e) {}
-        });
-      }
-    );
-    req.on('error', () => {});
-  }, 3000);
+  const { autoUpdater } = require('electron-updater');
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Aktualizácia pripravená',
+      message: `Verzia ${info.version} je stiahnutá. Reštartovať teraz?`,
+      buttons: ['Reštartovať', 'Neskôr'],
+      defaultId: 0
+    }).then(({ response }) => {
+      if (response === 0) autoUpdater.quitAndInstall();
+    });
+  });
+
+  autoUpdater.on('error', () => {});
+
+  setTimeout(() => autoUpdater.checkForUpdates(), 3000);
 }
 
 app.whenReady().then(() => {
