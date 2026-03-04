@@ -520,5 +520,23 @@
     "created_at": "2026-03-04 19:08:54.824897+00",
     "visibility": "company",
     "tags": "[\"process\", \"product\", \"automation\", \"quick_win\", \"marketing\"]"
+  },
+  {
+    "author_id": 125,
+    "author_name": "Daniel Vighova",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 79,
+    "transcript": "No, ja som mal nápad, hovorila som to aj na jednom meetingu tu v Prahe, že značka Ralph Del Fuego by mala odštartovať nejakým úvodným videom, kde by vlastne bol povedaný ten príbeh Ravla, keď zhorel, aj možno s nejakými fotkami, proste mal by to byť taký úvod, aby proste ľudia pochopili, že čo je to aj ten Ralph Del Fuego, čo to vlastne znamená, prečo sa to tak volá a potom aj ten Fuego moment a proste všetko, aby im to proste tak saspojilo, lebo akože my vieme vo firme, že čo sa mu stalo, ale ľudia, zákazníci vlastne tento príbeh nevedia.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 20:35:36.841575+00",
+    "visibility": "personal",
+    "tags": "[]"
   }
 ]
