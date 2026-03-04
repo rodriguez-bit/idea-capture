@@ -68,7 +68,7 @@ audio { width: 100%; border-radius: 8px; }
 
   <div class="form-group">
     <label>Oddelenie *</label>
-    <select id="department">
+    <select id="department" onchange="localStorage.setItem('savedDept', this.value)">
       <option value="">— vyberte oddelenie —</option>
       <option value="development">Vývoj</option>
       <option value="marketing">Marketing</option>
@@ -80,7 +80,7 @@ audio { width: 100%; border-radius: 8px; }
 
   <div class="form-group">
     <label>Vaša rola *</label>
-    <select id="role">
+    <select id="role" onchange="localStorage.setItem('savedRole', this.value)">
       <option value="">— vyberte rolu —</option>
       <option value="c-level">C-level</option>
       <option value="manager">Manažér</option>
@@ -137,10 +137,11 @@ async function init() {
     currentUser = await r.json();
     document.getElementById('user-info-bar').textContent = `👤 ${currentUser.name} · ${currentUser.department || currentUser.role}`;
 
-    // Pre-select department if user has one set
-    if (currentUser.department) {
-      document.getElementById('department').value = currentUser.department;
-    }
+    // Restore saved dept/role from localStorage (user preference wins over profile default)
+    const savedDept = localStorage.getItem('savedDept') || currentUser.department || '';
+    const savedRole = localStorage.getItem('savedRole') || '';
+    if (savedDept) document.getElementById('department').value = savedDept;
+    if (savedRole) document.getElementById('role').value = savedRole;
   } catch(e) {
     showStatus('Chyba pripojenia k serveru', 'error');
   }

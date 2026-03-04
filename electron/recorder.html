@@ -116,7 +116,7 @@ body { background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-siz
     <button class="btn-out" onclick="doLogout()">Odhlásiť</button>
   </div>
   <div class="sels">
-    <select class="sel" id="dept">
+    <select class="sel" id="dept" onchange="savePref('savedDept', this.value)">
       <option value="">Oddelenie</option>
       <option value="development">Vývoj</option>
       <option value="marketing">Marketing</option>
@@ -124,7 +124,7 @@ body { background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-siz
       <option value="management">Manažment</option>
       <option value="other">Iné</option>
     </select>
-    <select class="sel" id="role">
+    <select class="sel" id="role" onchange="savePref('savedRole', this.value)">
       <option value="">Rola</option>
       <option value="c-level">C-level</option>
       <option value="manager">Manažér</option>
@@ -173,10 +173,20 @@ async function init() {
   }
 }
 
-function showRec() {
+async function showRec() {
   document.getElementById('uname').textContent = user.name;
-  if (user.department) document.getElementById('dept').value = user.department;
+  // Restore saved dept/role preferences
+  var savedDept = window.electron ? await window.electron.getStore('savedDept') : null;
+  var savedRole = window.electron ? await window.electron.getStore('savedRole') : null;
+  var dept = savedDept || user.department || '';
+  var role = savedRole || '';
+  if (dept) document.getElementById('dept').value = dept;
+  if (role) document.getElementById('role').value = role;
   show('rec');
+}
+
+function savePref(key, value) {
+  if (window.electron) window.electron.setStore(key, value);
 }
 
 async function doLogin() {
