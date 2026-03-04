@@ -214,5 +214,23 @@
     "created_at": "2026-03-04 13:47:14.737706+00",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "other",
+    "role": "c-level",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "Ďakujem za pozornosť.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 13:47:54.396943+00",
+    "visibility": "personal",
+    "tags": "[]"
   }
 ]
