@@ -32,7 +32,8 @@ jobs:
             --electron-version=28.3.3 \
             --out=mac-out \
             --overwrite \
-            --app-version=1.0.15
+            --app-version=1.0.15 \
+            --icon=electron/assets/icon.png
 
       - name: Create DMG (arm64 — Apple Silicon)
         run: |
