@@ -39,7 +39,7 @@ ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.w
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
 ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
 
-# ─── Failed login tracking ───────────────────────────────────────────────────
+# ─── Failed login tracking ────────────────────────────────────────────────
 _failed_logins = {}
 _failed_logins_lock = threading.Lock()
 
@@ -48,7 +48,7 @@ def get_db():
     return DBConnection(DB_PATH)
 
 
-# ─── CORS + Security headers ──────────────────────────────────────────────────
+# ─── CORS + Security headers ───────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
     'null',  # Electron file:// origin
     'http://localhost:5000', 'http://localhost:5001',
@@ -76,7 +76,7 @@ def handle_options(path):
     return '', 204
 
 
-# ─── Auth decorator ───────────────────────────────────────────────────────────
+# ─── Auth decorator ─────────────────────────────────────────────────────────────────
 def login_required(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -110,7 +110,7 @@ def admin_required(f):
     return decorated
 
 
-# ─── GitHub backup ────────────────────────────────────────────────────────────
+# ─── GitHub backup ───────────────────────────────────────────────────────────────
 def _github_ensure_branch():
     global _branch_ready
     if _branch_ready or not GITHUB_TOKEN:
@@ -207,7 +207,7 @@ def save_users_backup():
         print(f'Users backup error: {e}')
 
 
-# ─── DB init ──────────────────────────────────────────────────────────────────
+# ─── DB init ────────────────────────────────────────────────────────────────────────
 def init_db():
     db = get_db()
 
@@ -390,7 +390,7 @@ def _restore_users_from_backup(db):
         print(f'Users restore error: {e}')
 
 
-# ─── Login page ───────────────────────────────────────────────────────────────
+# ─── Login page ────────────────────────────────────────────────────────────────────
 LOGIN_HTML = '''<!DOCTYPE html>
 <html lang="sk">
 <head>
@@ -440,7 +440,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
       window.location.href = '/';
     } else {
       const d = await r.json();
-      err.textContent = d.error || 'Nesprávne prihlasovacie údaje';
+      err.textContent = d.error || 'Neprávne prihlasovacie údaje';
       err.style.display = 'block';
     }
   }
@@ -449,7 +449,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
 </html>'''
 
 
-# ─── Routes: Auth ─────────────────────────────────────────────────────────────
+# ─── Routes: Auth ───────────────────────────────────────────────────────────────────
 @app.route('/login')
 def login_page():
     if session.get('authenticated'):
@@ -507,7 +507,7 @@ def api_current_user():
     })
 
 
-# ─── Routes: Ideas ────────────────────────────────────────────────────────────
+# ─── Routes: Ideas ──────────────────────────────────────────────────────────────────
 @app.route('/api/ideas', methods=['GET'])
 @login_required
 def api_ideas():
@@ -631,7 +631,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
                 'id': idea_id,
                 'transcript': transcript_text,
                 'duration_seconds': duration,
-                'message': 'Nápad úspešne zaznamenaný'
+                'message': 'Nápad úspecne zaznamenaý'
             }
         }
     except Exception as e:
@@ -794,7 +794,7 @@ def api_idea_delete(idea_id):
     return jsonify({'ok': True})
 
 
-# ─── Routes: Users (admin) ────────────────────────────────────────────────────
+# ─── Routes: Users (admin) ──────────────────────────────────────────────────────────
 @app.route('/api/users', methods=['GET'])
 @admin_required
 def api_users_list():
@@ -853,7 +853,7 @@ def api_users_update(user_id):
     return jsonify({'ok': True})
 
 
-# ─── Routes: Stats ────────────────────────────────────────────────────────────
+# ─── Routes: Stats ──────────────────────────────────────────────────────────────────
 @app.route('/api/stats')
 @login_required
 def api_stats():
@@ -879,11 +879,11 @@ def api_stats():
     })
 
 
-# ─── Routes: Pages ────────────────────────────────────────────────────────────
+# ─── Routes: Pages ──────────────────────────────────────────────────────────────────
 @app.route('/')
 @login_required
 def index():
-    return redirect(url_for('recorder_page'))
+    return send_from_directory('static', 'index.html')
 
 
 @app.route('/admin')
@@ -911,7 +911,7 @@ def health():
     return jsonify({'status': 'ok', 'time': datetime.now().isoformat()})
 
 
-# ─── Start ────────────────────────────────────────────────────────────────────
+# ─── Start ────────────────────────────────────────────────────────────────────────────
 with app.app_context():
     init_db()
 
