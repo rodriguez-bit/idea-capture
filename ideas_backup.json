@@ -264,7 +264,7 @@
     "ai_analysis": "{\"score\": 2, \"clarity\": 2, \"feasibility\": 3, \"summary\": \"Nápad naznačuje možnosť skrátenia pracovného času na päť hodín týždenne (pracovný deň raz za tri dni). Myšlienka je však vágne sformulovaná bez špecifikácie kontextu, dopadov a implementačného plánu.\", \"strengths\": [\"Potenciálne zvýšenie pracovnej spokojnosti a life-work balance zamestnancov\", \"Možný nižší burnout a zvýšená produktivita počas pracovných hodín\"], \"weaknesses\": [\"Extrémne nejasná formulácia bez detailov\", \"Chýba analýza dopadov na tím, klientov a projekty\", \"Niet špecifikácie ako by sa pokryli kritické úlohy a dostupnosť\", \"Nejasné, či by to bolo len pre marketing alebo celú firmu\", \"Absentuje návrh na kompenziu potenciálneho poklesu produktivity\"], \"next_steps\": [\"Požiadať autora o detailný návrh s konkrétnym plánom implementácie\", \"Analýza vplyvu na SLA s klientmi a kritické procesy marketingu\", \"Porovnanie s best practices flexibilného pracovného času v odvetví\", \"Diskusia s vedením a ďalšími oddeleniami o uskutočniteľnosti\"], \"category\": \"process_improvement\", \"tags\": [\"hr\", \"process\", \"cost_reduction\"]}",
     "reviewer_note": "tak to vobec\n",
     "reviewed_by": "David Varga",
-    "reviewed_at": "2026-03-04T14:06:02.142390",
+    "reviewed_at": "2026-03-04T14:16:20.722068",
     "created_at": "2026-03-04 14:02:35.06182+00",
     "visibility": "company",
     "tags": "[\"hr\", \"process\", \"cost_reduction\"]"
