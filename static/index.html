@@ -1,1 +1,863 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idea Capture</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+.hidden { display: none !important; }
+
+/* ── Login ── */
+#loginPage { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1rem; }
+.login-card { background: #fff; border-radius: 16px; padding: 2.5rem 2rem; box-shadow: 0 4px 32px rgba(0,0,0,.10); width: 100%; max-width: 360px; }
+.login-card h1 { font-size: 1.6rem; margin-bottom: .25rem; color: #1a1a2e; }
+.login-card p { color: #666; margin-bottom: 1.5rem; font-size: .95rem; }
+.input-group { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+.input-group label { font-size: .85rem; font-weight: 600; color: #444; }
+.input-group input { padding: .65rem .9rem; border: 1.5px solid #dde; border-radius: 8px; font-size: 1rem; transition: border .2s; }
+.input-group input:focus { border-color: #6c63ff; outline: none; }
+.btn-primary { width: 100%; padding: .75rem; background: #6c63ff; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background .2s; }
+.btn-primary:hover { background: #574fd6; }
+
+/* ── App shell ── */
+#app { display: flex; flex-direction: column; min-height: 100vh; }
+header { background: #1a1a2e; color: #fff; padding: .85rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+header h1 { font-size: 1.25rem; flex: 1; }
+.header-right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.user-chip { background: rgba(255,255,255,.12); border-radius: 20px; padding: .3rem .85rem; font-size: .85rem; }
+.btn-sm { padding: .35rem .85rem; border-radius: 6px; border: none; cursor: pointer; font-size: .82rem; font-weight: 600; }
+.btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,.4); color: #fff; }
+.btn-outline:hover { background: rgba(255,255,255,.1); }
+.btn-danger-sm { background: #e74c3c; color: #fff; }
+.btn-danger-sm:hover { background: #c0392b; }
+
+/* ── Nav tabs ── */
+.nav-tabs { background: #fff; border-bottom: 2px solid #eee; display: flex; padding: 0 1.5rem; gap: .25rem; overflow-x: auto; }
+.nav-tab { padding: .75rem 1.1rem; border: none; background: none; cursor: pointer; font-size: .92rem; color: #666; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: color .15s; }
+.nav-tab:hover { color: #6c63ff; }
+.nav-tab.active { color: #6c63ff; border-bottom-color: #6c63ff; font-weight: 600; }
+
+/* ── Main content ── */
+.main { flex: 1; padding: 1.5rem; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+/* ── Cards & panels ── */
+.card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.07); padding: 1.5rem; margin-bottom: 1rem; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem; }
+.panel-header h2 { font-size: 1.15rem; }
+
+/* ── Form elements ── */
+.form-row { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: .75rem; }
+.form-group { display: flex; flex-direction: column; gap: .35rem; flex: 1; min-width: 160px; }
+.form-group label { font-size: .82rem; font-weight: 600; color: #555; }
+.form-group input, .form-group textarea, .form-group select { padding: .55rem .8rem; border: 1.5px solid #dde; border-radius: 7px; font-size: .93rem; font-family: inherit; transition: border .2s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #6c63ff; outline: none; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* ── Buttons ── */
+.btn { padding: .55rem 1.1rem; border-radius: 7px; border: none; cursor: pointer; font-size: .9rem; font-weight: 600; transition: background .2s, transform .1s; }
+.btn:active { transform: scale(.98); }
+.btn-green { background: #2ecc71; color: #fff; }
+.btn-green:hover { background: #27ae60; }
+.btn-blue { background: #3498db; color: #fff; }
+.btn-blue:hover { background: #2980b9; }
+.btn-red { background: #e74c3c; color: #fff; }
+.btn-red:hover { background: #c0392b; }
+.btn-gray { background: #ecf0f1; color: #333; }
+.btn-gray:hover { background: #dde; }
+.btn-purple { background: #6c63ff; color: #fff; }
+.btn-purple:hover { background: #574fd6; }
+
+/* ── Idea list ── */
+.filters { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; align-items: center; }
+.filters select, .filters input { padding: .45rem .75rem; border: 1.5px solid #dde; border-radius: 7px; font-size: .88rem; }
+.idea-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.idea-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07); padding: 1.1rem 1.25rem; cursor: pointer; transition: box-shadow .2s, transform .15s; border-left: 4px solid transparent; }
+.idea-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.12); transform: translateY(-2px); }
+.idea-card.status-pending { border-left-color: #f39c12; }
+.idea-card.status-approved { border-left-color: #2ecc71; }
+.idea-card.status-rejected { border-left-color: #e74c3c; }
+.idea-card.status-v_realizacii { border-left-color: #3498db; }
+.idea-card.status-done { border-left-color: #9b59b6; }
+.idea-meta { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: .4rem; }
+.badge { font-size: .72rem; font-weight: 700; padding: .2rem .55rem; border-radius: 12px; text-transform: uppercase; }
+.badge-pending { background: #fef3cd; color: #856404; }
+.badge-approved { background: #d4edda; color: #155724; }
+.badge-rejected { background: #f8d7da; color: #721c24; }
+.badge-v_realizacii { background: #cce5ff; color: #004085; }
+.badge-done { background: #e2d9f3; color: #6f42c1; }
+.idea-card h3 { font-size: 1rem; margin-bottom: .3rem; color: #1a1a2e; }
+.idea-card p { font-size: .85rem; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.idea-footer { display: flex; align-items: center; justify-content: space-between; margin-top: .65rem; font-size: .8rem; color: #888; }
+.vote-row { display: flex; align-items: center; gap: .4rem; }
+.vote-btn { background: none; border: 1px solid #dde; border-radius: 5px; padding: .1rem .45rem; cursor: pointer; font-size: .85rem; transition: background .15s; }
+.vote-btn:hover { background: #f0f0f0; }
+
+/* ── Idea detail modal ── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 680px; padding: 2rem; position: relative; margin: auto; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
+.modal-close:hover { color: #333; }
+.modal h2 { font-size: 1.3rem; margin-bottom: 1rem; padding-right: 2rem; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
+.detail-row { margin-bottom: .75rem; }
+.detail-label { font-size: .8rem; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: .2rem; }
+.detail-value { font-size: .95rem; color: #333; }
+.status-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .5rem; }
+.comments-section { margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1rem; }
+.comment-item { padding: .6rem .8rem; background: #f8f9fa; border-radius: 8px; margin-bottom: .5rem; }
+.comment-meta { font-size: .78rem; color: #888; margin-bottom: .2rem; }
+.comment-text { font-size: .9rem; }
+.ai-analysis { background: #f0f4ff; border-radius: 10px; padding: 1rem 1.1rem; margin-top: 1rem; }
+.ai-analysis h4 { font-size: .9rem; color: #4a3fd6; margin-bottom: .5rem; }
+.ai-item { font-size: .88rem; margin-bottom: .3rem; }
+
+/* ── Stats ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: #fff; border-radius: 10px; padding: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); text-align: center; }
+.stat-num { font-size: 2rem; font-weight: 700; color: #6c63ff; }
+.stat-label { font-size: .82rem; color: #888; margin-top: .2rem; }
+
+/* ── User management ── */
+.user-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.user-table th { background: #f8f9fa; padding: .6rem .9rem; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
+.user-table td { padding: .6rem .9rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+.user-table tr:hover td { background: #fafafa; }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1a1a2e; color: #fff; padding: .75rem 1.25rem; border-radius: 10px; font-size: .9rem; opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .3s; z-index: 999; max-width: 320px; }
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.toast-error { background: #e74c3c; }
+#toast.toast-success { background: #2ecc71; }
+
+/* ── Settings panel ── */
+.settings-section { margin-bottom: 1.5rem; }
+.settings-section h3 { font-size: 1rem; margin-bottom: .75rem; color: #333; }
+
+@media (max-width: 600px) {
+  .main { padding: 1rem .75rem; }
+  .idea-grid { grid-template-columns: 1fr; }
+  .modal { padding: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Login page ───────────────────────────────────────────── -->
+<div id="loginPage">
+  <div class="login-card">
+    <h1>💡 Idea Capture</h1>
+    <p>Prihlás sa do svojho účtu</p>
+    <div class="input-group">
+      <label>Používateľské meno</label>
+      <input id="loginUser" type="text" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="input-group">
+      <label>Heslo</label>
+      <input id="loginPass" type="password" placeholder="••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Prihlásiť sa</button>
+    <p id="loginErr" style="color:#e74c3c;margin-top:.75rem;font-size:.88rem;"></p>
+  </div>
+</div>
+
+<!-- ── App shell ────────────────────────────────────────────── -->
+<div id="app" class="hidden">
+  <header>
+    <h1>💡 Idea Capture</h1>
+    <div class="header-right">
+      <span class="user-chip" id="userChip"></span>
+      <button class="btn-sm btn-outline" onclick="showTab('settings')">⚙️ Nastavenia</button>
+      <button class="btn-sm btn-danger-sm" onclick="doLogout()">Odhlásiť</button>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="ideas" onclick="showTab('ideas')">💡 Nápady</button>
+    <button class="nav-tab" data-tab="submit" onclick="showTab('submit')">➕ Pridať nápad</button>
+    <button class="nav-tab" data-tab="stats" onclick="showTab('stats')">📊 Štatistiky</button>
+    <button class="nav-tab admin-only hidden" data-tab="users" onclick="showTab('users')">👥 Používatelia</button>
+    <button class="nav-tab" data-tab="settings" onclick="showTab('settings')">⚙️ Nastavenia</button>
+  </nav>
+
+  <!-- IDEAS TAB -->
+  <div class="main" id="tab-ideas">
+    <div class="card">
+      <div class="panel-header">
+        <h2>Všetky nápady</h2>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-gray" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-purple" onclick="loadIdeas()">🔄 Obnoviť</button>
+        </div>
+      </div>
+      <div class="filters">
+        <select id="filterStatus" onchange="renderIdeas()">
+          <option value="">Všetky statusy</option>
+          <option value="pending">Čakajúce</option>
+          <option value="approved">Schválené</option>
+          <option value="rejected">Zamietnuté</option>
+          <option value="v_realizacii">V realizácii</option>
+          <option value="done">Hotové</option>
+        </select>
+        <select id="filterDept" onchange="renderIdeas()">
+          <option value="">Všetky oddelenia</option>
+          <option value="development">Development</option>
+          <option value="marketing">Marketing</option>
+          <option value="production">Production</option>
+          <option value="management">Management</option>
+          <option value="other">Ostatné</option>
+        </select>
+        <input id="filterSearch" placeholder="🔍 Hľadať..." oninput="renderIdeas()" style="flex:1;min-width:140px;">
+      </div>
+      <div id="ideasGrid" class="idea-grid"></div>
+    </div>
+  </div>
+
+  <!-- SUBMIT TAB -->
+  <div class="main hidden" id="tab-submit">
+    <div class="card">
+      <div class="panel-header"><h2>Pridať nový nápad</h2></div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2;">
+          <label>Názov nápadu *</label>
+          <input id="newTitle" placeholder="Krátky, výstižný názov...">
+        </div>
+        <div class="form-group">
+          <label>Oddelenie</label>
+          <select id="newDept">
+            <option value="development">Development</option>
+            <option value="marketing">Marketing</option>
+            <option value="production">Production</option>
+            <option value="management">Management</option>
+            <option value="other">Ostatné</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label>Priradené k (voliteľné)</label>
+          <input id="newAssignedTo" placeholder="Meno zodpovednej osoby...">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Deadline (voliteľné)</label>
+          <input id="newDeadline" type="date">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label>Popis</label>
+          <textarea id="newDesc" placeholder="Podrobnejší popis nápadu..."></textarea>
+        </div>
+      </div>
+
+      <!-- Voice input -->
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:.82rem;font-weight:600;color:#555;">🎙 Hlasový vstup</label>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;">
+          <button class="btn btn-blue" id="recordBtn" onclick="toggleRecord()">⏺ Nahrávať</button>
+          <button class="btn btn-gray" id="uploadAudioBtn" onclick="document.getElementById('audioFileInput').click()">📁 Nahrať súbor</button>
+          <input type="file" id="audioFileInput" accept=".mp3,.wav,.ogg,.m4a,.mp4,.flac,.webm" class="hidden" onchange="uploadAudioFile(this)">
+          <span id="recordStatus" style="font-size:.85rem;color:#888;align-self:center;"></span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+        <button class="btn btn-green" onclick="submitIdea()">💾 Uložiť nápad</button>
+        <button class="btn btn-gray" onclick="clearForm()">✕ Vymazať</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div class="main hidden" id="tab-stats">
+    <div class="card">
+      <div class="panel-header"><h2>Štatistiky nápadov</h2></div>
+      <div id="statsContent"></div>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div class="main hidden" id="tab-users">
+    <div class="card">
+      <div class="panel-header">
+        <h2>Správa používateľov</h2>
+        <button class="btn btn-purple" onclick="showAddUserForm()">+ Pridať používateľa</button>
+      </div>
+      <div id="addUserForm" class="hidden" style="background:#f8f9fa;border-radius:10px;padding:1rem;margin-bottom:1rem;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Používateľské meno</label>
+            <input id="newUsername" placeholder="username">
+          </div>
+          <div class="form-group">
+            <label>Heslo</label>
+            <input id="newUserPass" type="password" placeholder="min 6 znakov">
+          </div>
+          <div class="form-group">
+            <label>Rola</label>
+            <select id="newUserRole">
+              <option value="employee">Employee</option>
+              <option value="manager">Manager</option>
+              <option value="c-level">C-Level</option>
+              <option value="majo-markech">Majo Markech</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Oddelenie</label>
+            <select id="newUserDept">
+              <option value="development">Development</option>
+              <option value="marketing">Marketing</option>
+              <option value="production">Production</option>
+              <option value="management">Management</option>
+              <option value="other">Ostatné</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn btn-green" onclick="createUser()">Vytvoriť</button>
+          <button class="btn btn-gray" onclick="hideAddUserForm()">Zrušiť</button>
+        </div>
+      </div>
+      <table class="user-table">
+        <thead><tr><th>Meno</th><th>Rola</th><th>Oddelenie</th><th>Akcie</th></tr></thead>
+        <tbody id="usersList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="main hidden" id="tab-settings">
+    <div class="card">
+      <div class="panel-header"><h2>Nastavenia</h2></div>
+      <div class="settings-section">
+        <h3>Zmena hesla</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Aktuálne heslo</label>
+            <input id="curPass" type="password" placeholder="Aktuálne heslo">
+          </div>
+          <div class="form-group">
+            <label>Nové heslo</label>
+            <input id="newPass" type="password" placeholder="Min. 6 znakov">
+          </div>
+          <div class="form-group">
+            <label>Potvrdiť heslo</label>
+            <input id="confirmPass" type="password" placeholder="Zopakovať nové heslo">
+          </div>
+        </div>
+        <button class="btn btn-purple" onclick="changePassword()">Zmeniť heslo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Idea detail modal ─────────────────────────────────────── -->
+<div id="ideaModal" class="modal-backdrop hidden" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modalTitle"></h2>
+    <div class="detail-meta" id="modalMeta"></div>
+    <div class="detail-row"><div class="detail-label">Popis</div><div class="detail-value" id="modalDesc"></div></div>
+    <div class="detail-row" id="modalAssignedRow">
+      <div class="detail-label">Priradené k</div><div class="detail-value" id="modalAssigned"></div>
+    </div>
+    <div class="detail-row" id="modalDeadlineRow">
+      <div class="detail-label">Deadline</div><div class="detail-value" id="modalDeadline"></div>
+    </div>
+    <div class="detail-row" id="modalAnalysisRow" class="hidden">
+      <div class="ai-analysis" id="modalAnalysis"></div>
+    </div>
+    <div id="modalStatusRow" class="status-row hidden"></div>
+    <div class="comments-section">
+      <h3 style="font-size:.95rem;margin-bottom:.75rem;">Komentáre</h3>
+      <div id="modalComments"></div>
+      <div style="display:flex;gap:.5rem;margin-top:.75rem;">
+        <input id="commentInput" placeholder="Napíš komentár..." style="flex:1;padding:.5rem .8rem;border:1.5px solid #dde;border-radius:7px;font-size:.9rem;" onkeydown="if(event.key==='Enter')addComment()">
+        <button class="btn btn-blue" onclick="addComment()">Odoslať</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+const API = '';
+let currentUser = null;
+let ideas = [];
+let currentIdeaId = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+// ── Helpers ──────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    ...opts,
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Chyba servera');
+  return data;
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' toast-' + type : '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+function showTab(name) {
+  document.querySelectorAll('.main').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.remove('hidden');
+  const btn = document.querySelector(`.nav-tab[data-tab="${name}"]`);
+  if (btn) btn.classList.add('active');
+  if (name === 'stats') loadStats();
+  if (name === 'users') loadUsers();
+}
+
+function statusLabel(s) {
+  return { pending: 'Čakajúce', approved: 'Schválené', rejected: 'Zamietnuté', v_realizacii: 'V realizácii', done: 'Hotové' }[s] || s;
+}
+
+function deptLabel(d) {
+  return { development: 'Development', marketing: 'Marketing', production: 'Production', management: 'Management', other: 'Ostatné' }[d] || d;
+}
+
+// ── Auth ─────────────────────────────────────────────────────
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const password = document.getElementById('loginPass').value;
+  document.getElementById('loginErr').textContent = '';
+  try {
+    const u = await api('/api/login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    currentUser = u;
+    startApp();
+  } catch(e) {
+    document.getElementById('loginErr').textContent = e.message;
+  }
+}
+
+async function doLogout() {
+  await api('/api/logout', { method: 'POST' });
+  currentUser = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+}
+
+async function startApp() {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('userChip').textContent = `${currentUser.username} (${currentUser.role})`;
+  if (['c-level','majo-markech'].includes(currentUser.role)) {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+  }
+  // Pre-set department in form
+  if (currentUser.department) {
+    const sel = document.getElementById('newDept');
+    if (sel) sel.value = currentUser.department;
+  }
+  await loadIdeas();
+  showTab('ideas');
+}
+
+// Check session on load
+(async () => {
+  try {
+    currentUser = await api('/api/me');
+    startApp();
+  } catch(e) {
+    // Not logged in — show login
+  }
+})();
+
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── Ideas ─────────────────────────────────────────────────────
+async function loadIdeas() {
+  ideas = await api('/api/ideas');
+  renderIdeas();
+}
+
+function renderIdeas() {
+  const status = document.getElementById('filterStatus').value;
+  const dept = document.getElementById('filterDept').value;
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+  let filtered = ideas.filter(i => {
+    if (status && i.status !== status) return false;
+    if (dept && i.department !== dept) return false;
+    if (search && !i.title.toLowerCase().includes(search) && !(i.description||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const grid = document.getElementById('ideasGrid');
+  if (!filtered.length) { grid.innerHTML = '<p style="color:#888;padding:.5rem">Žiadne nápady.</p>'; return; }
+  grid.innerHTML = filtered.map(i => `
+    <div class="idea-card status-${i.status}" onclick="openIdea(${i.id})">
+      <div class="idea-meta">
+        <span class="badge badge-${i.status}">${statusLabel(i.status)}</span>
+        <span style="font-size:.78rem;color:#888;">${deptLabel(i.department)}</span>
+        ${i.priority ? `<span style="font-size:.75rem;color:#888;">${i.priority}</span>` : ''}
+      </div>
+      <h3>${escHtml(i.title)}</h3>
+      ${i.description ? `<p>${escHtml(i.description)}</p>` : ''}
+      ${i.assigned_to ? `<p style="font-size:.78rem;color:#666;margin-top:.3rem;">👤 ${escHtml(i.assigned_to)}</p>` : ''}
+      ${i.deadline ? `<p style="font-size:.78rem;color:#666;">📅 ${i.deadline}</p>` : ''}
+      <div class="idea-footer">
+        <span>${escHtml(i.username||'')} · ${fmtDate(i.created_at)}</span>
+        <div class="vote-row">
+          <button class="vote-btn" onclick="event.stopPropagation();vote(${i.id},1)">▲</button>
+          <span>${i.votes || 0}</span>
+          <button class="vote-btn" onclick="event.stopPropagation();vote(${i.id},-1)">▼</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('sk-SK', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+async function vote(id, val) {
+  try {
+    const r = await api(`/api/ideas/${id}/vote`, { method: 'POST', body: JSON.stringify({ value: val }) });
+    const idea = ideas.find(i => i.id === id);
+    if (idea) idea.votes = r.votes;
+    renderIdeas();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function exportCSV() {
+  window.location.href = '/api/ideas/export/csv';
+}
+
+// ── Submit idea ───────────────────────────────────────────────
+async function submitIdea() {
+  const title = document.getElementById('newTitle').value.trim();
+  const desc = document.getElementById('newDesc').value.trim();
+  const dept = document.getElementById('newDept').value;
+  const assignedTo = document.getElementById('newAssignedTo').value.trim();
+  const deadline = document.getElementById('newDeadline').value;
+  if (!title) { toast('Zadaj názov nápadu', 'error'); return; }
+  try {
+    await api('/api/ideas', { method: 'POST', body: JSON.stringify({ title, description: desc, department: dept, assigned_to: assignedTo || null, deadline: deadline || null }) });
+    toast('Nápad uložený!', 'success');
+    clearForm();
+    await loadIdeas();
+    showTab('ideas');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function clearForm() {
+  ['newTitle','newDesc','newAssignedTo','newDeadline'].forEach(id => document.getElementById(id).value = '');
+  const sel = document.getElementById('newDept');
+  if (currentUser && currentUser.department) sel.value = currentUser.department;
+}
+
+// ── Idea detail modal ─────────────────────────────────────────
+async function openIdea(id) {
+  currentIdeaId = id;
+  const idea = ideas.find(i => i.id === id);
+  if (!idea) return;
+
+  document.getElementById('modalTitle').textContent = idea.title;
+  document.getElementById('modalDesc').textContent = idea.description || '—';
+
+  // assigned_to & deadline
+  const assignedRow = document.getElementById('modalAssignedRow');
+  const deadlineRow = document.getElementById('modalDeadlineRow');
+  document.getElementById('modalAssigned').textContent = idea.assigned_to || '—';
+  document.getElementById('modalDeadline').textContent = idea.deadline ? fmtDate(idea.deadline) : '—';
+  assignedRow.style.display = (idea.assigned_to || idea.deadline) ? '' : 'none';
+  deadlineRow.style.display = idea.deadline ? '' : 'none';
+
+  // meta badges
+  document.getElementById('modalMeta').innerHTML = `
+    <span class="badge badge-${idea.status}">${statusLabel(idea.status)}</span>
+    <span class="badge" style="background:#e8e8e8;color:#555;">${deptLabel(idea.department)}</span>
+    ${idea.priority ? `<span class="badge" style="background:#fff3cd;color:#856404;">${idea.priority}</span>` : ''}
+    <span style="font-size:.8rem;color:#888;">${escHtml(idea.username||'')} · ${fmtDate(idea.created_at)}</span>
+  `;
+
+  // AI analysis
+  const analysisRow = document.getElementById('modalAnalysisRow');
+  const analysisEl = document.getElementById('modalAnalysis');
+  if (idea.ai_analysis) {
+    try {
+      const a = typeof idea.ai_analysis === 'string' ? JSON.parse(idea.ai_analysis) : idea.ai_analysis;
+      analysisEl.innerHTML = `
+        <h4>🤖 AI Analýza</h4>
+        ${a.summary ? `<div class="ai-item"><strong>Zhrnutie:</strong> ${escHtml(a.summary)}</div>` : ''}
+        ${a.potential ? `<div class="ai-item"><strong>Potenciál:</strong> ${escHtml(a.potential)}</div>` : ''}
+        ${a.risks && a.risks.length ? `<div class="ai-item"><strong>Riziká:</strong> ${a.risks.map(r => escHtml(r)).join(', ')}</div>` : ''}
+        ${a.next_steps && a.next_steps.length ? `<div class="ai-item"><strong>Ďalšie kroky:</strong> ${a.next_steps.map(s => escHtml(s)).join(', ')}</div>` : ''}
+      `;
+      analysisRow.classList.remove('hidden');
+    } catch(e) {
+      analysisRow.classList.add('hidden');
+    }
+  } else {
+    analysisRow.classList.add('hidden');
+  }
+
+  // Status buttons (managers+)
+  const statusRow = document.getElementById('modalStatusRow');
+  const role = currentUser.role;
+  if (['c-level','majo-markech','manager'].includes(role)) {
+    statusRow.classList.remove('hidden');
+    const statuses = [
+      ['pending','btn-gray','Čakajúce'],
+      ['approved','btn-green','Schváliť'],
+      ['rejected','btn-red','Zamietnuť'],
+      ['v_realizacii','btn-blue','V realizácii'],
+      ['done','btn-purple','Hotové'],
+    ];
+    statusRow.innerHTML = statuses.map(([s,cls,label]) =>
+      `<button class="btn ${cls}" onclick="setStatus('${s}')">${label}</button>`
+    ).join('');
+  } else {
+    statusRow.classList.add('hidden');
+  }
+
+  // Load comments
+  await loadComments(id);
+  document.getElementById('commentInput').value = '';
+  document.getElementById('ideaModal').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('ideaModal') || e.target.classList.contains('modal-close')) {
+    document.getElementById('ideaModal').classList.add('hidden');
+    currentIdeaId = null;
+  }
+}
+
+async function setStatus(status) {
+  if (!currentIdeaId) return;
+  try {
+    await api(`/api/ideas/${currentIdeaId}`, { method: 'PUT', body: JSON.stringify({ status }) });
+    toast('Status aktualizovaný', 'success');
+    await loadIdeas();
+    closeModal();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function loadComments(id) {
+  const comments = await api(`/api/ideas/${id}/comments`);
+  const el = document.getElementById('modalComments');
+  if (!comments.length) { el.innerHTML = '<p style="color:#aaa;font-size:.85rem;">Zatiaľ žiadne komentáre.</p>'; return; }
+  el.innerHTML = comments.map(c => `
+    <div class="comment-item">
+      <div class="comment-meta">${escHtml(c.username)} · ${fmtDate(c.created_at)}</div>
+      <div class="comment-text">${escHtml(c.content)}</div>
+    </div>
+  `).join('');
+}
+
+async function addComment() {
+  const content = document.getElementById('commentInput').value.trim();
+  if (!content || !currentIdeaId) return;
+  try {
+    await api(`/api/ideas/${currentIdeaId}/comments`, { method: 'POST', body: JSON.stringify({ content }) });
+    document.getElementById('commentInput').value = '';
+    await loadComments(currentIdeaId);
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── Users ─────────────────────────────────────────────────────
+async function loadUsers() {
+  const users = await api('/api/users');
+  const tbody = document.getElementById('usersList');
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>${escHtml(u.username)}</td>
+      <td><select onchange="updateUserRole(${u.id}, this.value)">
+        ${['employee','manager','c-level','majo-markech'].map(r =>
+          `<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`
+        ).join('')}
+      </select></td>
+      <td><select onchange="updateUserDept(${u.id}, this.value)">
+        ${['development','marketing','production','management','other'].map(d =>
+          `<option value="${d}" ${u.department===d?'selected':''}>${d}</option>`
+        ).join('')}
+      </select></td>
+      <td><button class="btn btn-red" style="padding:.25rem .6rem;font-size:.78rem;" onclick="deleteUser(${u.id})">Zmazať</button></td>
+    </tr>
+  `).join('');
+}
+
+function showAddUserForm() { document.getElementById('addUserForm').classList.remove('hidden'); }
+function hideAddUserForm() { document.getElementById('addUserForm').classList.add('hidden'); }
+
+async function createUser() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newUserPass').value;
+  const role = document.getElementById('newUserRole').value;
+  const department = document.getElementById('newUserDept').value;
+  if (!username || !password) { toast('Vyplň meno a heslo', 'error'); return; }
+  try {
+    await api('/api/users', { method: 'POST', body: JSON.stringify({ username, password, role, department }) });
+    toast('Používateľ vytvorený', 'success');
+    hideAddUserForm();
+    loadUsers();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function updateUserRole(id, role) {
+  try { await api(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify({ role }) }); toast('Rola aktualizovaná', 'success'); }
+  catch(e) { toast(e.message, 'error'); }
+}
+
+async function updateUserDept(id, department) {
+  try { await api(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify({ department }) }); toast('Oddelenie aktualizované', 'success'); }
+  catch(e) { toast(e.message, 'error'); }
+}
+
+async function deleteUser(id) {
+  if (!confirm('Naozaj zmazať tohto používateľa?')) return;
+  try {
+    await api(`/api/users/${id}`, { method: 'DELETE' });
+    toast('Používateľ zmazaný', 'success');
+    loadUsers();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+async function loadStats() {
+  const s = await api('/api/stats');
+  const el = document.getElementById('statsContent');
+  const statusOrder = ['pending','approved','rejected','v_realizacii','done'];
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${s.total}</div><div class="stat-label">Celkovo nápadov</div></div>
+      ${statusOrder.map(st => `
+        <div class="stat-card">
+          <div class="stat-num" style="font-size:1.5rem;">${s.by_status[st]||0}</div>
+          <div class="stat-label">${statusLabel(st)}</div>
+        </div>
+      `).join('')}
+    </div>
+    <h3 style="margin-bottom:.75rem;font-size:1rem;">Podľa oddelenia</h3>
+    <div class="stats-grid">
+      ${Object.entries(s.by_department).map(([d,c]) =>
+        `<div class="stat-card"><div class="stat-num" style="font-size:1.5rem;">${c}</div><div class="stat-label">${deptLabel(d)}</div></div>`
+      ).join('')}
+    </div>
+  `;
+}
+
+// ── Settings / Change password ────────────────────────────────
+async function changePassword() {
+  const current = document.getElementById('curPass').value;
+  const newPw = document.getElementById('newPass').value;
+  const confirm = document.getElementById('confirmPass').value;
+  if (!current || !newPw || !confirm) { toast('Vyplň všetky polia', 'error'); return; }
+  if (newPw !== confirm) { toast('Nové heslá sa nezhodujú', 'error'); return; }
+  if (newPw.length < 6) { toast('Heslo musí mať aspoň 6 znakov', 'error'); return; }
+  try {
+    await api('/api/change-password', { method: 'POST', body: JSON.stringify({ current_password: current, new_password: newPw }) });
+    toast('Heslo zmenené', 'success');
+    ['curPass','newPass','confirmPass'].forEach(id => document.getElementById(id).value = '');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── Voice recording ───────────────────────────────────────────
+async function toggleRecord() {
+  if (isRecording) {
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById('recordBtn').textContent = '⏺ Nahrávať';
+    document.getElementById('recordStatus').textContent = 'Spracúvam...';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      await uploadAudioBlob(blob, 'recording.webm');
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('recordBtn').textContent = '⏹ Zastaviť';
+    document.getElementById('recordStatus').textContent = 'Nahrávam...';
+  } catch(e) {
+    toast('Mikrofón nedostupný: ' + e.message, 'error');
+  }
+}
+
+async function uploadAudioFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  document.getElementById('recordStatus').textContent = 'Nahrávam súbor...';
+  await uploadAudioBlob(file, file.name);
+}
+
+async function uploadAudioBlob(blob, filename) {
+  const formData = new FormData();
+  formData.append('audio', blob, filename);
+  try {
+    // Use async upload endpoint
+    const r = await fetch('/api/upload-async', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Upload failed');
+    const jobId = data.job_id;
+    // Poll for result
+    document.getElementById('recordStatus').textContent = 'Prepis prebieha...';
+    await pollUploadJob(jobId);
+  } catch(e) {
+    document.getElementById('recordStatus').textContent = '';
+    toast('Chyba: ' + e.message, 'error');
+  }
+}
+
+async function pollUploadJob(jobId) {
+  for (let i = 0; i < 60; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    try {
+      const status = await api(`/api/upload-status/${jobId}`);
+      if (status.status === 'done') {
+        document.getElementById('newDesc').value = (document.getElementById('newDesc').value + ' ' + status.text).trim();
+        document.getElementById('recordStatus').textContent = '✓ Prepísané';
+        toast('Prepis hotový', 'success');
+        return;
+      } else if (status.status === 'error') {
+        throw new Error(status.error || 'Transcription failed');
+      }
+    } catch(e) {
+      document.getElementById('recordStatus').textContent = '';
+      toast('Chyba prepisu: ' + e.message, 'error');
+      return;
+    }
+  }
+  document.getElementById('recordStatus').textContent = '';
+  toast('Prepis trval príliš dlho', 'error');
+}
+</script>
+</body>
+</html>
