@@ -28,7 +28,7 @@
   },
   {
     "email": "kovacovicova@dajanarodriguez.com",
-    "display_name": "Dominika",
+    "display_name": "Dominika Michalec Kovačovičová",
     "password_hash": "scrypt:32768:8:1$t4gJj9ByM27G7CY1$8f22464128a2286e3ce0af922770c887e2807c796d599e667a34c780f7dfb526b5b525c089409f280af0f6ebb8bb9217cdfecf8d9d5c17eb8fb891dea28c9ffd",
     "role": "admin",
     "department": "marketing",
