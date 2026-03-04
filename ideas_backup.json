@@ -530,13 +530,13 @@
     "duration_seconds": 45,
     "transcript": "Mohol by si pridať do tohoto aj možnosť vkladať text, aby sme vedeli si všetky nápady držať na jednom mieste, lebo napríklad ja mám vytvorené dokumenty v klaude ako Google Sheet dokumenty, kde mi robí napríklad hand-offs alebo rôzne veci pre marketingové oddelenie. Teraz čítam, že si tam niečo nahrával, hodomral do Fuego, tak mám vymyslený celý koncept aj kampaň pre Fuego Moments, tak bolo by fajn, keby mám možnosť to tam celé dať a nemusím to iba len nahrávať ako nápad a reálne z tohoto spraviť takú centralizovanú vec na nápady pre celú firmu.",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 7,
+    "ai_analysis": "{\"score\": 7, \"clarity\": 6, \"feasibility\": 8, \"relevance\": 8, \"summary\": \"Nápad na rozšírenie systému ideí o možnosť vkladania rozsiahlejšieho textu a príloh s cieľom centralizovať všetky organizačné nápady a projektové materiály na jednom mieste namiesto fragmentácie v rôznych nástrojoch. Zamestnnanec c-level úrovne vidí potenciál integrácie existujúcich dokumentov a kampáňových konceptov priamo do systému.\", \"strengths\": [\"Vysoký praktický potenciál - riešenie skutočného bola zamestnancov (fragmentácia v Google Sheets, Claude a iných nástrojoch)\", \"C-level perspektíva - nápad pochádza od vedúceho pracovníka s prehľadom o cross-functional procesoch\", \"Centralizácia poznatkov - vytvára jednú centrálnu databázu namiesto rozptýlených dokumentov\", \"Relevantné pre viac oddelení - príklad s Fuego Moments ukazuje potenciál pre marketing aj product\"], \"weaknesses\": [\"Slabá formulácia - nápad je vyslovený rečovo bez jasných špecifikácií funkcionalít\", \"Nejasné technické požiadavky - nie je zrejmé, aké typy súborov a aká veľkosť obsahu sa očakáva\", \"Chýbajúca analýza dopadov - bez informácií o počte používateľov, frekvencii použitia alebo očakávanom ROI\"], \"next_steps\": [\"Pozvať zamestnanca na detailný workshop na špecifikáciu požiadaviek (typy obsahu, formáty, veľkosti, prístupové práva)\", \"Mapovať aktuálny workflow a identifikovať kľúčové pain points v súčasnom systéme\", \"Vykonať audit ostatných c-level zamestnancov na overenie potreby a frekvencie použitia\"], \"category\": \"process_improvement\", \"tags\": [\"process\", \"product\", \"automation\", \"quick_win\", \"marketing\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 19:08:54.824897+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[\"process\", \"product\", \"automation\", \"quick_win\", \"marketing\"]"
   }
 ]
