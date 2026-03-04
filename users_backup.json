@@ -142,5 +142,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 14:14:23.681429+00"
+  },
+  {
+    "email": "brodansky@dajanarodriguez.com",
+    "display_name": "Dominik Brodansky",
+    "password_hash": "scrypt:32768:8:1$4L6OX27fONoeFize$9faddb24c78c15ccc99e3fbbc3b915c1b85aeea2f8cbd3ac7987f8cd81af65c4c403d7953220ca285c37251e057d4ff0bc56d00adf2d9ef970f72dbb9d3a30f3",
+    "role": "submitter",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 14:14:47.35682+00"
   }
 ]
