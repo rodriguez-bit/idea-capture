@@ -309,7 +309,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 <div class="modal-overlay" id="user-modal">
   <div class="modal" style="max-width:480px">
     <button class="modal-close" onclick="closeModal('user-modal')">×</button>
-    <h2>Nový používateľ</h2>
+    <h2 id="u-modal-title">Nový používateľ</h2>
     <div class="form-row">
       <div class="form-group">
         <label>Meno</label>
@@ -320,8 +320,8 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <input type="email" id="u-email" placeholder="jan@firma.sk">
       </div>
     </div>
-    <div class="form-group">
-      <label>Heslo</label>
+    <div class="form-group" id="u-pass-group">
+      <label id="u-pass-label">Heslo</label>
       <input type="password" id="u-pass" placeholder="Dočasné heslo">
     </div>
     <div class="form-row">
@@ -345,7 +345,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         </select>
       </div>
     </div>
-    <button class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvoriť používateľa</button>
+    <button id="u-save-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvoriť používateľa</button>
   </div>
 </div>
 
@@ -356,6 +356,8 @@ let currentUser = null;
 let currentIdea = null;
 let ideasPage = 0;
 const PAGE_SIZE = 20;
+let editingUserId = null;
+let usersData = [];
 let searchTimer = null;
 
 // ─── Init ────────────────────────────────────────────────────────────────────
@@ -630,6 +632,7 @@ async function loadUsers() {
   const r = await fetch('/api/users');
   if (!r.ok) return;
   const users = await r.json();
+  usersData = users;
   const grid = document.getElementById('users-grid');
   if (!users.length) {
     grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadni používatelia</div>';
@@ -643,6 +646,7 @@ async function loadUsers() {
         <div class="user-email">${esc(u.email)} · <span class="badge badge-dept" style="font-size:11px">${u.role}</span> ${u.department ? `· ${deptLabel(u.department)}` : ''}</div>
       </div>
       <div class="user-actions">
+        <button class="btn-sm btn-ghost" onclick="openEditUserModal(${u.id})">Upraviť</button>
         <button class="btn-sm btn-ghost" onclick="toggleUser(${u.id}, ${u.active})">${u.active ? 'Deaktivovať' : 'Aktivovať'}</button>
       </div>
     </div>
@@ -650,7 +654,30 @@ async function loadUsers() {
 }
 
 function openUserModal() {
+  editingUserId = null;
   ['u-name','u-email','u-pass'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('u-email').removeAttribute('readonly');
+  document.getElementById('u-modal-title').textContent = 'Nový používateľ';
+  document.getElementById('u-pass-label').textContent = 'Heslo';
+  document.getElementById('u-pass').placeholder = 'Dočasné heslo';
+  document.getElementById('u-save-btn').textContent = 'Vytvoriť používateľa';
+  document.getElementById('user-modal').classList.add('open');
+}
+
+function openEditUserModal(id) {
+  const u = usersData.find(x => x.id === id);
+  if (!u) return;
+  editingUserId = id;
+  document.getElementById('u-name').value = u.display_name;
+  document.getElementById('u-email').value = u.email;
+  document.getElementById('u-email').setAttribute('readonly', true);
+  document.getElementById('u-pass').value = '';
+  document.getElementById('u-role').value = u.role;
+  document.getElementById('u-dept').value = u.department || '';
+  document.getElementById('u-modal-title').textContent = 'Upraviť používateľa';
+  document.getElementById('u-pass-label').textContent = 'Nové heslo (nepovinné)';
+  document.getElementById('u-pass').placeholder = 'Nechajte prázdne — heslo sa nezmení';
+  document.getElementById('u-save-btn').textContent = 'Uložiť zmeny';
   document.getElementById('user-modal').classList.add('open');
 }
 
@@ -660,19 +687,41 @@ async function saveUser() {
   const pass = document.getElementById('u-pass').value;
   const role = document.getElementById('u-role').value;
   const dept = document.getElementById('u-dept').value;
-  if (!name || !email || !pass) { showToast('Vyplňte všetky polia', 'error'); return; }
-  const r = await fetch('/api/users', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({display_name: name, email, password: pass, role, department: dept})
-  });
-  if (r.ok) {
-    showToast('Používateľ vytvorený', 'success');
-    closeModal('user-modal');
-    loadUsers();
+
+  if (editingUserId) {
+    // Edit mode — email not changeable, password optional
+    if (!name) { showToast('Zadajte meno', 'error'); return; }
+    const body = {display_name: name, role, department: dept};
+    if (pass) body.password = pass;
+    const r = await fetch(`/api/users/${editingUserId}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('Používateľ uložený', 'success');
+      closeModal('user-modal');
+      loadUsers();
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Chyba', 'error');
+    }
   } else {
-    const d = await r.json();
-    showToast(d.error || 'Chyba', 'error');
+    // Create mode — all fields required
+    if (!name || !email || !pass) { showToast('Vyplňte všetky polia', 'error'); return; }
+    const r = await fetch('/api/users', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({display_name: name, email, password: pass, role, department: dept})
+    });
+    if (r.ok) {
+      showToast('Používateľ vytvorený', 'success');
+      closeModal('user-modal');
+      loadUsers();
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Chyba', 'error');
+    }
   }
 }
 
