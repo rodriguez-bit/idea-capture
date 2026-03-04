@@ -502,5 +502,23 @@
     "created_at": "2026-03-04 18:43:09.711327+00",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 7,
+    "author_name": "David Varga",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "",
+    "duration_seconds": 45,
+    "transcript": "Mohol by si pridať do tohoto aj možnosť vkladať text, aby sme vedeli si všetky nápady držať na jednom mieste, lebo napríklad ja mám vytvorené dokumenty v klaude ako Google Sheet dokumenty, kde mi robí napríklad hand-offs alebo rôzne veci pre marketingové oddelenie. Teraz čítam, že si tam niečo nahrával, hodomral do Fuego, tak mám vymyslený celý koncept aj kampaň pre Fuego Moments, tak bolo by fajn, keby mám možnosť to tam celé dať a nemusím to iba len nahrávať ako nápad a reálne z tohoto spraviť takú centralizovanú vec na nápady pre celú firmu.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 19:06:38.479416+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
