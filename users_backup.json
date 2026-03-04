@@ -34,5 +34,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 13:27:39.789983+00"
+  },
+  {
+    "email": "stoffova@dajanarodriguez.com",
+    "display_name": "Lucia Štoffová",
+    "password_hash": "scrypt:32768:8:1$xelmC9VT2hkpcT3g$05267488ff14937bf2592b54dcc33ddf2914d42c44deccfa46122afbee4d74c66159f458b14ac1d9efb467e299c032f1917c35a03fe343581aaede821af6dbb7",
+    "role": "submitter",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 13:36:10.285752+00"
   }
 ]
