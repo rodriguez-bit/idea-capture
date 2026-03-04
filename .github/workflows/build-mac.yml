@@ -13,44 +13,52 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Prepare clean source
+        run: |
+          mkdir -p src-clean
+          cp electron/main.js src-clean/
+          cp electron/preload.js src-clean/
+          cp electron/recorder.html src-clean/
+          echo '{"name":"ridea","version":"1.0.14","main":"main.js","dependencies":{}}' > src-clean/package.json
+
       - name: Package app for darwin (arm64 + x64)
         run: |
-          npx --yes @electron/packager electron/src-clean Ridea \
+          npx --yes @electron/packager src-clean Ridea \
             --platform=darwin \
             --arch=arm64,x64 \
             --electron-version=28.3.3 \
-            --out=electron/mac-out \
+            --out=mac-out \
             --overwrite \
             --app-version=1.0.14
 
       - name: Create DMG (arm64 — Apple Silicon)
         run: |
           mkdir dmg_arm64
-          cp -r "electron/mac-out/Ridea-darwin-arm64/Ridea.app" dmg_arm64/
+          cp -r "mac-out/Ridea-darwin-arm64/Ridea.app" dmg_arm64/
           ln -s /Applications dmg_arm64/Applications
           hdiutil create \
             -volname "Ridea" \
             -srcfolder dmg_arm64 \
             -ov -format UDZO \
-            "electron/Ridea-1.0.14-arm64.dmg"
+            "Ridea-1.0.14-arm64.dmg"
 
       - name: Create DMG (x64 — Intel Mac)
         run: |
           mkdir dmg_x64
-          cp -r "electron/mac-out/Ridea-darwin-x64/Ridea.app" dmg_x64/
+          cp -r "mac-out/Ridea-darwin-x64/Ridea.app" dmg_x64/
           ln -s /Applications dmg_x64/Applications
           hdiutil create \
             -volname "Ridea" \
             -srcfolder dmg_x64 \
             -ov -format UDZO \
-            "electron/Ridea-1.0.14-x64.dmg"
+            "Ridea-1.0.14-x64.dmg"
 
       - name: Upload DMGs to GitHub Release v1.0.14
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload v1.0.14 \
-            "electron/Ridea-1.0.14-arm64.dmg" \
-            "electron/Ridea-1.0.14-x64.dmg" \
+            "Ridea-1.0.14-arm64.dmg" \
+            "Ridea-1.0.14-x64.dmg" \
             --repo rodriguez-bit/idea-capture \
             --clobber
