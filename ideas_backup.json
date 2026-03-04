@@ -126,5 +126,21 @@
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 09:24:07"
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 81,
+    "transcript": "Potrebujem si dať do kopy aplikáciu pre výrobu CNC Manager rozšírenú o to čo idú sekať Ďalej potrebujem aplikáciu rozšírenú o kovania následne potrebujem dorobiť video následne potrebujem cashflow kompletne prerobiť aplikáciu následne potrebujem dorobiť software na CNC cutter potrebujem aplikáciu na vypočet času vyšívacích strojov potrebujem aplikáciu na cashflow potrebujem spraviť aplikáciu na atribučný model a potrebujem doriešiť kreditko aby mohli volať",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 09:54:24"
   }
 ]
