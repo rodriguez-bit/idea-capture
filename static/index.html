@@ -183,7 +183,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <option value="employee">Zamestnanec</option>
         <option value="majo-markech">Majo markech je kral</option>
       </select>
-      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()" autocomplete="new-password" data-lpignore="true">
+      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()" autocomplete="off" readonly onkeydown="this.removeAttribute('readonly')" onpaste="this.removeAttribute('readonly')" data-lpignore="true">
     </div>
 
     <div class="table-wrap">
