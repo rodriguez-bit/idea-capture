@@ -51,8 +51,8 @@ main { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
 .filter-select, .filter-input { padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
 .filter-select:focus, .filter-input:focus { border-color: var(--primary); }
 .filter-input { flex: 1; min-width: 200px; }
-@keyframes _noAutofill { from { opacity:1; } to { opacity:1; } }
-#f-search:-webkit-autofill { animation-name: _noAutofill; animation-duration: 1ms; }
+#f-search[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; }
+#f-search[contenteditable] { cursor: text; white-space: nowrap; overflow: hidden; }
 
 /* IDEAS TABLE */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -371,19 +371,14 @@ async function init() {
   document.getElementById('user-badge').textContent = `${currentUser.name} (${currentUser.role})`;
   // Replace search input dynamically — Chrome does not autofill dynamically inserted elements
   const _old = document.getElementById('f-search');
-  const _fresh = document.createElement('input');
+  const _fresh = document.createElement('div');
   _fresh.className = _old.className;
   _fresh.id = 'f-search';
-  _fresh.type = 'search';
-  _fresh.placeholder = _old.placeholder;
-  _fresh.setAttribute('autocomplete', 'off');
-  _fresh.setAttribute('data-lpignore', 'true');
-  let _searchUserTyped = false;
-  _fresh.addEventListener('keydown', () => { _searchUserTyped = true; });
-  _fresh.addEventListener('input', () => { debounceSearch(); if (!_fresh.value) _searchUserTyped = false; });
-  _fresh.addEventListener('animationstart', e => { if (e.animationName === '_noAutofill') _fresh.value = ''; });
-  // Guard: clear if Chrome autofills (value set without user typing)
-  setInterval(() => { if (!_searchUserTyped && _fresh.value) _fresh.value = ''; }, 200);
+  _fresh.contentEditable = 'true';
+  _fresh.setAttribute('role', 'searchbox');
+  _fresh.setAttribute('data-placeholder', 'Hľadať v transkripte...');
+  _fresh.addEventListener('input', debounceSearch);
+  _fresh.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
   _old.replaceWith(_fresh);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
@@ -412,7 +407,7 @@ async function loadIdeas() {
   const status = document.getElementById('f-status').value;
   const dept = document.getElementById('f-dept').value;
   const role = document.getElementById('f-role').value;
-  const search = document.getElementById('f-search').value.trim();
+  const search = (document.getElementById('f-search').textContent || '').trim();
   if (status) params.set('status', status);
   if (dept) params.set('department', dept);
   if (role) params.set('role', role);
@@ -761,7 +756,7 @@ async function doLogout() {
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   const s = document.getElementById('f-search');
-  if (s) { s.value = ''; setTimeout(() => { s.value = ''; }, 300); }
+  if (s) { s.textContent = ''; setTimeout(() => { s.textContent = ''; }, 300); }
 }
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
