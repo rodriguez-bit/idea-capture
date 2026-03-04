@@ -64,6 +64,9 @@ audio { width: 100%; border-radius: 8px; }
 .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
 
 .user-info-bar { font-size: 12px; color: var(--muted); text-align: right; margin-bottom: 16px; }
+.visibility-toggle { display: flex; gap: 8px; }
+.vis-btn { flex: 1; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.15s; }
+.vis-btn.active { background: rgba(99,102,241,0.15); border-color: var(--primary); color: var(--text); }
 </style>
 </head>
 <body>
@@ -94,6 +97,14 @@ audio { width: 100%; border-radius: 8px; }
       <option value="employee">Zamestnanec</option>
       <option value="majo-markech">Majo markech je kral</option>
     </select>
+  </div>
+
+  <div class="form-group">
+    <label>Viditeľnosť</label>
+    <div class="visibility-toggle">
+      <button type="button" class="vis-btn active" id="vis-personal" onclick="setVisibility('personal')">🔒 Môj nápad</button>
+      <button type="button" class="vis-btn" id="vis-company" onclick="setVisibility('company')">🌐 Pre celú firmu</button>
+    </div>
   </div>
 
   <button class="record-btn idle" id="record-btn" onclick="toggleRecord()">
@@ -129,6 +140,13 @@ let audioBlob = null;
 let timerInterval = null;
 let seconds = 0;
 let currentUser = null;
+let currentVisibility = 'personal';
+
+function setVisibility(val) {
+  currentVisibility = val;
+  document.getElementById('vis-personal').classList.toggle('active', val === 'personal');
+  document.getElementById('vis-company').classList.toggle('active', val === 'company');
+}
 
 const API_BASE = window.API_BASE || '';  // Electron sets this via preload
 
@@ -274,6 +292,7 @@ async function submitIdea() {
     formData.append('audio', audioBlob, `idea_${Date.now()}.${ext}`);
     formData.append('department', dept);
     formData.append('role', role);
+    formData.append('visibility', currentVisibility);
 
     const r = await fetch(`${API_BASE}/api/ideas/upload`, {
       method: 'POST',
@@ -329,6 +348,16 @@ init();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'SW_UPDATED') {
+      if (confirm('Dostupná nová verzia aplikácie. Obnoviť teraz?')) {
+        window.location.reload();
+      }
+    }
+  });
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 }
 </script>
 </body>

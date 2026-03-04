@@ -227,7 +227,8 @@ def init_db():
                 reviewer_note TEXT DEFAULT '',
                 reviewed_by TEXT DEFAULT '',
                 reviewed_at TEXT DEFAULT '',
-                created_at TEXT DEFAULT (datetime('now'))
+                created_at TEXT DEFAULT (datetime('now')),
+                visibility TEXT NOT NULL DEFAULT 'personal'
             );
 
             CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
@@ -235,6 +236,27 @@ def init_db():
             CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
         ''')
         db.commit()
+
+    # Idempotent migration: add visibility column if missing
+    existing_cols = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
+    if not DATABASE_URL and 'visibility' not in existing_cols:
+        db.execute("ALTER TABLE ideas ADD COLUMN visibility TEXT NOT NULL DEFAULT 'personal'")
+        db.commit()
+    elif DATABASE_URL:
+        try:
+            db.execute("""
+                DO $$ BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_name='ideas' AND column_name='visibility'
+                  ) THEN
+                    ALTER TABLE ideas ADD COLUMN visibility TEXT NOT NULL DEFAULT 'personal';
+                  END IF;
+                END $$;
+            """)
+            db.commit()
+        except Exception:
+            pass
 
     # Seed default users if none exist
     count = db.execute('SELECT COUNT(*) FROM users').fetchone()[0]
@@ -433,6 +455,12 @@ def api_ideas():
     limit = int(request.args.get('limit', 50))
     offset = int(request.args.get('offset', 0))
 
+    # Submitters only see their own ideas or company-wide ones
+    user_role = session.get('user_role')
+    if user_role == 'submitter':
+        filters.append("(author_id = ? OR visibility = 'company')")
+        params.append(session['user_id'])
+
     if dept:
         filters.append('department = ?')
         params.append(dept)
@@ -462,6 +490,10 @@ def api_idea_detail(idea_id):
     db.close()
     if not idea:
         return jsonify({'error': 'Nápad nenájdený'}), 404
+    user_role = session.get('user_role')
+    if user_role == 'submitter':
+        if idea['author_id'] != session['user_id'] and idea['visibility'] != 'company':
+            return jsonify({'error': 'Prístup zamietnutý'}), 403
     return jsonify(dict(idea))
 
 
@@ -469,8 +501,10 @@ def api_idea_detail(idea_id):
 @reviewer_required
 def api_idea_update(idea_id):
     data = request.get_json() or {}
-    allowed = {'status', 'reviewer_note'}
+    allowed = {'status', 'reviewer_note', 'visibility'}
     updates = {k: v for k, v in data.items() if k in allowed}
+    if 'visibility' in updates and updates['visibility'] not in ('personal', 'company'):
+        return jsonify({'error': 'Neplatná hodnota viditeľnosti'}), 400
     if not updates:
         return jsonify({'error': 'Nič na aktualizáciu'}), 400
 
@@ -515,6 +549,9 @@ def api_ideas_upload():
 
     department = (request.form.get('department') or '').strip()
     role = (request.form.get('role') or '').strip()
+    visibility = (request.form.get('visibility') or 'personal').strip()
+    if visibility not in ('personal', 'company'):
+        visibility = 'personal'
 
     if not department or not role:
         return jsonify({'error': 'Oddelenie a rola sú povinné'}), 400
@@ -539,15 +576,16 @@ def api_ideas_upload():
 
         db = get_db()
         cursor = db.execute('''
-            INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status)
-            VALUES (?, ?, ?, ?, ?, ?, 'new')
+            INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+            VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
         ''', (
             session['user_id'],
             session['user_name'],
             department,
             role,
             duration,
-            transcript_text
+            transcript_text,
+            visibility
         ))
         idea_id = cursor.lastrowid
         db.commit()
@@ -721,12 +759,16 @@ def api_stats():
     by_dept = {}
     for row in db.execute('SELECT department, COUNT(*) as cnt FROM ideas GROUP BY department').fetchall():
         by_dept[row['department']] = row['cnt']
+    by_visibility = {}
+    for row in db.execute('SELECT visibility, COUNT(*) as cnt FROM ideas GROUP BY visibility').fetchall():
+        by_visibility[row['visibility']] = row['cnt']
     recent = db.execute('SELECT * FROM ideas ORDER BY created_at DESC LIMIT 5').fetchall()
     db.close()
     return jsonify({
         'total': total,
         'by_status': by_status,
         'by_department': by_dept,
+        'by_visibility': by_visibility,
         'recent': [dict(r) for r in recent]
     })
 

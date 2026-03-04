@@ -94,6 +94,9 @@ body { background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .smsg.ok { color: #22c55e; } .smsg.err { color: #ef4444; } .smsg.inf { color: #818cf8; }
 .adml { font-size: 11px; color: #475569; text-align: center; cursor: pointer; flex-shrink: 0; }
 .adml:hover { color: #6366f1; }
+.vis-row { display: flex; gap: 6px; flex-shrink: 0; }
+.vis-btn { flex: 1; padding: 7px 6px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #64748b; font-size: 12px; cursor: pointer; transition: all .15s; }
+.vis-btn.active { background: rgba(99,102,241,0.15); border-color: #6366f1; color: #e2e8f0; }
 </style>
 </head>
 <body>
@@ -132,6 +135,10 @@ body { background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-siz
       <option value="majo-markech">Majo markech je kral</option>
     </select>
   </div>
+  <div class="vis-row">
+    <button type="button" class="vis-btn active" id="vis-personal" onclick="setVisibility('personal')">🔒 Môj nápad</button>
+    <button type="button" class="vis-btn" id="vis-company" onclick="setVisibility('company')">🌐 Pre celú firmu</button>
+  </div>
   <div class="mid">
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div></button>
     <div class="rtime" id="rtime">—</div>
@@ -148,7 +155,13 @@ body { background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 
 <script>
 var API = 'https://ridea.onrender.com';
-var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null;
+var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='personal';
+
+function setVisibility(val) {
+  currentVisibility = val;
+  document.getElementById('vis-personal').classList.toggle('active', val === 'personal');
+  document.getElementById('vis-company').classList.toggle('active', val === 'company');
+}
 
 function show(id) {
   var l = document.getElementById('login-screen');
@@ -281,6 +294,7 @@ async function sendIdea() {
     fd.append('audio', blob, 'idea_'+Date.now()+'.webm');
     fd.append('department', document.getElementById('dept').value);
     fd.append('role', document.getElementById('role').value);
+    fd.append('visibility', currentVisibility);
     var r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include'});
     clearInterval(p); fill.style.width='100%';
     if (r.ok) { setMsg('✓ Nápad odoslaný!','ok'); setTimeout(discard, 2500); }

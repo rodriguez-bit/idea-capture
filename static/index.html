@@ -188,6 +188,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
             <th>Transkript</th>
             <th>AI</th>
             <th>Status</th>
+            <th>Viditeľnosť</th>
             <th>Dátum</th>
           </tr>
         </thead>
@@ -259,6 +260,13 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
           <option value="in_review">V prehliadke</option>
           <option value="accepted">Prijatý</option>
           <option value="rejected">Zamietnutý</option>
+        </select>
+      </div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Viditeľnosť</label>
+        <select id="modal-visibility-select">
+          <option value="personal">🔒 Osobný</option>
+          <option value="company">🌐 Firemný</option>
         </select>
       </div>
       <div style="width:100%">
@@ -381,7 +389,7 @@ async function loadIdeas() {
 function renderIdeas(ideas) {
   const tbody = document.getElementById('ideas-tbody');
   if (!ideas.length) {
-    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
     return;
   }
   tbody.innerHTML = ideas.map(i => `
@@ -393,6 +401,7 @@ function renderIdeas(ideas) {
       <td class="truncate" style="color:var(--muted)">${esc(i.transcript) || '—'}</td>
       <td>${i.ai_score > 0 ? `<span class="badge badge-score">⭐ ${i.ai_score}/10</span>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
       <td><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
+      <td>${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(i.created_at)}</td>
     </tr>
   `).join('');
@@ -424,6 +433,7 @@ async function openIdea(id) {
     <span class="badge badge-dept">${roleLabel(i.role)}</span>
     <span class="badge badge-dept">👤 ${esc(i.author_name)}</span>
     ${i.duration_seconds > 0 ? `<span class="badge badge-dept">⏱ ${i.duration_seconds}s</span>` : ''}
+    <span class="badge badge-dept">${i.visibility === 'company' ? '🌐 Firemný' : '🔒 Osobný'}</span>
   `;
   document.getElementById('modal-transcript').textContent = i.transcript || '(prázdny transkript)';
 
@@ -449,6 +459,7 @@ async function openIdea(id) {
   if (currentUser.role === 'reviewer' || currentUser.role === 'admin') {
     actions.style.display = '';
     document.getElementById('modal-status-select').value = i.status;
+    document.getElementById('modal-visibility-select').value = i.visibility || 'personal';
     document.getElementById('modal-note').value = i.reviewer_note || '';
   } else {
     actions.style.display = 'none';
@@ -477,11 +488,12 @@ async function deleteIdea() {
 async function saveIdea() {
   if (!currentIdea) return;
   const status = document.getElementById('modal-status-select').value;
+  const visibility = document.getElementById('modal-visibility-select').value;
   const note = document.getElementById('modal-note').value;
   const r = await fetch(`/api/ideas/${currentIdea.id}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({status, reviewer_note: note})
+    body: JSON.stringify({status, reviewer_note: note, visibility})
   });
   if (r.ok) {
     showToast('Uložené', 'success');

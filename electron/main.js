@@ -168,10 +168,10 @@ function checkForUpdates() {
             if (latest && isNewer(latest, currentVersion)) {
               dialog.showMessageBox(mainWindow, {
                 type: 'info',
-                title: 'Nová verzia Ridea',
-                message: `Dostupná verzia ${latest}`,
-                detail: `Vaša verzia: ${currentVersion}\n\nOdporúčame aktualizovať.`,
-                buttons: ['Stiahnuť aktualizáciu', 'Neskôr'],
+                title: 'Dostupná aktualizácia',
+                message: `Verzia ${latest} je dostupná. Chcete otvoriť stránku na stiahnutie?`,
+                detail: `Vaša verzia: ${currentVersion}`,
+                buttons: ['Stiahnuť', 'Neskôr'],
                 defaultId: 0
               }).then(({ response }) => {
                 if (response === 0)

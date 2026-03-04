@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS ideas (
     reviewer_note TEXT DEFAULT '',
     reviewed_by TEXT DEFAULT '',
     reviewed_at TEXT DEFAULT '',
-    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text)
+    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text),
+    visibility TEXT NOT NULL DEFAULT 'personal'
 );
 
 CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
