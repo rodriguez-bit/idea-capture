@@ -286,5 +286,23 @@
     "created_at": "2026-03-04 14:06:49.785388+00",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 7,
+    "author_name": "David Varga",
+    "department": "marketing",
+    "role": "c-level",
+    "audio_filename": "",
+    "duration_seconds": 50,
+    "transcript": "Ja mám nápad, že by sme Raulovi mali kúpiť tu pro max super rýchlu verziu 200 eur, aby nám mohol postaviť vlastnú verziu Cloud, aby sme vlastne nemuseli platiť pre celý tím 1000 eur mesačne, ale aby sme rovnosť to vedeli takto sami interne spravovať. Ideálne, aby to bol open source, aby aj iní ľudia sa k tomu vedeli vyjadriť a najlepšie by bolo, keby to má 0 security, aby kdokoľvek na internetoch sa vedel pozrieť na to, čo tam riešíme, na naše data a tak ďalej. Myslím si, že toto je vec, ktorú Raul z jeho superschopnosťou by vedel mať správenú do nedele, maximálne do pondelka. Ďakujem za pozornosť.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 14:11:27.993142+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
