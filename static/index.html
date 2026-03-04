@@ -174,7 +174,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         <option value="employee">Zamestnanec</option>
         <option value="majo-markech">Majo markech je kral</option>
       </select>
-      <input class="filter-input" id="f-search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()" autocomplete="off">
+      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." oninput="debounceSearch()" autocomplete="nope">
     </div>
 
     <div class="table-wrap">
@@ -333,6 +333,7 @@ async function init() {
   currentUser = await r.json();
   document.getElementById('user-badge').textContent = `${currentUser.name} (${currentUser.role})`;
   document.getElementById('f-search').value = '';
+  setTimeout(() => { document.getElementById('f-search').value = ''; }, 500);
   if (currentUser.role === 'admin') {
     document.getElementById('nav-users').style.display = '';
   }
