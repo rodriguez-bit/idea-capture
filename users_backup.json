@@ -52,5 +52,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 13:37:59.823531+00"
+  },
+  {
+    "email": "varga@dajanarodriguez.com",
+    "display_name": "David Varga",
+    "password_hash": "scrypt:32768:8:1$ss0PXYlFP7GS4LFT$8c05608a1ee1c4ec2df623f6c45982e354792f9b2008dcb5e806122525cada4e1d9fd5470669b079fe9509158b0b40f8415f3ccb4a805671d85e6d441f1cd055",
+    "role": "admin",
+    "department": "marketing",
+    "active": 1,
+    "created_at": "2026-03-04 13:39:28.691932+00"
   }
 ]
