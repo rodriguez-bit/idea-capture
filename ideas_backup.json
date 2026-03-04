@@ -188,13 +188,13 @@
     "duration_seconds": 14,
     "transcript": "Mám nápad, že by som chcel optimalizovať celú firmu cez umelú inteligenciu a čo najviac ju zahrnúť do procesov od výroby, marketingu až po vývojové oddelenie.",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 6,
+    "ai_analysis": "{\"score\": 6, \"clarity\": 4, \"feasibility\": 5, \"summary\": \"Nápad na komplexnú integráciu umelej inteligencie do všetkých oddelení firmy od výroby až po vývoj. Ide o ambiciózny projekt s vysokým potenciálom, ale súčasne s mnohými otvoreným otázkami a nejasnosťami.\", \"strengths\": [\"Ambiciózny a moderný prístup k automatizácii procesov\", \"Pokrýva viaceré oblasti firmy a môže mať synergické efekty\", \"Potenciál na zlepšenie efektivity a zníženie nákladov\", \"Spojuje sa s aktuálnymi trendami v technológiách\"], \"weaknesses\": [\"Veľmi vágny a nekonkrétny - chýbajú špecifické ciele a procesy\", \"Žiadne detaily o rozpočte, časovom horizonte ani zdrojoch\", \"Neuvažuje sa o rizikách, bezpečnosti údajov ani právnych aspektoch\", \"Chýba analýza, ktoré procesy by najprv priniesli najväčší prínos\", \"Nie je jasné, ako by sa to implementovalo postupne\"], \"next_steps\": [\"Urobiť detailný audit súčasných procesov v jednotlivých oddeleniach\", \"Identifikovať 2-3 konkrétne pilotné projekty kde by AI priniesla najväčší ROI\", \"Vytvoriť detailný implementačný plán s rozpočtom a časovou osou\", \"Konzultovať s externými odborníkmi na AI a interna tí špecialisti\", \"Zanalyzovať konkurenčný landscape a best practices v odvetví\"], \"category\": \"process_improvement\", \"tags\": [\"automation\", \"innovation\", \"process\", \"technical\", \"cost_reduction\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 13:36:06.174275+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[\"automation\", \"innovation\", \"process\", \"technical\", \"cost_reduction\"]"
   }
 ]
