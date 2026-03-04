@@ -242,13 +242,13 @@
     "duration_seconds": 7,
     "transcript": "Akurát je tu Ruslan a mám nápad, že môžeme niekedy spolu ísť na stejku. Suvisí alebo nesuvisí to s firmou?",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 2,
+    "ai_analysis": "{\"score\": 2, \"clarity\": 2, \"feasibility\": 5, \"summary\": \"Nápad spočíva v spoločnom obede manažéra s kolegom Ruslanom. Autor si nie je istý, či má vôbec súvislosť s firemným kontextom.\", \"strengths\": [\"Jednoduchá realizácia - nevyžaduje zložité procesy\", \"Môže prispieť k budovaniu tímových vzťahov\"], \"weaknesses\": [\"Nejasný firemný prínos a relevancia\", \"Nie je jasne sformulovaný cieľ alebo výsledok\", \"Skôr osobná aktivita než firemný nápad\", \"Chýbajú konkrétne metriky úspechu\"], \"next_steps\": [\"Autor by mal jasne definovať, aký firemný cieľ by mal táto aktivita plniť\", \"Zvážiť, či ide o team building aktivitu alebo o niečo iné\", \"Ak ide o team building, formalizovať nápad s jasným plánom a účelom\"], \"category\": \"other\", \"tags\": [\"hr\", \"team_building\"]}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 13:49:55.036189+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[\"hr\", \"team_building\"]"
   }
 ]
