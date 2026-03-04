@@ -60,8 +60,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v1.0.15 \
-            "Ridea-1.0.15-arm64.dmg" \
-            "Ridea-1.0.15-x64.dmg" \
-            --repo dajanarodriguez/idea-capture \
-            --clobber
+          ls *.dmg 2>/dev/null || true
+          for f in *.dmg; do
+            [ -f "$f" ] && gh release upload v1.0.15 "$f" \
+              --repo dajanarodriguez/idea-capture --clobber
+          done
