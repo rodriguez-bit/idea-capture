@@ -151,5 +151,14 @@
     "department": "marketing",
     "active": 1,
     "created_at": "2026-03-04 14:14:47.35682+00"
+  },
+  {
+    "email": "paduano@dajanarodriguez.com",
+    "display_name": "Zuzana Paduano",
+    "password_hash": "scrypt:32768:8:1$sfdqIMrMylPiV9ic$a42803fb805cbf43fd285b7adfa40c1921a5d0ddf3c09a89e3c8973112f0842d8e9065de08c79944ca2629718774d5987a39c443e9a770f3d46a41dbfc934d23",
+    "role": "submitter",
+    "department": "other",
+    "active": 1,
+    "created_at": "2026-03-04 15:01:31.592186+00"
   }
 ]
