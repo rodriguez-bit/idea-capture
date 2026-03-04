@@ -110,5 +110,21 @@
     "reviewed_by": "",
     "reviewed_at": "",
     "created_at": "2026-03-04 08:54:17"
+  },
+  {
+    "author_id": 7,
+    "author_name": "Lucia Stoffova",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 23,
+    "transcript": "Moje nápad je, že by sme si mali dneska dobrý obed a pri ňom vymyslieť, či pôjdeme natáčať také jedno video, čo by som chcela. Aké video? Aj so mnou? Aj s tebou. Aleby toho mám dosť. Nie, nie, že do mesta, ak ma drža.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 09:24:07"
   }
 ]
