@@ -185,6 +185,24 @@ def save_ideas_backup():
         print(f'Backup error: {e}')
 
 
+def save_users_backup():
+    try:
+        db = get_db()
+        rows = db.execute(
+            'SELECT email, display_name, password_hash, role, department, active, created_at FROM users ORDER BY id'
+        ).fetchall()
+        data = [dict(r) for r in rows]
+        content = json.dumps(data, ensure_ascii=False, indent=2)
+        with open('users_backup.json', 'w', encoding='utf-8') as f:
+            f.write(content)
+        threading.Thread(target=_github_push_file,
+                         args=('users_backup.json', content.encode('utf-8'), 'Auto-backup users'),
+                         daemon=True).start()
+        db.close()
+    except Exception as e:
+        print(f'Users backup error: {e}')
+
+
 # ─── DB init ──────────────────────────────────────────────────────────────────
 def init_db():
     db = get_db()
@@ -300,6 +318,7 @@ def init_db():
 
     # Restore from backup
     _restore_from_backup(db)
+    _restore_users_from_backup(db)
     db.close()
 
 
@@ -343,6 +362,28 @@ def _restore_from_backup(db):
         print(f'Restored {len(ideas)} ideas from backup')
     except Exception as e:
         print(f'Restore error: {e}')
+
+
+def _restore_users_from_backup(db):
+    content = _github_fetch_file('users_backup.json')
+    if not content:
+        try:
+            with open('users_backup.json', 'r', encoding='utf-8') as f:
+                content = f.read()
+        except FileNotFoundError:
+            return
+    try:
+        users = json.loads(content)
+        for u in users:
+            db.execute(
+                'INSERT OR IGNORE INTO users (email, display_name, password_hash, role, department, active, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                (u.get('email', ''), u.get('display_name', ''), u.get('password_hash', ''),
+                 u.get('role', 'submitter'), u.get('department', ''), u.get('active', 1), u.get('created_at', ''))
+            )
+        db.commit()
+        print(f'Restored {len(users)} users from backup')
+    except Exception as e:
+        print(f'Users restore error: {e}')
 
 
 # ─── Login page ───────────────────────────────────────────────────────────────
@@ -754,6 +795,7 @@ def api_users_create():
         )
         db.commit()
         db.close()
+        save_users_backup()
         return jsonify({'ok': True}), 201
     except Exception as e:
         db.close()
@@ -775,6 +817,7 @@ def api_users_update(user_id):
     db.execute(f'UPDATE users SET {set_clause} WHERE id = ?', list(updates.values()) + [user_id])
     db.commit()
     db.close()
+    save_users_backup()
     return jsonify({'ok': True})
 
 
