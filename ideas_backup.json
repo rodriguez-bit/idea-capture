@@ -178,5 +178,23 @@
     "created_at": "2026-03-04 11:10:24",
     "visibility": "personal",
     "tags": "[]"
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 14,
+    "transcript": "Mám nápad, že by som chcel optimalizovať celú firmu cez umelú inteligenciu a čo najviac ju zahrnúť do procesov od výroby, marketingu až po vývojové oddelenie.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-04 13:36:06.174275+00",
+    "visibility": "company",
+    "tags": "[]"
   }
 ]
