@@ -183,7 +183,8 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
   </div>
   <div class="nav-right">
     <span class="user-badge" id="user-badge"></span>
-    <a href="/recorder" target="_blank"><button class="btn-sm btn-primary">+ Nahrať nápad</button></a>
+    <a href="/recorder" target="_blank"><button class="btn-sm btn-primary">🎤 Nahrať</button></a>
+    <button class="btn-sm btn-primary" style="background:#22c55e" onclick="openAddIdeaModal()">+ Pridať</button>
     <button class="btn-sm btn-ghost" onclick="openPasswordModal()">🔒</button>
     <button class="btn-sm btn-ghost" onclick="doLogout()">Odhlásiť</button>
   </div>
@@ -565,6 +566,72 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
   </div>
 </div>
 
+<!-- ADD IDEA MODAL -->
+<div class="modal-overlay" id="add-idea-modal">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('add-idea-modal')">×</button>
+    <h2>Pridať nápad</h2>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn-sm" id="tab-text" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer" onclick="switchAddTab('text')">Textom</button>
+      <button class="btn-sm" id="tab-doc" style="padding:10px 20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="switchAddTab('doc')">Dokument</button>
+    </div>
+    <div id="add-tab-text">
+      <div class="form-group">
+        <label>Váš nápad</label>
+        <textarea id="add-text" rows="6" style="width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napíšte váš nápad, poznámku, alebo vložte text z dokumentu..."></textarea>
+      </div>
+    </div>
+    <div id="add-tab-doc" style="display:none">
+      <div class="form-group">
+        <label>Nahrať súbor</label>
+        <div id="drop-zone" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s" onclick="document.getElementById('add-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--primary)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
+          <div style="font-size:32px;margin-bottom:8px">📎</div>
+          <div style="color:var(--muted);font-size:14px">Kliknite alebo pretiahnite súbor</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:4px">PDF, DOCX, TXT, obrázky</div>
+        </div>
+        <input type="file" id="add-file" style="display:none" accept=".pdf,.docx,.doc,.txt,.md,.rtf,.png,.jpg,.jpeg,.gif,.webp" onchange="handleFileSelect(this)">
+        <div id="file-info" style="display:none;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;display:none">
+          <span id="file-name"></span>
+          <span style="cursor:pointer;margin-left:8px;color:var(--red)" onclick="clearFile()">✕</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Oddelenie</label>
+        <select id="add-dept">
+          <option value="development">Vývoj</option>
+          <option value="marketing">Marketing</option>
+          <option value="production">Produkcia</option>
+          <option value="management">Manažment</option>
+          <option value="other">Iné</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Rola</label>
+        <select id="add-role">
+          <option value="c-level">C-level</option>
+          <option value="manager">Manažér</option>
+          <option value="employee">Zamestnanec</option>
+          <option value="majo-markech">Majo markech je kral</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:10px">
+        <span>Viditelnosť</span>
+        <select id="add-visibility" style="flex:1">
+          <option value="personal">Osobný (iba ja)</option>
+          <option value="company">Firemný (zdieľať s tímom)</option>
+        </select>
+      </label>
+    </div>
+    <button id="add-submit-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="submitIdea()">
+      Pridať nápad
+    </button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -576,7 +643,7 @@ let editingUserId = null;
 let usersData = [];
 let searchTimer = null;
 
-// ─── Init ──────────────────────────────────────────────────────────────────────────────
+// ─── Init ────────────────────────────────────────────────────────────────────
 async function init() {
   const r = await fetch('/api/current-user');
   if (!r.ok) { window.location.href = '/login'; return; }
@@ -611,7 +678,7 @@ async function init() {
   loadIdeas();
 }
 
-// ─── Pages ─────────────────────────────────────────────────────────────────────────────
+// ─── Pages ───────────────────────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -625,7 +692,7 @@ function showPage(name) {
   if (name === 'kanban') loadKanban();
 }
 
-// ─── Ideas ─────────────────────────────────────────────────────────────────────────────
+// ─── Ideas ───────────────────────────────────────────────────────────────────
 function debounceSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => { ideasPage = 0; loadIdeas(); }, 400);
@@ -700,7 +767,7 @@ function renderPagination(total) {
 
 function gotoPage(p) { ideasPage = p; loadIdeas(); }
 
-// ─── Idea detail ───────────────────────────────────────────────────────────────────────
+// ─── Idea detail ─────────────────────────────────────────────────────────────
 async function openIdea(id) {
   const r = await fetch(`/api/ideas/${id}`);
   currentIdea = await r.json();
@@ -853,7 +920,7 @@ async function analyzeIdea() {
   }
 }
 
-// ─── Stats ─────────────────────────────────────────────────────────────────────────────
+// ─── Stats ───────────────────────────────────────────────────────────────────
 let chartInstances = {};
 function destroyChart(key) {
   if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; }
@@ -968,7 +1035,7 @@ async function loadStats() {
   }
 }
 
-// ─── Kanban ───────────────────────────────────────────────────────────────────────────
+// ─── Kanban ─────────────────────────────────────────────────────────────────
 const kanbanStatusLabels = {new:'Nový',in_review:'V prehliadke',accepted:'Prijaté',v_realizacii:'V realizácii',rejected:'Zamietnuté'};
 const kanbanStatusColors = {new:'var(--blue)',in_review:'var(--yellow)',accepted:'var(--green)',v_realizacii:'#a855f7',rejected:'var(--red)'};
 
@@ -1008,7 +1075,7 @@ async function loadKanban() {
   }
 }
 
-// ─── Users ─────────────────────────────────────────────────────────────────────────────
+// ─── Users ───────────────────────────────────────────────────────────────────
 async function loadUsers() {
   const r = await fetch('/api/users');
   if (!r.ok) return;
@@ -1115,13 +1182,13 @@ async function toggleUser(id, active) {
   loadUsers();
 }
 
-// ─── Auth ──────────────────────────────────────────────────────────────────────────────
+// ─── Auth ────────────────────────────────────────────────────────────────────
 async function doLogout() {
   await fetch('/api/logout', {method: 'POST'});
   window.location.href = '/login';
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   const s = document.getElementById('f-search');
@@ -1162,7 +1229,7 @@ function formatDate(s) {
   } catch { return s; }
 }
 
-// ─── Company Context ──────────────────────────────────────────────────────────────────
+// ─── Company Context ──────────────────────────────────────────────────────────
 async function loadCompanyContext() {
   try {
     const r = await fetch('/api/company-context');
@@ -1200,7 +1267,7 @@ async function saveCompanyContext() {
   }
 }
 
-// ─── Comments ───────────────────────────────────────────────────────────────────────────
+// ─── Comments ───────────────────────────────────────────────────────────────
 async function loadComments(ideaId) {
   const el = document.getElementById('modal-comments');
   try {
@@ -1250,7 +1317,7 @@ async function deleteComment(commentId, ideaId) {
   if (r.ok) loadComments(ideaId);
 }
 
-// ─── Votes ─────────────────────────────────────────────────────────────────────────────
+// ─── Votes ─────────────────────────────────────────────────────────────────
 async function loadVotes(ideaId) {
   try {
     const r = await fetch(`/api/ideas/${ideaId}/votes`);
@@ -1267,7 +1334,7 @@ async function toggleVote() {
   if (r.ok) loadVotes(currentIdea.id);
 }
 
-// ─── Meetings ────────────────────────────────────────────────────────────────────────
+// ─── Meetings ──────────────────────────────────────────────────────────────
 async function loadMeetings() {
   const r = await fetch('/api/meetings');
   if (!r.ok) return;
@@ -1327,7 +1394,7 @@ async function deleteMeeting(id) {
   if (r.ok) { loadMeetings(); showToast('Porada vymazaná', 'success'); }
 }
 
-// ─── Campaigns ───────────────────────────────────────────────────────────────────────
+// ─── Campaigns ─────────────────────────────────────────────────────────────
 async function loadCampaigns() {
   const r = await fetch('/api/campaigns');
   if (!r.ok) return;
@@ -1399,7 +1466,7 @@ async function deleteCampaign(id) {
   if (r.ok) { loadCampaigns(); showToast('Kampaň vymazaná', 'success'); }
 }
 
-// ─── Bulk Selection & Delete ───────────────────────────────────────────────────────────
+// ─── Bulk Selection & Delete ─────────────────────────────────────────────────
 function getSelectedIds() {
   return [...document.querySelectorAll('.idea-cb:checked')].map(cb => parseInt(cb.value));
 }
@@ -1455,7 +1522,7 @@ async function bulkDelete() {
   }
 }
 
-// ─── CSV Export ───────────────────────────────────────────────────────────────────────
+// ─── CSV Export ─────────────────────────────────────────────────────────────
 function exportCSV() {
   const params = new URLSearchParams();
   const status = document.getElementById('f-status').value;
@@ -1469,7 +1536,7 @@ function exportCSV() {
   window.location.href = '/api/ideas/export-csv?' + params;
 }
 
-// ─── Password Change ─────────────────────────────────────────────────────────────────
+// ─── Password Change ───────────────────────────────────────────────────────
 function openPasswordModal() {
   document.getElementById('pw-current').value = '';
   document.getElementById('pw-new').value = '';
@@ -1500,7 +1567,7 @@ async function changePassword() {
   }
 }
 
-// ─── All users cache for assigned_to dropdown ───────────────────────────────────────
+// ─── All users cache for assigned_to dropdown ───────────────────────────
 let allUsersCache = null;
 
 async function getAllUsers() {
@@ -1531,6 +1598,115 @@ async function populateAssignedDropdown(selectedValue) {
     sel.appendChild(opt);
   }
   sel.value = selectedValue || '';
+}
+
+// ─── Add Idea (Text / Document) ───────────────────────────────────────────
+let addIdeaTab = 'text';
+let selectedFile = null;
+
+function openAddIdeaModal() {
+  addIdeaTab = 'text';
+  selectedFile = null;
+  document.getElementById('add-text').value = '';
+  document.getElementById('add-file').value = '';
+  const fi = document.getElementById('file-info');
+  if (fi) fi.style.display = 'none';
+  switchAddTab('text');
+  // Pre-select user department/role if available
+  if (currentUser) {
+    const deptSel = document.getElementById('add-dept');
+    const roleSel = document.getElementById('add-role');
+    if (currentUser.department && deptSel) deptSel.value = currentUser.department;
+  }
+  document.getElementById('add-idea-modal').classList.add('open');
+}
+
+function switchAddTab(tab) {
+  addIdeaTab = tab;
+  document.getElementById('add-tab-text').style.display = tab === 'text' ? '' : 'none';
+  document.getElementById('add-tab-doc').style.display = tab === 'doc' ? '' : 'none';
+  document.getElementById('tab-text').style.background = tab === 'text' ? 'var(--primary)' : 'var(--surface2)';
+  document.getElementById('tab-text').style.color = tab === 'text' ? 'white' : 'var(--muted)';
+  document.getElementById('tab-text').style.border = tab === 'text' ? 'none' : '1px solid var(--border)';
+  document.getElementById('tab-doc').style.background = tab === 'doc' ? 'var(--primary)' : 'var(--surface2)';
+  document.getElementById('tab-doc').style.color = tab === 'doc' ? 'white' : 'var(--muted)';
+  document.getElementById('tab-doc').style.border = tab === 'doc' ? 'none' : '1px solid var(--border)';
+  document.getElementById('add-submit-btn').textContent = tab === 'text' ? 'Pridať nápad' : 'Importovať dokument';
+}
+
+function handleFileSelect(input) {
+  if (input.files && input.files[0]) {
+    selectedFile = input.files[0];
+    document.getElementById('file-name').textContent = selectedFile.name + ' (' + (selectedFile.size / 1024).toFixed(1) + ' KB)';
+    document.getElementById('file-info').style.display = 'block';
+  }
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  event.currentTarget.style.borderColor = 'var(--border)';
+  const files = event.dataTransfer.files;
+  if (files && files[0]) {
+    selectedFile = files[0];
+    document.getElementById('add-file').files = files;
+    document.getElementById('file-name').textContent = selectedFile.name + ' (' + (selectedFile.size / 1024).toFixed(1) + ' KB)';
+    document.getElementById('file-info').style.display = 'block';
+  }
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('add-file').value = '';
+  document.getElementById('file-info').style.display = 'none';
+}
+
+async function submitIdea() {
+  const dept = document.getElementById('add-dept').value;
+  const role = document.getElementById('add-role').value;
+  const visibility = document.getElementById('add-visibility').value;
+  const btn = document.getElementById('add-submit-btn');
+
+  if (addIdeaTab === 'text') {
+    const text = document.getElementById('add-text').value.trim();
+    if (!text) { showToast('Napíšte text nápadu', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Ukladám...';
+    try {
+      const r = await fetch('/api/ideas/text', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text, department: dept, role, visibility})
+      });
+      if (r.ok) {
+        showToast('Nápad pridaný', 'success');
+        closeModal('add-idea-modal');
+        loadIdeas();
+      } else {
+        const d = await r.json();
+        showToast(d.error || 'Chyba', 'error');
+      }
+    } catch(e) { showToast('Chyba: ' + e.message, 'error'); }
+    btn.disabled = false; btn.textContent = 'Pridať nápad';
+  } else {
+    if (!selectedFile) { showToast('Vyberte súbor', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Importujem...';
+    try {
+      const fd = new FormData();
+      fd.append('document', selectedFile);
+      fd.append('department', dept);
+      fd.append('role', role);
+      fd.append('visibility', visibility);
+      const r = await fetch('/api/ideas/upload-document', {method: 'POST', body: fd});
+      if (r.ok) {
+        showToast('Dokument importovaný ako nápad', 'success');
+        closeModal('add-idea-modal');
+        loadIdeas();
+      } else {
+        const d = await r.json();
+        showToast(d.error || 'Chyba pri importe', 'error');
+      }
+    } catch(e) { showToast('Chyba: ' + e.message, 'error'); }
+    btn.disabled = false; btn.textContent = 'Importovať dokument';
+  }
 }
 
 init();
