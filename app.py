@@ -37,11 +37,12 @@ _branch_ready = False
 _backup_lock = threading.Lock()
 
 ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.webm', '.mpeg', '.opus'}
+ALLOWED_DOCUMENT_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt', '.md', '.rtf', '.png', '.jpg', '.jpeg', '.gif', '.webp'}
 
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
 ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
 
-# --- Failed login tracking ---
+# ─── Failed login tracking ───────────────────────────────────────────────────
 _failed_logins = {}
 _failed_logins_lock = threading.Lock()
 
@@ -50,9 +51,9 @@ def get_db():
     return DBConnection(DB_PATH)
 
 
-# --- CORS + Security headers ---
+# ─── CORS + Security headers ──────────────────────────────────────────────────
 _ALLOWED_ORIGINS = {
-    'null',
+    'null',  # Electron file:// origin
     'http://localhost:5000', 'http://localhost:5001',
     'https://ridea.onrender.com',
 }
@@ -78,7 +79,7 @@ def handle_options(path):
     return '', 204
 
 
-# --- Auth decorator ---
+# ─── Auth decorator ───────────────────────────────────────────────────────────
 def login_required(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -112,7 +113,7 @@ def admin_required(f):
     return decorated
 
 
-# --- GitHub backup ---
+# ─── GitHub backup ────────────────────────────────────────────────────────────
 def _github_ensure_branch():
     global _branch_ready
     if _branch_ready or not GITHUB_TOKEN:
@@ -209,11 +210,12 @@ def save_users_backup():
         print(f'Users backup error: {e}')
 
 
-# --- DB init ---
+# ─── DB init ──────────────────────────────────────────────────────────────────
 def init_db():
     db = get_db()
 
     if DATABASE_URL:
+        # PostgreSQL: run schema file
         try:
             with open('schema_pg.sql', 'r', encoding='utf-8') as f:
                 schema = f.read()
@@ -222,6 +224,7 @@ def init_db():
         except Exception as e:
             print(f'PG schema error: {e}')
     else:
+        # SQLite: inline schema
         db.executescript('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -233,6 +236,7 @@ def init_db():
                 active INTEGER DEFAULT 1,
                 created_at TEXT DEFAULT (datetime('now'))
             );
+
             CREATE TABLE IF NOT EXISTS ideas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 author_id INTEGER NOT NULL,
@@ -255,13 +259,16 @@ def init_db():
                 deadline TEXT DEFAULT '',
                 campaign_id INTEGER DEFAULT NULL
             );
+
             CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
             CREATE INDEX IF NOT EXISTS idx_ideas_created ON ideas (created_at DESC);
             CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
+
             CREATE TABLE IF NOT EXISTS company_context (
                 key TEXT PRIMARY KEY,
                 value TEXT DEFAULT ''
             );
+
             CREATE TABLE IF NOT EXISTS comments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 idea_id INTEGER NOT NULL,
@@ -270,7 +277,9 @@ def init_db():
                 text TEXT NOT NULL,
                 created_at TEXT DEFAULT (datetime('now'))
             );
+
             CREATE INDEX IF NOT EXISTS idx_comments_idea ON comments (idea_id);
+
             CREATE TABLE IF NOT EXISTS votes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 idea_id INTEGER NOT NULL,
@@ -278,7 +287,9 @@ def init_db():
                 created_at TEXT DEFAULT (datetime('now')),
                 UNIQUE (idea_id, user_id)
             );
+
             CREATE INDEX IF NOT EXISTS idx_votes_idea ON votes (idea_id);
+
             CREATE TABLE IF NOT EXISTS meetings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -290,12 +301,14 @@ def init_db():
                 notes TEXT DEFAULT '',
                 created_at TEXT DEFAULT (datetime('now'))
             );
+
             CREATE TABLE IF NOT EXISTS meeting_ideas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 meeting_id INTEGER NOT NULL,
                 idea_id INTEGER NOT NULL,
                 UNIQUE (meeting_id, idea_id)
             );
+
             CREATE TABLE IF NOT EXISTS campaigns (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -309,6 +322,7 @@ def init_db():
         ''')
         db.commit()
 
+    # Idempotent migration: add visibility column if missing
     existing_cols = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
     if not DATABASE_URL and 'visibility' not in existing_cols:
         db.execute("ALTER TABLE ideas ADD COLUMN visibility TEXT NOT NULL DEFAULT 'personal'")
@@ -329,6 +343,7 @@ def init_db():
         except Exception:
             pass
 
+    # Idempotent migration: add tags column if missing
     existing_cols2 = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
     if not DATABASE_URL and 'tags' not in existing_cols2:
         db.execute("ALTER TABLE ideas ADD COLUMN tags TEXT DEFAULT '[]'")
@@ -349,6 +364,7 @@ def init_db():
         except Exception:
             pass
 
+    # Idempotent migration: add assigned_to, deadline, campaign_id columns
     existing_cols3 = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
     if not DATABASE_URL:
         if 'assigned_to' not in existing_cols3:
@@ -377,6 +393,7 @@ def init_db():
         except Exception:
             pass
 
+    # Seed default users if none exist
     count = db.execute('SELECT COUNT(*) FROM users').fetchone()[0]
     if count == 0:
         default_password = os.environ.get('DEFAULT_USER_PASSWORD', os.urandom(16).hex())
@@ -394,6 +411,7 @@ def init_db():
         db.commit()
         print(f'Seeded default users. Default password env: DEFAULT_USER_PASSWORD')
 
+    # Restore from backup
     _restore_from_backup(db)
     _restore_users_from_backup(db)
     db.close()
@@ -403,6 +421,7 @@ def _restore_from_backup(db):
     count = db.execute('SELECT COUNT(*) FROM ideas').fetchone()[0]
     if count > 0:
         return
+    # Try GitHub backup first
     content = _github_fetch_file('ideas_backup.json')
     if not content:
         try:
@@ -462,13 +481,13 @@ def _restore_users_from_backup(db):
         print(f'Users restore error: {e}')
 
 
-# --- Login page ---
+# ─── Login page ───────────────────────────────────────────────────────────────
 LOGIN_HTML = '''<!DOCTYPE html>
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ridea \u2014 Prihl\u00e1senie</title>
+<title>Ridea — Prihlásenie</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -486,14 +505,14 @@ LOGIN_HTML = '''<!DOCTYPE html>
 </head>
 <body>
 <div class="card">
-  <div class="logo">\ud83d\udca1</div>
+  <div class="logo">&#128161;</div>
   <h1>Ridea</h1>
-  <p>Intern\u00fd n\u00e1stroj pre zachyt\u00e1vanie n\u00e1padov</p>
+  <p>Interný nástroj pre zachytávanie nápadov</p>
   <label>E-mail</label>
   <input type="email" id="email" placeholder="vas@email.com" autofocus>
   <label>Heslo</label>
-  <input type="password" id="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022">
-  <button onclick="doLogin()">Prihl\u00e1si\u0165 sa</button>
+  <input type="password" id="password" placeholder="••••••••">
+  <button onclick="doLogin()">Prihlásiť sa</button>
   <div class="error" id="err"></div>
 </div>
 <script>
@@ -512,7 +531,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
       window.location.href = '/';
     } else {
       const d = await r.json();
-      err.textContent = d.error || 'Nespr\u00e1vne prihlasovacie \u00fadaje';
+      err.textContent = d.error || 'Nesprávne prihlasovacie údaje';
       err.style.display = 'block';
     }
   }
@@ -521,7 +540,7 @@ LOGIN_HTML = '''<!DOCTYPE html>
 </html>'''
 
 
-# --- Routes: Auth ---
+# ─── Routes: Auth ─────────────────────────────────────────────────────────────
 @app.route('/login')
 def login_page():
     if session.get('authenticated'):
@@ -538,7 +557,7 @@ def api_login():
         attempts = _failed_logins.get(ip, [])
         attempts = [t for t in attempts if now - t < 300]
         if len(attempts) >= 5:
-            return jsonify({'error': 'Pr\u00edli\u0161 ve\u013ea pokusov. Sk\u00faste za 5 min\u00fat.'}), 429
+            return jsonify({'error': 'Príliš veľa pokusov. Skúste za 5 minút.'}), 429
     data = request.get_json() or {}
     email = (data.get('email') or '').strip().lower()
     password = data.get('password') or ''
@@ -550,7 +569,7 @@ def api_login():
             attempts = _failed_logins.get(ip, [])
             attempts.append(now)
             _failed_logins[ip] = attempts
-        return jsonify({'error': 'Nespr\u00e1vny e-mail alebo heslo'}), 401
+        return jsonify({'error': 'Nesprávny e-mail alebo heslo'}), 401
     session.permanent = True
     session['authenticated'] = True
     session['user_id'] = user['id']
@@ -579,23 +598,27 @@ def api_current_user():
     })
 
 
-# --- Routes: Ideas ---
+# ─── Routes: Ideas ────────────────────────────────────────────────────────────
 @app.route('/api/ideas', methods=['GET'])
 @login_required
 def api_ideas():
     db = get_db()
     filters = []
     params = []
+
     dept = request.args.get('department')
     role = request.args.get('role')
     status = request.args.get('status')
     search = request.args.get('search')
     limit = int(request.args.get('limit', 50))
     offset = int(request.args.get('offset', 0))
+
+    # Submitters only see their own ideas or company-wide ones
     user_role = session.get('user_role')
     if user_role == 'submitter':
         filters.append("(author_id = ? OR visibility = 'company')")
         params.append(session['user_id'])
+
     if dept:
         filters.append('department = ?')
         params.append(dept)
@@ -608,6 +631,7 @@ def api_ideas():
     if search:
         filters.append('(transcript LIKE ? OR author_name LIKE ?)')
         params.extend([f'%{search}%', f'%{search}%'])
+
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
     total = db.execute(f'SELECT COUNT(*) FROM ideas {where}', params).fetchone()[0]
     rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
@@ -623,11 +647,11 @@ def api_idea_detail(idea_id):
     idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     db.close()
     if not idea:
-        return jsonify({'error': 'N\u00e1pad nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Nápad nenájdený'}), 404
     user_role = session.get('user_role')
     if user_role == 'submitter':
         if idea['author_id'] != session['user_id'] and idea['visibility'] != 'company':
-            return jsonify({'error': 'Pr\u00edstup zamietnut\u00fd'}), 403
+            return jsonify({'error': 'Prístup zamietnutý'}), 403
     return jsonify(dict(idea))
 
 
@@ -638,25 +662,28 @@ def api_idea_update(idea_id):
     allowed = {'status', 'reviewer_note', 'visibility', 'tags', 'assigned_to', 'deadline'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if 'visibility' in updates and updates['visibility'] not in ('personal', 'company'):
-        return jsonify({'error': 'Neplatn\u00e1 hodnota vidite\u013enosti'}), 400
+        return jsonify({'error': 'Neplatná hodnota viditeľnosti'}), 400
     if 'status' in updates and updates['status'] not in ('new', 'in_review', 'accepted', 'rejected', 'v_realizacii'):
-        return jsonify({'error': 'Neplatn\u00fd status'}), 400
+        return jsonify({'error': 'Neplatný status'}), 400
     if 'tags' in updates:
         try:
             parsed = json.loads(updates['tags']) if isinstance(updates['tags'], str) else updates['tags']
             updates['tags'] = json.dumps([str(t) for t in parsed[:10]], ensure_ascii=False)
         except Exception:
-            return jsonify({'error': 'Neplatn\u00fd form\u00e1t tagov'}), 400
+            return jsonify({'error': 'Neplatný formát tagov'}), 400
     if not updates:
-        return jsonify({'error': 'Ni\u010d na aktualiz\u00e1ciu'}), 400
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
+
     db = get_db()
     idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     if not idea:
         db.close()
-        return jsonify({'error': 'N\u00e1pad nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Nápad nenájdený'}), 404
+
     if 'status' in updates:
         updates['reviewed_by'] = session['user_name']
         updates['reviewed_at'] = datetime.now().isoformat()
+
     set_clause = ', '.join(f'{k} = ?' for k in updates)
     values = list(updates.values()) + [idea_id]
     db.execute(f'UPDATE ideas SET {set_clause} WHERE id = ?', values)
@@ -667,44 +694,49 @@ def api_idea_update(idea_id):
 
 
 def _auto_analyze(idea_id):
+    """Auto-trigger Claude analysis after transcription."""
     try:
         import anthropic as anthropic_sdk
         api_key = os.environ.get('ANTHROPIC_API_KEY')
         if not api_key:
             print(f'Auto-analyze: no ANTHROPIC_API_KEY')
             return
+
         with app.app_context():
             db = get_db()
             idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
             if not idea or not idea['transcript']:
                 db.close()
                 return
+
             company_context = _get_company_context_for_prompt()
-            prompt = f"""Analyzuj nasleduj\u00faci intern\u00fd n\u00e1pad od zamestnanca a ohodno\u0165 ho.
+
+            prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
 {('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
 Oddelenie: {idea['department']}
 Rola: {idea['role']}
-Transkript n\u00e1padu:
-\"{idea['transcript']}\"
+Transkript nápadu:
+"{idea['transcript']}"
 
-Vr\u00e1\u0165 JSON s t\u00fdmto form\u00e1tom (iba JSON, bez markdown):
+Vráť JSON s týmto formátom (iba JSON, bez markdown):
 {{
-  \"score\": <1-10>,
-  \"clarity\": <1-10>,
-  \"feasibility\": <1-10>,
-  \"relevance\": <1-10>,
-  \"summary\": \"<2-3 vety zhrnutie n\u00e1padu>\",
-  \"strengths\": [\"<siln\u00e1 str\u00e1nka 1>\", \"<siln\u00e1 str\u00e1nka 2>\"],
-  \"weaknesses\": [\"<slab\u00e1 str\u00e1nka 1>\"],
-  \"next_steps\": [\"<konkr\u00e9tny krok 1>\", \"<konkr\u00e9tny krok 2>\"],
-  \"category\": \"<one of: process_improvement|cost_reduction|revenue|product|other>\",
-  \"tags\": [\"<tag1>\", \"<tag2>\"]
+  "score": <1-10>,
+  "clarity": <1-10>,
+  "feasibility": <1-10>,
+  "relevance": <1-10>,
+  "summary": "<2-3 vety zhrnutie nápadu>",
+  "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
+  "weaknesses": ["<slabá stránka 1>"],
+  "next_steps": ["<konkrétny krok 1>", "<konkrétny krok 2>"],
+  "category": "<one of: process_improvement|cost_reduction|revenue|product|other>",
+  "tags": ["<tag1>", "<tag2>"]
 }}
 
-Hodno\u0165 objekt\u00edvne. score je celkov\u00e9 hodnotenie potenci\u00e1lu n\u00e1padu.
-relevance je hodnotenie relevancie n\u00e1padu pre firmu (ak je k dispoz\u00edcii kontext firmy, zoh\u013eadni ciele, priority a hodnoty firmy).
-Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00e9/anglick\u00e9 slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
+Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+relevance je hodnotenie relevancie nápadu pre firmu (ak je k dispozícii kontext firmy, zohľadni ciele, priority a hodnoty firmy).
+Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
+
             client = anthropic_sdk.Anthropic(api_key=api_key)
             message = client.messages.create(
                 model='claude-haiku-4-5-20251001',
@@ -719,6 +751,7 @@ Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00
             analysis = json.loads(raw)
             score = int(analysis.get('score', 0))
             tags = json.dumps(analysis.get('tags', []), ensure_ascii=False)
+
             db.execute('UPDATE ideas SET ai_score = ?, ai_analysis = ?, tags = ? WHERE id = ?',
                        (score, json.dumps(analysis, ensure_ascii=False), tags, idea_id))
             db.commit()
@@ -742,6 +775,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             )
         transcript_text = transcription.text or ''
         duration = int(getattr(transcription, 'duration', 0) or 0)
+
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
@@ -752,14 +786,17 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             db.commit()
             db.close()
             save_ideas_backup()
+
+        # Auto-analyze with Claude
         _auto_analyze(idea_id)
+
         _upload_jobs[job_id] = {
             'status': 'done',
             'result': {
                 'id': idea_id,
                 'transcript': transcript_text,
                 'duration_seconds': duration,
-                'message': 'N\u00e1pad \u00faspe\u0161ne zaznamenan\u00fd'
+                'message': 'Nápad úspešne zaznamenaný'
             }
         }
     except Exception as e:
@@ -778,38 +815,47 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
 def api_ideas_upload():
     api_key = os.environ.get('OPENAI_API_KEY')
     if not api_key:
-        return jsonify({'error': 'OpenAI API k\u013e\u00fa\u010d nie je nastaven\u00fd'}), 500
+        return jsonify({'error': 'OpenAI API kľúč nie je nastavený'}), 500
+
     if 'audio' not in request.files:
-        return jsonify({'error': 'Ch\u00fdba audio s\u00fabor'}), 400
+        return jsonify({'error': 'Chýba audio súbor'}), 400
+
     file = request.files['audio']
     if not file.filename:
-        return jsonify({'error': 'Pr\u00e1zdny s\u00fabor'}), 400
+        return jsonify({'error': 'Prázdny súbor'}), 400
+
     ext = os.path.splitext(secure_filename(file.filename))[1].lower()
     if ext not in ALLOWED_AUDIO_EXTENSIONS:
-        return jsonify({'error': f'Nepodporovan\u00fd form\u00e1t: {ext}'}), 400
+        return jsonify({'error': f'Nepodporovaný formát: {ext}'}), 400
+
     department = (request.form.get('department') or '').strip()
     role = (request.form.get('role') or '').strip()
     visibility = (request.form.get('visibility') or 'personal').strip()
     if visibility not in ('personal', 'company'):
         visibility = 'personal'
+
     if not department or not role:
-        return jsonify({'error': 'Oddelenie a rola s\u00fa povinn\u00e9'}), 400
+        return jsonify({'error': 'Oddelenie a rola sú povinné'}), 400
+
     try:
         with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
             file.save(tmp)
             tmp_path = tmp.name
     except Exception as e:
-        return jsonify({'error': f'Chyba pri ukladan\u00ed: {str(e)}'}), 500
+        return jsonify({'error': f'Chyba pri ukladaní: {str(e)}'}), 500
+
     job_id = str(uuid.uuid4())
     user_id = session['user_id']
     user_name = session['user_name']
     _upload_jobs[job_id] = {'status': 'processing'}
+
     t = threading.Thread(
         target=_process_upload,
         args=(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key),
         daemon=True
     )
     t.start()
+
     return jsonify({'job_id': job_id, 'status': 'processing'})
 
 
@@ -818,12 +864,12 @@ def api_ideas_upload():
 def api_ideas_job(job_id):
     job = _upload_jobs.get(job_id)
     if not job:
-        return jsonify({'error': 'Job nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Job nenájdený'}), 404
     if job['status'] == 'done':
         del _upload_jobs[job_id]
         return jsonify(job['result'])
     elif job['status'] == 'error':
-        err = job.get('error', 'Nezn\u00e1ma chyba')
+        err = job.get('error', 'Neznáma chyba')
         del _upload_jobs[job_id]
         return jsonify({'error': err}), 500
     else:
@@ -834,44 +880,50 @@ def api_ideas_job(job_id):
 @login_required
 def api_idea_analyze(idea_id):
     import anthropic as anthropic_sdk
+
     api_key = os.environ.get('ANTHROPIC_API_KEY')
     if not api_key:
-        return jsonify({'error': 'Anthropic API k\u013e\u00fa\u010d nie je nastaven\u00fd'}), 500
+        return jsonify({'error': 'Anthropic API kľúč nie je nastavený'}), 500
+
     db = get_db()
     idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     if not idea:
         db.close()
-        return jsonify({'error': 'N\u00e1pad nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Nápad nenájdený'}), 404
+
     transcript = idea['transcript']
     if not transcript:
         db.close()
-        return jsonify({'error': 'Ch\u00fdba transkript'}), 400
+        return jsonify({'error': 'Chýba transkript'}), 400
+
     company_context = _get_company_context_for_prompt()
-    prompt = f"""Analyzuj nasleduj\u00faci intern\u00fd n\u00e1pad od zamestnanca a ohodno\u0165 ho.
+
+    prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
 {('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
 Oddelenie: {idea['department']}
 Rola: {idea['role']}
-Transkript n\u00e1padu:
-\"{transcript}\"
+Transkript nápadu:
+"{transcript}"
 
-Vr\u00e1\u0165 JSON s t\u00fdmto form\u00e1tom (iba JSON, bez markdown):
+Vráť JSON s týmto formátom (iba JSON, bez markdown):
 {{
-  \"score\": <1-10>,
-  \"clarity\": <1-10>,
-  \"feasibility\": <1-10>,
-  \"relevance\": <1-10>,
-  \"summary\": \"<2-3 vety zhrnutie n\u00e1padu>\",
-  \"strengths\": [\"<siln\u00e1 str\u00e1nka 1>\", \"<siln\u00e1 str\u00e1nka 2>\"],
-  \"weaknesses\": [\"<slab\u00e1 str\u00e1nka 1>\"],
-  \"next_steps\": [\"<konkr\u00e9tny krok 1>\", \"<konkr\u00e9tny krok 2>\"],
-  \"category\": \"<one of: process_improvement|cost_reduction|revenue|product|other>\",
-  \"tags\": [\"<tag1>\", \"<tag2>\"]
+  "score": <1-10>,
+  "clarity": <1-10>,
+  "feasibility": <1-10>,
+  "relevance": <1-10>,
+  "summary": "<2-3 vety zhrnutie nápadu>",
+  "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
+  "weaknesses": ["<slabá stránka 1>"],
+  "next_steps": ["<konkrétny krok 1>", "<konkrétny krok 2>"],
+  "category": "<one of: process_improvement|cost_reduction|revenue|product|other>",
+  "tags": ["<tag1>", "<tag2>"]
 }}
 
-Hodno\u0165 objekt\u00edvne. score je celkov\u00e9 hodnotenie potenci\u00e1lu n\u00e1padu.
-relevance je hodnotenie relevancie n\u00e1padu pre firmu (ak je k dispoz\u00edcii kontext firmy, zoh\u013eadni ciele, priority a hodnoty firmy).
-Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00e9/anglick\u00e9 slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
+Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+relevance je hodnotenie relevancie nápadu pre firmu (ak je k dispozícii kontext firmy, zohľadni ciele, priority a hodnoty firmy).
+Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
+
     try:
         client = anthropic_sdk.Anthropic(api_key=api_key)
         message = client.messages.create(
@@ -880,6 +932,7 @@ Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00
             messages=[{'role': 'user', 'content': prompt}]
         )
         raw = message.content[0].text.strip()
+        # Strip markdown if present
         if raw.startswith('```'):
             raw = raw.split('```')[1]
             if raw.startswith('json'):
@@ -887,6 +940,7 @@ Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00
         analysis = json.loads(raw)
         score = int(analysis.get('score', 0))
         tags = json.dumps(analysis.get('tags', []), ensure_ascii=False)
+
         db.execute('UPDATE ideas SET ai_score = ?, ai_analysis = ?, tags = ? WHERE id = ?',
                    (score, json.dumps(analysis, ensure_ascii=False), tags, idea_id))
         db.commit()
@@ -896,7 +950,7 @@ Pre tags pou\u017ei max 5 tagov z tohto zoznamu (alebo vlastn\u00e9 slovensk\u00
     except Exception as e:
         db.close()
         print(f'Analyze error: {e}')
-        return jsonify({'error': f'AI anal\u00fdza zlyhala: {str(e)}'}), 500
+        return jsonify({'error': f'AI analýza zlyhala: {str(e)}'}), 500
 
 
 @app.route('/api/ideas/<int:idea_id>', methods=['DELETE'])
@@ -910,13 +964,138 @@ def api_idea_delete(idea_id):
     return jsonify({'ok': True})
 
 
+@app.route('/api/ideas/text', methods=['POST'])
+@login_required
+def api_ideas_text():
+    """Create an idea from text input."""
+    data = request.get_json() or {}
+    text = (data.get('text') or '').strip()
+    department = (data.get('department') or '').strip()
+    role = (data.get('role') or '').strip()
+    visibility = (data.get('visibility') or 'personal').strip()
+    if visibility not in ('personal', 'company'):
+        visibility = 'personal'
+    if not text:
+        return jsonify({'error': 'Text napadu je povinny'}), 400
+    if not department or not role:
+        return jsonify({'error': 'Oddelenie a rola su povinne'}), 400
+
+    db = get_db()
+    cursor = db.execute('''
+        INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+        VALUES (?, ?, ?, ?, 0, ?, 'new', ?)
+    ''', (session['user_id'], session['user_name'], department, role, text, visibility))
+    idea_id = cursor.lastrowid
+    db.commit()
+    db.close()
+    save_ideas_backup()
+
+    # Auto-analyze in background
+    threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
+
+    return jsonify({'ok': True, 'id': idea_id, 'message': 'Napad uspesne vytvoreny'}), 201
+
+
+@app.route('/api/ideas/upload-document', methods=['POST'])
+@login_required
+def api_ideas_upload_document():
+    """Create an idea from an uploaded document (PDF, DOCX, TXT, image)."""
+    if 'document' not in request.files:
+        return jsonify({'error': 'Chyba subor'}), 400
+
+    file = request.files['document']
+    if not file.filename:
+        return jsonify({'error': 'Prazdny subor'}), 400
+
+    ext = os.path.splitext(secure_filename(file.filename))[1].lower()
+    if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
+        return jsonify({'error': f'Nepodporovany format: {ext}. Podporovane: PDF, DOCX, TXT, MD, obrazky'}), 400
+
+    department = (request.form.get('department') or '').strip()
+    role = (request.form.get('role') or '').strip()
+    visibility = (request.form.get('visibility') or 'personal').strip()
+    if visibility not in ('personal', 'company'):
+        visibility = 'personal'
+    if not department or not role:
+        return jsonify({'error': 'Oddelenie a rola su povinne'}), 400
+
+    try:
+        content = file.read()
+        text = ''
+
+        if ext in ('.txt', '.md', '.rtf'):
+            text = content.decode('utf-8', errors='replace')
+        elif ext == '.pdf':
+            try:
+                import PyPDF2
+                reader = PyPDF2.PdfReader(io.BytesIO(content))
+                pages = []
+                for page in reader.pages:
+                    pages.append(page.extract_text() or '')
+                text = '\n'.join(pages)
+            except ImportError:
+                # Fallback: try pdfminer
+                try:
+                    from pdfminer.high_level import extract_text as pdf_extract
+                    text = pdf_extract(io.BytesIO(content))
+                except ImportError:
+                    text = f'[PDF subor: {file.filename} - kniznica na citanie PDF nie je nainstalovana]'
+        elif ext in ('.docx', '.doc'):
+            try:
+                import docx
+                doc = docx.Document(io.BytesIO(content))
+                text = '\n'.join([p.text for p in doc.paragraphs])
+            except ImportError:
+                text = f'[DOCX subor: {file.filename} - kniznica na citanie DOCX nie je nainstalovana]'
+        elif ext in ('.png', '.jpg', '.jpeg', '.gif', '.webp'):
+            # For images, store a placeholder and try OCR if available
+            text = f'[Obrazok: {file.filename}]'
+            try:
+                import pytesseract
+                from PIL import Image
+                img = Image.open(io.BytesIO(content))
+                ocr_text = pytesseract.image_to_string(img, lang='slk+eng')
+                if ocr_text.strip():
+                    text = f'[Obrazok: {file.filename}]\n\n{ocr_text.strip()}'
+            except ImportError:
+                pass
+            except Exception as ocr_err:
+                print(f'OCR error: {ocr_err}')
+
+        if not text.strip():
+            text = f'[Importovany subor: {file.filename}]'
+
+        # Limit text length
+        if len(text) > 50000:
+            text = text[:50000] + '\n\n[... text skrateny, povodny subor mal viac ako 50000 znakov]'
+
+        db = get_db()
+        cursor = db.execute('''
+            INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+            VALUES (?, ?, ?, ?, 0, ?, 'new', ?)
+        ''', (session['user_id'], session['user_name'], department, role, text, visibility))
+        idea_id = cursor.lastrowid
+        db.commit()
+        db.close()
+        save_ideas_backup()
+
+        # Auto-analyze in background
+        threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
+
+        return jsonify({'ok': True, 'id': idea_id, 'message': 'Dokument uspesne importovany ako napad', 'transcript': text[:200]}), 201
+
+    except Exception as e:
+        print(f'Document upload error: {e}')
+        return jsonify({'error': f'Chyba pri spracovani suboru: {str(e)}'}), 500
+
+
 @app.route('/api/ideas/bulk-delete', methods=['POST'])
 @admin_required
 def api_ideas_bulk_delete():
     data = request.get_json() or {}
     ids = data.get('ids', [])
     if not ids or not isinstance(ids, list):
-        return jsonify({'error': '\u017diadne n\u00e1pady na vymazanie'}), 400
+        return jsonify({'error': 'Žiadne nápady na vymazanie'}), 400
     db = get_db()
     placeholders = ','.join(['?'] * len(ids))
     db.execute(f'DELETE FROM ideas WHERE id IN ({placeholders})', ids)
@@ -926,7 +1105,7 @@ def api_ideas_bulk_delete():
     return jsonify({'ok': True, 'deleted': len(ids)})
 
 
-# --- Routes: Users (admin) ---
+# ─── Routes: Users (admin) ────────────────────────────────────────────────────
 @app.route('/api/users', methods=['GET'])
 @admin_required
 def api_users_list():
@@ -945,10 +1124,12 @@ def api_users_create():
     password = data.get('password') or ''
     role = data.get('role', 'submitter')
     department = data.get('department', '')
+
     if not email or not name or not password:
-        return jsonify({'error': 'E-mail, meno a heslo s\u00fa povinn\u00e9'}), 400
+        return jsonify({'error': 'E-mail, meno a heslo sú povinné'}), 400
     if role not in ('submitter', 'reviewer', 'admin'):
-        return jsonify({'error': 'Neplatn\u00e1 rola'}), 400
+        return jsonify({'error': 'Neplatná rola'}), 400
+
     db = get_db()
     try:
         db.execute(
@@ -961,7 +1142,7 @@ def api_users_create():
         return jsonify({'ok': True}), 201
     except Exception as e:
         db.close()
-        return jsonify({'error': 'E-mail u\u017e existuje'}), 409
+        return jsonify({'error': 'E-mail už existuje'}), 409
 
 
 @app.route('/api/users/<int:user_id>', methods=['PATCH'])
@@ -973,7 +1154,7 @@ def api_users_update(user_id):
     if 'password' in data and data['password']:
         updates['password_hash'] = generate_password_hash(data['password'])
     if not updates:
-        return jsonify({'error': 'Ni\u010d na aktualiz\u00e1ciu'}), 400
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
     db = get_db()
     set_clause = ', '.join(f'{k} = ?' for k in updates)
     db.execute(f'UPDATE users SET {set_clause} WHERE id = ?', list(updates.values()) + [user_id])
@@ -983,22 +1164,25 @@ def api_users_update(user_id):
     return jsonify({'ok': True})
 
 
-# --- Routes: Password change ---
+# ─── Routes: Password change (self-service) ─────────────────────────────────
 @app.route('/api/change-password', methods=['POST'])
 @login_required
 def api_change_password():
     data = request.get_json() or {}
     current_password = data.get('current_password', '')
     new_password = data.get('new_password', '')
+
     if not current_password or not new_password:
-        return jsonify({'error': 'Aktu\u00e1lne heslo a nov\u00e9 heslo s\u00fa povinn\u00e9'}), 400
+        return jsonify({'error': 'Aktuálne heslo a nové heslo sú povinné'}), 400
     if len(new_password) < 6:
-        return jsonify({'error': 'Nov\u00e9 heslo mus\u00ed ma\u0165 aspo\u0148 6 znakov'}), 400
+        return jsonify({'error': 'Nové heslo musí mať aspoň 6 znakov'}), 400
+
     db = get_db()
     user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     if not user or not check_password_hash(user['password_hash'], current_password):
         db.close()
-        return jsonify({'error': 'Nespr\u00e1vne aktu\u00e1lne heslo'}), 401
+        return jsonify({'error': 'Nesprávne aktuálne heslo'}), 401
+
     db.execute('UPDATE users SET password_hash = ? WHERE id = ?',
                (generate_password_hash(new_password), session['user_id']))
     db.commit()
@@ -1007,21 +1191,24 @@ def api_change_password():
     return jsonify({'ok': True})
 
 
-# --- Routes: CSV Export ---
+# ─── Routes: CSV Export ───────────────────────────────────────────────────────
 @app.route('/api/ideas/export-csv')
 @login_required
 def api_ideas_export_csv():
     db = get_db()
     filters = []
     params = []
+
     dept = request.args.get('department')
     role = request.args.get('role')
     status = request.args.get('status')
     search = request.args.get('search')
+
     user_role = session.get('user_role')
     if user_role == 'submitter':
         filters.append("(author_id = ? OR visibility = 'company')")
         params.append(session['user_id'])
+
     if dept:
         filters.append('department = ?')
         params.append(dept)
@@ -1034,20 +1221,31 @@ def api_ideas_export_csv():
     if search:
         filters.append('(transcript LIKE ? OR author_name LIKE ?)')
         params.extend([f'%{search}%', f'%{search}%'])
+
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
     rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC', params).fetchall()
     db.close()
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['ID', 'Autor', 'Oddelenie', 'Rola', 'Transkript', 'AI Sk\u00f3re', 'Status', 'Vidite\u013enos\u0165', 'Priraden\u00e9', 'Deadline', 'Tagy', 'Vytvoren\u00e9'])
+    writer.writerow(['ID', 'Autor', 'Oddelenie', 'Rola', 'Transkript', 'AI Skóre', 'Status', 'Viditeľnosť', 'Priradené', 'Deadline', 'Tagy', 'Vytvorené'])
     for r in rows:
         d = dict(r)
         writer.writerow([
-            d.get('id', ''), d.get('author_name', ''), d.get('department', ''),
-            d.get('role', ''), d.get('transcript', ''), d.get('ai_score', ''),
-            d.get('status', ''), d.get('visibility', ''), d.get('assigned_to', ''),
-            d.get('deadline', ''), d.get('tags', ''), d.get('created_at', '')
+            d.get('id', ''),
+            d.get('author_name', ''),
+            d.get('department', ''),
+            d.get('role', ''),
+            d.get('transcript', ''),
+            d.get('ai_score', ''),
+            d.get('status', ''),
+            d.get('visibility', ''),
+            d.get('assigned_to', ''),
+            d.get('deadline', ''),
+            d.get('tags', ''),
+            d.get('created_at', '')
         ])
+
     csv_data = output.getvalue()
     return Response(
         csv_data,
@@ -1056,7 +1254,7 @@ def api_ideas_export_csv():
     )
 
 
-# --- Routes: Stats ---
+# ─── Routes: Stats ────────────────────────────────────────────────────────────
 @app.route('/api/stats')
 @login_required
 def api_stats():
@@ -1072,12 +1270,18 @@ def api_stats():
     for row in db.execute('SELECT visibility, COUNT(*) as cnt FROM ideas GROUP BY visibility').fetchall():
         by_visibility[row['visibility']] = row['cnt']
     recent = db.execute('SELECT * FROM ideas ORDER BY created_at DESC LIMIT 5').fetchall()
+
+    # Score distribution for chart
     score_dist = {}
     for row in db.execute('SELECT ai_score, COUNT(*) as cnt FROM ideas WHERE ai_score > 0 GROUP BY ai_score ORDER BY ai_score').fetchall():
         score_dist[str(row['ai_score'])] = row['cnt']
+
+    # Average score by department
     avg_by_dept = {}
     for row in db.execute('SELECT department, AVG(ai_score) as avg_score FROM ideas WHERE ai_score > 0 GROUP BY department').fetchall():
         avg_by_dept[row['department']] = round(float(row['avg_score']), 1)
+
+    # Ideas over time (last 30 days, grouped by date)
     trend = []
     for row in db.execute("""
         SELECT substr(created_at, 1, 10) as day, COUNT(*) as cnt
@@ -1087,6 +1291,7 @@ def api_stats():
         LIMIT 30
     """).fetchall():
         trend.append({'day': row['day'], 'count': row['cnt']})
+
     db.close()
     return jsonify({
         'total': total,
@@ -1100,12 +1305,12 @@ def api_stats():
     })
 
 
-# --- Routes: Company Context ---
+# ─── Routes: Company Context ──────────────────────────────────────────────────
 COMPANY_CONTEXT_KEYS = [
-    'company_description',
-    'goals_priorities',
-    'brand_values',
-    'idea_criteria',
+    'company_description',   # O firme
+    'goals_priorities',      # Ciele a priority
+    'brand_values',          # Brand hodnoty
+    'idea_criteria',         # Čo hľadáme v nápadoch
 ]
 
 
@@ -1128,7 +1333,7 @@ def api_company_context_save():
     db = get_db()
     for key in COMPANY_CONTEXT_KEYS:
         if key in data:
-            value = str(data[key])[:5000]
+            value = str(data[key])[:5000]  # max 5000 chars per field
             db.execute(
                 'INSERT OR REPLACE INTO company_context (key, value) VALUES (?, ?)',
                 (key, value)
@@ -1139,6 +1344,7 @@ def api_company_context_save():
 
 
 def _get_company_context_for_prompt():
+    """Build company context string for AI analysis prompt."""
     db = get_db()
     rows = db.execute('SELECT key, value FROM company_context').fetchall()
     db.close()
@@ -1146,8 +1352,8 @@ def _get_company_context_for_prompt():
     labels = {
         'company_description': 'O firme',
         'goals_priorities': 'Ciele a priority firmy',
-        'brand_values': 'Hodnoty zna\u010dky',
-        'idea_criteria': '\u010co h\u013ead\u00e1me v n\u00e1padoch',
+        'brand_values': 'Hodnoty značky',
+        'idea_criteria': 'Čo hľadáme v nápadoch',
     }
     for row in rows:
         if row['value'] and row['value'].strip():
@@ -1156,7 +1362,7 @@ def _get_company_context_for_prompt():
     return '\n'.join(context_parts)
 
 
-# --- Routes: Kanban ---
+# ─── Routes: Kanban ─────────────────────────────────────────────────────────────
 @app.route('/api/kanban')
 @login_required
 def api_kanban():
@@ -1173,7 +1379,7 @@ def api_kanban():
     return jsonify(result)
 
 
-# --- Routes: Comments ---
+# ─── Routes: Comments ───────────────────────────────────────────────────────────
 @app.route('/api/ideas/<int:idea_id>/comments', methods=['GET'])
 @login_required
 def api_comments_list(idea_id):
@@ -1191,14 +1397,16 @@ def api_comments_create(idea_id):
     data = request.get_json() or {}
     text = (data.get('text') or '').strip()
     if not text:
-        return jsonify({'error': 'Text koment\u00e1ra je povinn\u00fd'}), 400
+        return jsonify({'error': 'Text komentára je povinný'}), 400
     if len(text) > 2000:
-        return jsonify({'error': 'Koment\u00e1r je pr\u00edli\u0161 dlh\u00fd (max 2000 znakov)'}), 400
+        return jsonify({'error': 'Komentár je príliš dlhý (max 2000 znakov)'}), 400
+
     db = get_db()
     idea = db.execute('SELECT id FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     if not idea:
         db.close()
-        return jsonify({'error': 'N\u00e1pad nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Nápad nenájdený'}), 404
+
     db.execute(
         'INSERT INTO comments (idea_id, user_id, user_name, text) VALUES (?, ?, ?, ?)',
         (idea_id, session['user_id'], session['user_name'], text)
@@ -1215,17 +1423,18 @@ def api_comments_delete(comment_id):
     comment = db.execute('SELECT * FROM comments WHERE id = ?', (comment_id,)).fetchone()
     if not comment:
         db.close()
-        return jsonify({'error': 'Koment\u00e1r nen\u00e1jden\u00fd'}), 404
+        return jsonify({'error': 'Komentár nenájdený'}), 404
+    # Only author or admin can delete
     if comment['user_id'] != session['user_id'] and session.get('user_role') != 'admin':
         db.close()
-        return jsonify({'error': 'Nem\u00e1te opr\u00e1vnenie'}), 403
+        return jsonify({'error': 'Nemáte oprávnenie'}), 403
     db.execute('DELETE FROM comments WHERE id = ?', (comment_id,))
     db.commit()
     db.close()
     return jsonify({'ok': True})
 
 
-# --- Routes: Votes ---
+# ─── Routes: Votes ─────────────────────────────────────────────────────────────
 @app.route('/api/ideas/<int:idea_id>/votes', methods=['GET'])
 @login_required
 def api_votes_get(idea_id):
@@ -1260,7 +1469,7 @@ def api_votes_toggle(idea_id):
     return jsonify({'count': count, 'user_voted': user_voted})
 
 
-# --- Routes: Meetings ---
+# ─── Routes: Meetings (porady) ────────────────────────────────────────────────
 @app.route('/api/meetings', methods=['GET'])
 @login_required
 def api_meetings_list():
@@ -1269,6 +1478,7 @@ def api_meetings_list():
     result = []
     for m in rows:
         d = dict(m)
+        # Get linked ideas count
         cnt = db.execute('SELECT COUNT(*) FROM meeting_ideas WHERE meeting_id = ?', (m['id'],)).fetchone()[0]
         d['ideas_count'] = cnt
         result.append(d)
@@ -1282,7 +1492,8 @@ def api_meetings_create():
     data = request.get_json() or {}
     title = (data.get('title') or '').strip()
     if not title:
-        return jsonify({'error': 'N\u00e1zov porady je povinn\u00fd'}), 400
+        return jsonify({'error': 'Názov porady je povinný'}), 400
+
     db = get_db()
     cursor = db.execute(
         'INSERT INTO meetings (title, description, meeting_date, created_by, created_by_name) VALUES (?, ?, ?, ?, ?)',
@@ -1302,8 +1513,9 @@ def api_meeting_detail(meeting_id):
     m = db.execute('SELECT * FROM meetings WHERE id = ?', (meeting_id,)).fetchone()
     if not m:
         db.close()
-        return jsonify({'error': 'Porada nen\u00e1jden\u00e1'}), 404
+        return jsonify({'error': 'Porada nenájdená'}), 404
     d = dict(m)
+    # Get linked ideas
     idea_rows = db.execute('''
         SELECT i.* FROM ideas i
         JOIN meeting_ideas mi ON mi.idea_id = i.id
@@ -1322,7 +1534,7 @@ def api_meeting_update(meeting_id):
     allowed = {'title', 'description', 'meeting_date', 'status', 'notes'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if not updates:
-        return jsonify({'error': 'Ni\u010d na aktualiz\u00e1ciu'}), 400
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
     db = get_db()
     set_clause = ', '.join(f'{k} = ?' for k in updates)
     db.execute(f'UPDATE meetings SET {set_clause} WHERE id = ?', list(updates.values()) + [meeting_id])
@@ -1337,13 +1549,13 @@ def api_meeting_add_idea(meeting_id):
     data = request.get_json() or {}
     idea_id = data.get('idea_id')
     if not idea_id:
-        return jsonify({'error': 'idea_id je povinn\u00e9'}), 400
+        return jsonify({'error': 'idea_id je povinné'}), 400
     db = get_db()
     try:
         db.execute('INSERT INTO meeting_ideas (meeting_id, idea_id) VALUES (?, ?)', (meeting_id, idea_id))
         db.commit()
     except Exception:
-        pass
+        pass  # Already linked
     db.close()
     return jsonify({'ok': True})
 
@@ -1369,7 +1581,7 @@ def api_meeting_delete(meeting_id):
     return jsonify({'ok': True})
 
 
-# --- Routes: Campaigns ---
+# ─── Routes: Campaigns ────────────────────────────────────────────────────────
 @app.route('/api/campaigns', methods=['GET'])
 @login_required
 def api_campaigns_list():
@@ -1391,7 +1603,8 @@ def api_campaigns_create():
     data = request.get_json() or {}
     title = (data.get('title') or '').strip()
     if not title:
-        return jsonify({'error': 'N\u00e1zov kampane je povinn\u00fd'}), 400
+        return jsonify({'error': 'Názov kampane je povinný'}), 400
+
     db = get_db()
     cursor = db.execute(
         'INSERT INTO campaigns (title, description, start_date, end_date, created_by) VALUES (?, ?, ?, ?, ?)',
@@ -1411,7 +1624,7 @@ def api_campaign_detail(campaign_id):
     c = db.execute('SELECT * FROM campaigns WHERE id = ?', (campaign_id,)).fetchone()
     if not c:
         db.close()
-        return jsonify({'error': 'Kampa\u0148 nen\u00e1jden\u00e1'}), 404
+        return jsonify({'error': 'Kampaň nenájdená'}), 404
     d = dict(c)
     ideas = db.execute('SELECT * FROM ideas WHERE campaign_id = ? ORDER BY created_at DESC',
                        (campaign_id,)).fetchall()
@@ -1427,7 +1640,7 @@ def api_campaign_update(campaign_id):
     allowed = {'title', 'description', 'start_date', 'end_date', 'status'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if not updates:
-        return jsonify({'error': 'Ni\u010d na aktualiz\u00e1ciu'}), 400
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
     db = get_db()
     set_clause = ', '.join(f'{k} = ?' for k in updates)
     db.execute(f'UPDATE campaigns SET {set_clause} WHERE id = ?', list(updates.values()) + [campaign_id])
@@ -1440,6 +1653,7 @@ def api_campaign_update(campaign_id):
 @admin_required
 def api_campaign_delete(campaign_id):
     db = get_db()
+    # Unlink ideas from campaign
     db.execute('UPDATE ideas SET campaign_id = NULL WHERE campaign_id = ?', (campaign_id,))
     db.execute('DELETE FROM campaigns WHERE id = ?', (campaign_id,))
     db.commit()
@@ -1447,7 +1661,7 @@ def api_campaign_delete(campaign_id):
     return jsonify({'ok': True})
 
 
-# --- Routes: Pages ---
+# ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
 @login_required
 def index():
@@ -1479,7 +1693,7 @@ def health():
     return jsonify({'status': 'ok', 'time': datetime.now().isoformat()})
 
 
-# --- Start ---
+# ─── Start ────────────────────────────────────────────────────────────────────
 with app.app_context():
     init_db()
 
