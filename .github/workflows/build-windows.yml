@@ -21,44 +21,28 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Wine for cross-compilation
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq wine64 wine32 2>/dev/null || sudo apt-get install -y -qq wine64
-
       - name: Read version
         id: ver
         run: |
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare source
+      - name: Setup build directory
         run: |
-          mkdir -p build-src
-          cp electron/main.js build-src/
-          cp electron/preload.js build-src/
-          cp electron/recorder.html build-src/
-          cp -r electron/assets build-src/ 2>/dev/null || true
-          echo '{"name":"ridea","version":"'"${{ steps.ver.outputs.version }}"'","main":"main.js","dependencies":{}}' > build-src/package.json
-          cat build-src/package.json
+          cd electron
+          npm install
+          ls -la node_modules/ | head -20
 
-      - name: Package for Windows
+      - name: Package for Windows with electron-builder
         run: |
-          npx --yes @electron/packager@latest build-src Ridea \
-            --platform=win32 \
-            --arch=x64 \
-            --electron-version=28.3.3 \
-            --out=win-out \
-            --overwrite \
-            --app-version=${{ steps.ver.outputs.version }} 2>&1
+          cd electron
+          npx electron-builder --win dir --publish never 2>&1 || true
+          npx electron-builder --win zip --publish never 2>&1
 
-      - name: Create ZIP
+      - name: Find output files
         run: |
-          cd win-out/Ridea-win32-x64
-          zip -r ../../Ridea-${{ steps.ver.outputs.version }}-win-x64.zip .
-          cd ../..
-          ls -la *.zip
+          find electron/dist -type f \( -name '*.exe' -o -name '*.zip' \) 2>/dev/null
+          ls -laR electron/dist/ 2>/dev/null || echo 'No dist directory'
 
       - name: Create Release
         env:
@@ -67,13 +51,14 @@ jobs:
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
             --title "Ridea v${{ steps.ver.outputs.version }}" \
-            --notes "Ridea v${{ steps.ver.outputs.version }} — fialovy dizajn #512D6D" \
+            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn #512D6D" \
             --latest 2>/dev/null || true
 
-      - name: Upload to Release
+      - name: Upload artifacts to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "v${{ steps.ver.outputs.version }}" \
-            "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip" \
-            --repo ${{ github.repository }} --clobber
+          for f in electron/dist/*.exe electron/dist/*.zip; do
+            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+              --repo ${{ github.repository }} --clobber
+          done
