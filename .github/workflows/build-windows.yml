@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Read version from package.json
+      - name: Read version
         id: ver
         shell: bash
         run: |
@@ -36,9 +36,9 @@ jobs:
           cp electron/preload.js src-clean/
           cp electron/recorder.html src-clean/
           cp -r electron/assets src-clean/ 2>/dev/null || true
-          echo "{\"name\":\"ridea\",\"version\":\"${{ steps.ver.outputs.version }}\",\"main\":\"main.js\",\"dependencies\":{}}" > src-clean/package.json
+          node -e "var p=require('./electron/package.json'); p.dependencies={}; delete p.devDependencies; delete p.build; delete p.scripts; require('fs').writeFileSync('src-clean/package.json', JSON.stringify(p,null,2));"
 
-      - name: Package app (x64)
+      - name: Package app
         shell: bash
         run: |
           npx --yes @electron/packager src-clean Ridea \
@@ -47,15 +47,14 @@ jobs:
             --electron-version=28.3.3 \
             --out=win-out \
             --overwrite \
-            --app-version=${{ steps.ver.outputs.version }} \
-            --icon=electron/assets/icon.ico
+            --app-version=${{ steps.ver.outputs.version }}
 
       - name: Create portable ZIP
         shell: pwsh
         run: |
           Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
 
-      - name: Create or get GitHub Release
+      - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -63,11 +62,11 @@ jobs:
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
             --title "Ridea v${{ steps.ver.outputs.version }}" \
-            --notes "Ridea v${{ steps.ver.outputs.version }} — aktualizacia" \
+            --notes "Ridea v${{ steps.ver.outputs.version }}" \
             --latest \
             2>/dev/null || true
 
-      - name: Upload to GitHub Release
+      - name: Upload ZIP to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
