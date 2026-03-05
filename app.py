@@ -856,8 +856,28 @@ def _clean_hallucinations(text):
     return cleaned
 
 
+def _save_audio_backup(tmp_path, ext, job_id):
+    """Save raw audio file to persistent backup directory. Returns saved filename or None."""
+    try:
+        backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
+        os.makedirs(backup_dir, exist_ok=True)
+        filename = f'{job_id}{ext}'
+        dest = os.path.join(backup_dir, filename)
+        import shutil
+        shutil.copy2(tmp_path, dest)
+        print(f'Audio backup saved: {filename} ({os.path.getsize(dest) / 1024:.0f}KB)')
+        return filename
+    except Exception as e:
+        print(f'Audio backup error: {e}')
+        return None
+
+
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
+
+    # FIRST: Save raw audio backup so recording is never lost
+    audio_filename = _save_audio_backup(tmp_path, ext, job_id)
+
     try:
         client = openai.OpenAI(api_key=api_key)
 
@@ -877,25 +897,29 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
                 print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
                 continue
 
-            with open(chunk_path, 'rb') as f:
-                transcription = client.audio.transcriptions.create(
-                    model='whisper-1',
-                    file=f,
-                    language='sk',
-                    response_format='verbose_json',
-                    prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
-                )
+            try:
+                with open(chunk_path, 'rb') as f:
+                    transcription = client.audio.transcriptions.create(
+                        model='whisper-1',
+                        file=f,
+                        language='sk',
+                        response_format='verbose_json',
+                        prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
+                    )
 
-            chunk_text = transcription.text or ''
-            chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
-            total_duration += chunk_dur
+                chunk_text = transcription.text or ''
+                chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
+                total_duration += chunk_dur
 
-            # Clean hallucinations from each chunk
-            cleaned = _clean_hallucinations(chunk_text)
-            if cleaned:
-                all_text.append(cleaned)
+                # Clean hallucinations from each chunk
+                cleaned = _clean_hallucinations(chunk_text)
+                if cleaned:
+                    all_text.append(cleaned)
 
-            print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
+                print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
+            except Exception as whisper_err:
+                print(f'Upload job {job_id}: Whisper error on chunk {i}: {whisper_err}')
+                continue
 
         # Clean up chunk files
         for chunk_path in chunks:
@@ -908,21 +932,19 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         transcript_text = ' '.join(all_text).strip()
 
         # Final hallucination check on combined text
-        transcript_text = _clean_hallucinations(transcript_text)
+        if transcript_text:
+            transcript_text = _clean_hallucinations(transcript_text)
 
+        # Even if transcript is empty, SAVE the idea with audio backup reference
         if not transcript_text:
-            _upload_jobs[job_id] = {
-                'status': 'error',
-                'error': 'Nahravka neobsahuje rozpoznatelnu rec. Skuste nahrat znova s jasnejsim hlasom.'
-            }
-            return
+            transcript_text = '[Nahravka ulozena - transkript nedostupny. Audio: ' + (audio_filename or 'N/A') + ']'
 
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
-                INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
-                VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, total_duration, transcript_text, visibility))
+                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, duration_seconds, transcript, status, visibility)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)
+            ''', (user_id, user_name, department, role, audio_filename or '', total_duration, transcript_text, visibility))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
@@ -1800,6 +1822,26 @@ def api_campaign_delete(campaign_id):
     db.commit()
     db.close()
     return jsonify({'ok': True})
+
+
+# ─── Routes: Audio files ──────────────────────────────────────────────────────
+@app.route('/api/ideas/<int:idea_id>/audio')
+@login_required
+def api_idea_audio(idea_id):
+    """Download raw audio backup for an idea."""
+    db = get_db()
+    idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    db.close()
+    if not idea:
+        return jsonify({'error': 'Napad nenajdeny'}), 404
+    audio_file = idea.get('audio_filename', '') if isinstance(idea, dict) else (idea['audio_filename'] if 'audio_filename' in idea.keys() else '')
+    if not audio_file:
+        return jsonify({'error': 'Audio subor nie je k dispozicii'}), 404
+    backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
+    filepath = os.path.join(backup_dir, audio_file)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'Audio subor nebol najdeny na disku'}), 404
+    return send_from_directory(backup_dir, audio_file, as_attachment=True)
 
 
 # ─── Routes: Pages ────────────────────────────────────────────────────────────

@@ -20,6 +20,9 @@ chrome-extension/.env
 # Backups (committed separately to data-backups branch)
 ideas_backup.json
 
+# Audio uploads (stored on server disk)
+audio_uploads/
+
 # OS
 .DS_Store
 Thumbs.db
