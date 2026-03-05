@@ -187,5 +187,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 6,
+    "author_name": "Veronika Víghová",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 99,
+    "transcript": "Mňa napadlo skres aj zahraničný koncept a možno aj nejaké rozšírenie podkastu, že koncept je Deň s úspešnou ženou. A v podstate mohla by to byť nejaká séria krátkych videí na Instagram, či už so ženami, s ktorými sme napríklad natačali podkast alebo s nejakými novými, že v podstate prevedenie toho dňa ako funguje, že vlastne možno od nejakej ránej rutiny po to, čo nosí v kabelke. Presne bola by tam kabelka Diana Rodrigues, ktorú vlastní a ktorú proste väčšinou nosí. Po to možno ako ten deň vyzerá, čiže išť možno aj do nejakého jej pracovného prostredia alebo pokiaľ je to mama, tak možno proste z jej domácnosti natočiť. A vlastne v zahraničí to funguje tak, že známe osobnosti, celebrity sú napríklad doma a kameramán im poklada, čo neviem, 10 otázok s Kim Kardashian a ona odpoveda na tí zaujímavé otázky. Tak mohlo by to byť buď takto, alebo proste prevedenie toho dňa s úspešnou, silnou ženou.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 09:23:37.131338+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
