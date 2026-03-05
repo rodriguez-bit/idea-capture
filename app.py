@@ -1842,26 +1842,6 @@ def api_campaign_delete(campaign_id):
     return jsonify({'ok': True})
 
 
-# ─── Routes: Audio files ──────────────────────────────────────────────────────
-@app.route('/api/ideas/<int:idea_id>/audio')
-@login_required
-def api_idea_audio(idea_id):
-    """Download raw audio backup for an idea."""
-    db = get_db()
-    idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
-    db.close()
-    if not idea:
-        return jsonify({'error': 'Napad nenajdeny'}), 404
-    audio_file = idea.get('audio_filename', '') if isinstance(idea, dict) else (idea['audio_filename'] if 'audio_filename' in idea.keys() else '')
-    if not audio_file:
-        return jsonify({'error': 'Audio subor nie je k dispozicii'}), 404
-    backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
-    filepath = os.path.join(backup_dir, audio_file)
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'Audio subor nebol najdeny na disku'}), 404
-    return send_from_directory(backup_dir, audio_file, as_attachment=True)
-
-
 # ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
 def index():
