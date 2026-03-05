@@ -166,5 +166,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 7,
+    "author_name": "Lucia Stoffova",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "Môj nápad je, aby sme v CZ začali aktívne riešiť spoluprácu s iným lokálnym brandom ako mala Dajana spoluprácu s Gentlejemom napríklad. Spolupráce so silnými ženami sú super ale spolupráca s ďalšou značkou ponúka úplne ďalšie a nové výhody ako výmenu know-how podelanie nákladov na vývoj distribuciu atď. Aktuálne by som to riešila skôr v rovine Dajana Rodriguez než Raul del Fuego a asi by som išla do spolupráce s niekým, kto je tiež v podobnom segmente, zdieľa naše hodnoty a ich prímarne zákazníčky su ženy - keďže nas ľudia momentálne ešte moc nepoznajú aby neboli zmätený, že kto vlastne sme a čo predávame. Primárny cieľ je zvýšiť poznateľnosť brandu.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 09:04:54.532945+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
