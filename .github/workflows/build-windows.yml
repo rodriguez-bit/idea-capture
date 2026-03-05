@@ -28,39 +28,30 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Install Electron
+      - name: Prepare build directory
         shell: bash
         run: |
           mkdir build-src
           cp electron/main.js build-src/
           cp electron/preload.js build-src/
           cp electron/recorder.html build-src/
+          cp electron/package.json build-src/
           cp -r electron/assets build-src/ 2>/dev/null || true
-          cd build-src
-          npm init -y
-          npm install electron@28.3.3 electron-updater@6.8.3
-          echo "Electron installed"
-          npx electron --version
 
-      - name: Package with electron-packager
+      - name: Install dependencies
         shell: bash
+        working-directory: build-src
         run: |
-          npx --yes @electron/packager@latest build-src Ridea \
-            --platform=win32 \
-            --arch=x64 \
-            --out=win-out \
-            --overwrite \
-            --app-version=${{ steps.ver.outputs.version }} \
-            --no-prune 2>&1
-          echo "Packaging done"
-          ls -la win-out/ 2>/dev/null
+          npm install
+          echo "Dependencies installed"
 
-      - name: Create ZIP
-        if: success()
-        shell: pwsh
+      - name: Build with electron-builder
+        shell: bash
+        working-directory: build-src
         run: |
-          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
-          Get-ChildItem *.zip
+          npx electron-builder --win --publish never
+          echo "Build done"
+          ls -la dist/ 2>/dev/null
 
       - name: Create Release and Upload
         if: success()
@@ -71,8 +62,17 @@ jobs:
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
             --title "Ridea v${{ steps.ver.outputs.version }}" \
-            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn #512D6D" \
+            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || true
-          gh release upload "v${{ steps.ver.outputs.version }}" \
-            "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip" \
-            --repo ${{ github.repository }} --clobber
+
+          # Upload NSIS installer
+          for f in build-src/dist/*.exe; do
+            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+              --repo ${{ github.repository }} --clobber
+          done
+
+          # Upload portable too
+          for f in build-src/dist/*.zip; do
+            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+              --repo ${{ github.repository }} --clobber
+          done
