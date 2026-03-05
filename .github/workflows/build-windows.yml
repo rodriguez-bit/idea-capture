@@ -67,20 +67,140 @@ jobs:
           print(f"Created ICO with sizes: {sizes}")
           print(f"ICO size: {os.path.getsize('electron/assets/icon.ico')} bytes")
 
-      - name: Install dependencies
-        working-directory: electron
-        run: npm install
-
-      - name: Build with electron-builder
-        working-directory: electron
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --win --x64 --publish always
-
-      - name: List output
+      - name: Prepare and package
         shell: bash
         run: |
-          echo "=== Build output ==="
-          ls -la electron/dist/ || true
-          echo "=== Latest yml ==="
-          cat electron/dist/latest.yml || true
+          mkdir build-src
+          cp electron/main.js build-src/
+          cp electron/preload.js build-src/
+          cp electron/recorder.html build-src/
+          cp -r electron/assets build-src/ 2>/dev/null || true
+          cd build-src
+          npm init -y
+          npm install electron@28.3.3 electron-updater@6.8.3
+          cd ..
+
+          echo "=== Verify icon ==="
+          ls -la electron/assets/icon.ico
+          ls -la build-src/assets/icon.ico
+
+          npx --yes @electron/packager@latest build-src Ridea \
+            --platform=win32 \
+            --arch=x64 \
+            --out=win-out \
+            --overwrite \
+            --app-version=${{ steps.ver.outputs.version }} \
+            --icon=build-src/assets/icon.ico \
+            --no-prune 2>&1
+          echo "Packaging done"
+
+      - name: Create Inno Setup script
+        shell: pwsh
+        run: |
+          $version = "${{ steps.ver.outputs.version }}"
+          $iss = @"
+          [Setup]
+          AppName=Ridea
+          AppVersion=$version
+          AppPublisher=Dajana Rodriguez
+          DefaultDirName={autopf}\Ridea
+          DefaultGroupName=Ridea
+          OutputDir=installer-out
+          OutputBaseFilename=Ridea-Setup-$version
+          SetupIconFile=electron\assets\icon.ico
+          Compression=lzma2
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          UninstallDisplayIcon={app}\Ridea.exe
+          WizardStyle=modern
+
+          [Files]
+          Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+          [Icons]
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
+
+          [Run]
+          Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
+          "@
+          Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
+          Write-Host "Created installer.iss"
+
+      - name: Build installer with Inno Setup
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Create ZIP too
+        if: success()
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+
+      - name: Generate latest.yml for auto-updater
+        if: success()
+        shell: python
+        run: |
+          import hashlib, base64, os, datetime
+
+          version = "${{ steps.ver.outputs.version }}"
+          exe_path = f"installer-out/Ridea-Setup-{version}.exe"
+          file_size = os.path.getsize(exe_path)
+
+          with open(exe_path, "rb") as f:
+              sha512 = hashlib.sha512(f.read()).digest()
+          sha512_b64 = base64.b64encode(sha512).decode()
+
+          now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+          yml = f"""version: {version}
+          files:
+            - url: Ridea-Setup-{version}.exe
+              sha512: {sha512_b64}
+              size: {file_size}
+          path: Ridea-Setup-{version}.exe
+          sha512: {sha512_b64}
+          releaseDate: '{now}'
+          """
+
+          # Remove leading spaces from each line (dedent)
+          import textwrap
+          yml = textwrap.dedent(yml).strip() + "\n"
+
+          with open("latest.yml", "w") as f:
+              f.write(yml)
+
+          print("Generated latest.yml:")
+          print(yml)
+
+      - name: Create Release and Upload
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          REPO="${{ github.repository }}"
+
+          gh release create "v${VERSION}" \
+            --repo "${REPO}" \
+            --title "Ridea v${VERSION}" \
+            --notes "Ridea v${VERSION} - auto-update podpora, opravena ikona" \
+            --latest 2>/dev/null || echo "Release already exists"
+
+          gh release upload "v${VERSION}" \
+            "installer-out/Ridea-Setup-${VERSION}.exe" \
+            --repo "${REPO}" --clobber || echo "Installer upload failed"
+
+          gh release upload "v${VERSION}" \
+            "Ridea-${VERSION}-win-x64.zip" \
+            --repo "${REPO}" --clobber || echo "ZIP upload failed"
+
+          gh release upload "v${VERSION}" \
+            "latest.yml" \
+            --repo "${REPO}" --clobber || echo "latest.yml upload failed"
+
+          echo "Upload complete"
