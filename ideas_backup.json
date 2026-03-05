@@ -147,27 +147,6 @@
     "campaign_id": null
   },
   {
-    "author_id": 125,
-    "author_name": "Daniel Vighova",
-    "department": "marketing",
-    "role": "manager",
-    "audio_filename": "",
-    "duration_seconds": 79,
-    "transcript": "No, ja som mal nápad, hovorila som to aj na jednom meetingu tu v Prahe, že značka Ralph Del Fuego by mala odštartovať nejakým úvodným videom, kde by vlastne bol povedaný ten príbeh Ravla, keď zhorel, aj možno s nejakými fotkami, proste mal by to byť taký úvod, aby proste ľudia pochopili, že čo je to aj ten Ralph Del Fuego, čo to vlastne znamená, prečo sa to tak volá a potom ten Fuego moment a proste všetko, aby im to tak saspojilo, lebo my vieme vo firme, že čo sa mu stalo, ale ľudia ako naši... zákazníci vlastne tento príbeh nevedia.",
-    "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-04 20:35:49.849462+00",
-    "visibility": "personal",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 8,
     "author_name": "Raul Rodriguez",
     "department": "management",
