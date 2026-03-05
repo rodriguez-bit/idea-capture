@@ -271,5 +271,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "5ff1b0fa-2d81-47a3-a171-57f362d761db.webm",
+    "duration_seconds": 11,
+    "transcript": "1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 13:41:11.543426+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
