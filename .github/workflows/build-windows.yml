@@ -28,9 +28,15 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Install Pillow
+        run: pip install Pillow
+
       - name: Generate RI icon
         shell: python
         run: |
+          import os
+          os.makedirs('electron/assets', exist_ok=True)
+
           from PIL import Image, ImageDraw, ImageFont
 
           def make_icon_image(size):
@@ -59,8 +65,6 @@ jobs:
           images[0].save('electron/assets/icon.ico', format='ICO', sizes=[(s, s) for s in sizes])
           images[0].save('electron/assets/icon.png', format='PNG')
           print(f"Created ICO with sizes: {sizes}")
-
-          import os
           print(f"ICO size: {os.path.getsize('electron/assets/icon.ico')} bytes")
 
       - name: Prepare and package
@@ -152,7 +156,7 @@ jobs:
           gh release create "v${VERSION}" \
             --repo "${REPO}" \
             --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI" \
+            --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI, opravena ikona" \
             --latest 2>/dev/null || echo "Release already exists"
 
           gh release upload "v${VERSION}" \
