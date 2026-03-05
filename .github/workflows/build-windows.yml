@@ -28,30 +28,28 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Prepare build directory
-        shell: bash
-        run: |
-          mkdir build-src
-          cp electron/main.js build-src/
-          cp electron/preload.js build-src/
-          cp electron/recorder.html build-src/
-          cp electron/package.json build-src/
-          cp -r electron/assets build-src/ 2>/dev/null || true
-
       - name: Install dependencies
         shell: bash
-        working-directory: build-src
+        working-directory: electron
         run: |
           npm install
           echo "Dependencies installed"
+          ls -la node_modules/.bin/ | head -20
 
-      - name: Build with electron-builder
+      - name: Build NSIS installer
         shell: bash
-        working-directory: build-src
+        working-directory: electron
         run: |
-          npx electron-builder --win --publish never
+          npx electron-builder --win nsis --x64 --publish never 2>&1
           echo "Build done"
-          ls -la dist/ 2>/dev/null
+          ls -la dist/ 2>/dev/null || true
+
+      - name: List output files
+        if: always()
+        shell: bash
+        run: |
+          echo "=== dist contents ==="
+          find electron/dist -type f 2>/dev/null || echo "No dist folder"
 
       - name: Create Release and Upload
         if: success()
@@ -62,17 +60,11 @@ jobs:
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
             --title "Ridea v${{ steps.ver.outputs.version }}" \
-            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn, textove napady, logo RI" \
+            --notes "Ridea v${{ steps.ver.outputs.version }} - NSIS installer, fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || true
 
-          # Upload NSIS installer
-          for f in build-src/dist/*.exe; do
-            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
-              --repo ${{ github.repository }} --clobber
-          done
-
-          # Upload portable too
-          for f in build-src/dist/*.zip; do
+          # Upload NSIS installer .exe
+          for f in electron/dist/*.exe; do
             [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
               --repo ${{ github.repository }} --clobber
           done
