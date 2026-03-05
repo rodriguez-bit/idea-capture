@@ -250,5 +250,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 7,
+    "author_name": "Lucia Stoffova",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "V rámci touchpointov v CZ republike sa stať sponzorom podcastu. Nájsť nejaký hodnotový podcast pre ženy, kde by sme vedeli byť dlhodobým sponzorom alebo aspoň zopár epizód. Potencial vidim v tom, že tie formy spoluprac už niesu len na urovni zľavového kódu ale vieme darovať produkt/kabelku/kozmetiku ktorá môže byť odovzdaná ako darček hosťovi. Toto vieme robiť aj na úrovni Dajana Rodriguez aj Raul del Fuego. Podcasty sú v CZ stále veľmi populárna forma zábavy, ktorá má obrovské dosahy na sociálnych sieťach. Je to relativne jednoduche na realizaciu. Minusom bude pravdepodobna potreba finančnej odmeny.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 12:02:11.231181+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
