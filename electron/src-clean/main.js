@@ -66,6 +66,19 @@ function makeTrayIcon() {
   return nativeImage.createFromBuffer(png);
 }
 
+function getIconPath() {
+  const locations = [
+    path.join(__dirname, 'assets', 'icon.ico'),
+    path.join(__dirname, '..', 'assets', 'icon.ico'),
+    path.join(process.resourcesPath || '', 'app', 'assets', 'icon.ico'),
+    path.join(process.resourcesPath || '', 'assets', 'icon.ico'),
+  ];
+  for (const p of locations) {
+    try { if (fs.existsSync(p)) return p; } catch {}
+  }
+  return undefined;
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 380,
@@ -73,6 +86,7 @@ function createWindow() {
     resizable: false,
     title: 'Ridea',
     autoHideMenuBar: true,
+    icon: getIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
