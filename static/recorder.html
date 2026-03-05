@@ -56,11 +56,6 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 #text-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
 #text-panel.active { display: flex; }
 
-.src-row { display: flex; gap: 6px; flex-shrink: 0; }
-.src-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; transition: all .15s; text-align: center; }
-.src-btn.active { background: rgba(168,75,47,0.3); border-color: rgba(239,68,68,0.4); color: #f0e6f6; }
-.src-btn:hover { border-color: rgba(255,255,255,0.25); }
-
 .mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .rbtn {
   width: 88px; height: 88px; border-radius: 50%;
@@ -78,6 +73,9 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 
 #visualizer { width: 100%; max-width: 280px; height: 48px; border-radius: 8px; display: none; }
 #visualizer.active { display: block; }
+
+.audio-info { font-size: 11px; color: rgba(255,255,255,0.35); text-align: center; padding: 2px 0; }
+.audio-info .active-src { color: #4ade80; }
 
 .txt-area {
   flex: 1; min-height: 100px; padding: 12px; border-radius: 8px;
@@ -142,14 +140,11 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
   </div>
 
   <div id="voice-panel" class="active">
-    <div class="src-row" id="src-row">
-      <button type="button" class="src-btn active" id="src-mic" onclick="setAudioSource('mic')">&#127908; Mikrof&#243;n</button>
-      <button type="button" class="src-btn" id="src-system" onclick="setAudioSource('system')">&#128187; Syst&#233;mov&#253; zvuk</button>
-    </div>
     <canvas id="visualizer"></canvas>
     <button class="rbtn" id="rbtn" onclick="toggleRecord()"><div class="rdot"></div></button>
     <div class="rtime" id="rtime">&#8212;</div>
     <div class="rhint" id="rhint">Klikni pre nahr&#225;vanie</div>
+    <div class="audio-info" id="audio-info"></div>
   </div>
 
   <div id="text-panel">
@@ -175,11 +170,11 @@ let timerInterval = null;
 let seconds = 0;
 let currentUser = null;
 let currentVisibility = 'company';
-let audioSource = 'mic';
 let audioContext = null;
 let analyser = null;
 let animFrameId = null;
-let activeStream = null;
+let activeStreams = [];
+let mixedDestination = null;
 
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
@@ -194,12 +189,6 @@ function setVisibility(val) {
   document.getElementById('vis-company').classList.toggle('active', val === 'company');
 }
 
-function setAudioSource(src) {
-  audioSource = src;
-  document.getElementById('src-mic').classList.toggle('active', src === 'mic');
-  document.getElementById('src-system').classList.toggle('active', src === 'system');
-}
-
 async function init() {
   try {
     const r = await fetch(API_BASE + '/api/current-user', { credentials: 'include' });
@@ -212,10 +201,6 @@ async function init() {
     if (savedRole) document.getElementById('role').value = savedRole;
   } catch(e) {
     setMsg('Chyba pripojenia k serveru', 'err');
-  }
-  // Check if getDisplayMedia is available
-  if (!navigator.mediaDevices.getDisplayMedia) {
-    document.getElementById('src-row').style.display = 'none';
   }
 }
 
@@ -236,7 +221,9 @@ function startVisualizer(stream) {
   canvas.width = canvas.offsetWidth * 2;
   canvas.height = canvas.offsetHeight * 2;
 
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioContext || audioContext.state === 'closed') {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
   var source = audioContext.createMediaStreamSource(stream);
   analyser = audioContext.createAnalyser();
   analyser.fftSize = 128;
@@ -250,12 +237,10 @@ function startVisualizer(stream) {
     animFrameId = requestAnimationFrame(draw);
     analyser.getByteFrequencyData(data);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     for (var i = 0; i < bufLen; i++) {
       var v = data[i] / 255;
       var h = v * canvas.height;
       var x = i * barW;
-      // Purple gradient bars
       var r = 180 + Math.round(v * 59);
       var g = 75 - Math.round(v * 30);
       var b = 213 + Math.round(v * 42);
@@ -285,47 +270,112 @@ async function startRecording() {
   var dept = document.getElementById('dept').value;
   var role = document.getElementById('role').value;
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
+
+  var micStream = null;
+  var systemStream = null;
+  var sources = [];
+  activeStreams = [];
+
+  // Always get microphone
   try {
-    var stream;
-    if (audioSource === 'system') {
-      try {
-        var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        var audioTracks = displayStream.getAudioTracks();
-        if (audioTracks.length === 0) {
-          displayStream.getTracks().forEach(function(t) { t.stop(); });
-          setMsg('Zdie\u013Eanie zvuku nebolo povolen\u00E9. Skontroluj nastavenia.', 'err');
-          return;
-        }
-        // Stop video track, keep only audio
-        displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
-        stream = new MediaStream(audioTracks);
-      } catch(e) {
-        if (e.name === 'NotAllowedError') {
-          setMsg('Zdie\u013Eanie obrazovky odmietnut\u00E9', 'err');
-        } else {
-          setMsg('Chyba: ' + e.message, 'err');
-        }
-        return;
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    activeStreams.push(micStream);
+    sources.push('mikrofon');
+  } catch(e) {
+    setMsg(e.name === 'NotAllowedError' ? 'Mikrofon odmietnuty' : 'Chyba: ' + e.message, 'err');
+    return;
+  }
+
+  // Try to also get system audio (if browser supports it)
+  if (navigator.mediaDevices.getDisplayMedia) {
+    try {
+      var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      var sysAudioTracks = displayStream.getAudioTracks();
+      // Stop video track immediately
+      displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
+      if (sysAudioTracks.length > 0) {
+        systemStream = new MediaStream(sysAudioTracks);
+        activeStreams.push(systemStream);
+        sources.push('systemovy zvuk');
       }
-    } else {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch(e) {
+      // User cancelled or not supported - continue with mic only
     }
-    activeStream = stream;
+  }
+
+  // Mix streams together using AudioContext
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    mixedDestination = audioContext.createMediaStreamDestination();
+
+    // Connect mic
+    var micSource = audioContext.createMediaStreamSource(micStream);
+    micSource.connect(mixedDestination);
+
+    // Connect system audio if available
+    if (systemStream) {
+      var sysSource = audioContext.createMediaStreamSource(systemStream);
+      sysSource.connect(mixedDestination);
+    }
+
+    // Also connect to analyser for visualizer
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 128;
+    micSource.connect(analyser);
+    if (systemStream) {
+      var sysSource2 = audioContext.createMediaStreamSource(systemStream);
+      sysSource2.connect(analyser);
+    }
+
+    var mixedStream = mixedDestination.stream;
+
+    // Show what sources are active
+    var infoEl = document.getElementById('audio-info');
+    infoEl.innerHTML = '<span class="active-src">' + sources.join(' + ') + '</span>';
+
+    // Start visualizer with mixed stream
+    var canvas = document.getElementById('visualizer');
+    canvas.classList.add('active');
+    var ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    var bufLen = analyser.frequencyBinCount;
+    var data = new Uint8Array(bufLen);
+    var barW = canvas.width / bufLen;
+
+    function draw() {
+      animFrameId = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(data);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < bufLen; i++) {
+        var v = data[i] / 255;
+        var h = v * canvas.height;
+        var x = i * barW;
+        var r = 180 + Math.round(v * 59);
+        var g = 75 - Math.round(v * 30);
+        var b = 213 + Math.round(v * 42);
+        ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
+        ctx.fillRect(x, canvas.height - h, barW - 1, h);
+      }
+    }
+    draw();
+
+    // Record the mixed stream
     audioChunks = [];
     var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+    mediaRecorder = new MediaRecorder(mixedStream, { mimeType: mime });
     mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
     mediaRecorder.onstop = function() {
       audioBlob = new Blob(audioChunks, { type: mime });
-      stream.getTracks().forEach(function(t) { t.stop(); });
+      stopAllStreams();
       stopVisualizer();
       document.getElementById('acts').style.display = 'flex';
-      document.getElementById('rhint').textContent = 'Nahr\u00E1vka pripraven\u00E1';
+      document.getElementById('rhint').textContent = 'Nahravka pripravena';
     };
     mediaRecorder.start(1000);
-    startVisualizer(stream);
+
     document.getElementById('rbtn').classList.add('on');
-    document.getElementById('rhint').textContent = 'Nahr\u00E1vam... klikni pre zastavenie';
+    document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
     seconds = 0;
     document.getElementById('rtime').textContent = '0:00';
@@ -336,8 +386,16 @@ async function startRecording() {
     }, 1000);
     clearMsg();
   } catch(e) {
-    setMsg(e.name === 'NotAllowedError' ? 'Mikrof\u00F3n odmietnut\u00FD' : 'Chyba: ' + e.message, 'err');
+    stopAllStreams();
+    setMsg('Chyba: ' + e.message, 'err');
   }
+}
+
+function stopAllStreams() {
+  activeStreams.forEach(function(s) {
+    s.getTracks().forEach(function(t) { t.stop(); });
+  });
+  activeStreams = [];
 }
 
 function stopRecording() {
@@ -348,12 +406,13 @@ function stopRecording() {
 
 function discardRecording() {
   audioBlob = null; audioChunks = [];
-  if (activeStream) { activeStream.getTracks().forEach(function(t) { t.stop(); }); activeStream = null; }
+  stopAllStreams();
   stopVisualizer();
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
   document.getElementById('rtime').textContent = '\u2014';
-  document.getElementById('rhint').textContent = 'Klikni pre nahr\u00E1vanie';
+  document.getElementById('rhint').textContent = 'Klikni pre nahravanie';
+  document.getElementById('audio-info').innerHTML = '';
   clearMsg();
 }
 
@@ -364,7 +423,7 @@ async function submitIdea() {
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
   var btn = document.getElementById('bsend');
   btn.disabled = true; btn.textContent = 'Odosiela sa...';
-  setMsg('Nahr\u00E1vam s\u00FAbor...', 'inf');
+  setMsg('Nahravam subor...', 'inf');
   var fill = document.getElementById('bfill');
   fill.style.width = '15%';
   try {
@@ -378,31 +437,31 @@ async function submitIdea() {
     if (!r.ok) {
       var d = await r.json().catch(function() { return {}; });
       setMsg(d.error || 'Chyba', 'err');
-      btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
+      btn.disabled = false; btn.textContent = 'Odoslat napad';
       fill.style.width = '0%';
       return;
     }
     var data = await r.json();
     if (data.job_id) {
-      setMsg('Prep\u00EDsujem... 10\u201330 sek\u00FAnd', 'inf');
+      setMsg('Prepisujem... 10-30 sekund', 'inf');
       fill.style.width = '40%';
       await pollJob(data.job_id, fill, btn);
     } else {
       fill.style.width = '100%';
-      setMsg('\u2713 N\u00E1pad odoslan\u00FD!', 'ok');
+      setMsg('Napad odoslany!', 'ok');
       setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
-      btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
+      btn.disabled = false; btn.textContent = 'Odoslat napad';
     }
   } catch(e) {
     setMsg('Chyba: ' + e.message, 'err');
-    btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
+    btn.disabled = false; btn.textContent = 'Odoslat napad';
     fill.style.width = '0%';
   }
 }
 
 async function sendTextIdea() {
   var text = document.getElementById('txtIdea').value.trim();
-  if (!text) { setMsg('Nap\u00ED\u0161te text n\u00E1padu', 'err'); return; }
+  if (!text) { setMsg('Napiste text napadu', 'err'); return; }
   var dept = document.getElementById('dept').value;
   var role = document.getElementById('role').value;
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
@@ -420,7 +479,7 @@ async function sendTextIdea() {
     });
     clearInterval(p); fill.style.width = '100%';
     if (r.ok) {
-      setMsg('\u2713 Textov\u00FD n\u00E1pad odoslan\u00FD!', 'ok');
+      setMsg('Textovy napad odoslany!', 'ok');
       document.getElementById('txtIdea').value = '';
       setTimeout(function() { fill.style.width = '0%'; clearMsg(); }, 2500);
     } else {
@@ -431,7 +490,7 @@ async function sendTextIdea() {
     clearInterval(p);
     setMsg('Chyba: ' + e.message, 'err');
   }
-  finally { btn.disabled = false; btn.textContent = 'Odosla\u0165 textov\u00FD n\u00E1pad'; setTimeout(function() { fill.style.width = '0%'; }, 2000); }
+  finally { btn.disabled = false; btn.textContent = 'Odoslat textovy napad'; setTimeout(function() { fill.style.width = '0%'; }, 2000); }
 }
 
 async function pollJob(jobId, fill, btn) {
@@ -447,15 +506,15 @@ async function pollJob(jobId, fill, btn) {
       }
       if (r.ok) {
         fill.style.width = '100%';
-        setMsg('\u2713 N\u00E1pad odoslan\u00FD!', 'ok');
+        setMsg('Napad odoslany!', 'ok');
         setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
       } else if (r.status === 404) {
         fill.style.width = '100%';
-        setMsg('\u2713 N\u00E1pad spracovan\u00FD!', 'ok');
+        setMsg('Napad spracovany!', 'ok');
         setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
       } else {
         var d = await r.json().catch(function() { return {}; });
-        setMsg(d.error || 'Chyba pri spracovan\u00ED', 'err');
+        setMsg(d.error || 'Chyba pri spracovani', 'err');
         fill.style.width = '0%';
       }
       break;
@@ -464,10 +523,10 @@ async function pollJob(jobId, fill, btn) {
     }
   }
   if (attempts >= 60) {
-    setMsg('Timeout \u2014 sk\u00FAs znova', 'err');
+    setMsg('Timeout - skus znova', 'err');
     fill.style.width = '0%';
   }
-  btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
+  btn.disabled = false; btn.textContent = 'Odoslat napad';
 }
 
 function setMsg(t, c) { var e = document.getElementById('smsg'); e.textContent = t; e.className = 'smsg ' + c; }
@@ -479,7 +538,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(function() {});
   navigator.serviceWorker.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'SW_UPDATED') {
-      if (confirm('Dostupn\u00E1 nov\u00E1 verzia aplik\u00E1cie. Obnovi\u0165 teraz?')) window.location.reload();
+      if (confirm('Dostupna nova verzia aplikacie. Obnovit teraz?')) window.location.reload();
     }
   });
   navigator.serviceWorker.addEventListener('controllerchange', function() { window.location.reload(); });

@@ -83,6 +83,9 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 #visualizer { width: 100%; max-width: 240px; height: 40px; border-radius: 8px; display: none; }
 #visualizer.active { display: block; }
 
+.audio-info { font-size: 10px; color: rgba(255,255,255,0.35); text-align: center; padding: 2px 0; }
+.audio-info .active-src { color: #4ade80; }
+
 .tab-row { display: flex; gap: 0; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); }
 .tab-btn { flex: 1; padding: 8px 6px; background: rgba(255,255,255,0.04); border: none; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
 .tab-btn.active { background: rgba(255,255,255,0.15); color: #f0e6f6; }
@@ -105,9 +108,9 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .txt-send:hover { background: #f0e6f6; }
 .txt-send:disabled { opacity: .5; cursor: not-allowed; }
 
-.src-row { display: flex; gap: 6px; flex-shrink: 0; }
-.src-btn { flex: 1; padding: 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; transition: all .15s; text-align: center; }
-.src-btn.active { background: rgba(168,75,47,0.3); border-color: rgba(239,68,68,0.4); color: #f0e6f6; }
+.vis-row { display: flex; gap: 6px; flex-shrink: 0; }
+.vis-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; transition: all .15s; }
+.vis-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #f0e6f6; }
 
 .acts { display: flex; gap: 10px; flex-shrink: 0; }
 .bsend { flex: 1; padding: 10px; background: #fff; color: #512D6D; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -122,9 +125,6 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .smsg.ok { color: #4ade80; } .smsg.err { color: #f87171; } .smsg.inf { color: #d4a6f5; }
 .adml { font-size: 11px; color: rgba(255,255,255,0.3); text-align: center; cursor: pointer; flex-shrink: 0; }
 .adml:hover { color: #d4a6f5; }
-.vis-row { display: flex; gap: 6px; flex-shrink: 0; }
-.vis-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; transition: all .15s; }
-.vis-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #f0e6f6; }
 </style>
 </head>
 <body>
@@ -173,14 +173,11 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
   </div>
 
   <div id="voice-panel" class="active">
-    <div class="src-row" id="src-row">
-      <button type="button" class="src-btn active" id="src-mic" onclick="setAudioSource('mic')">Mikrofon</button>
-      <button type="button" class="src-btn" id="src-system" onclick="setAudioSource('system')">Systemovy zvuk</button>
-    </div>
     <canvas id="visualizer"></canvas>
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div></button>
     <div class="rtime" id="rtime">&#8212;</div>
     <div class="rhint" id="rhint">Klikni pre nahravanie</div>
+    <div class="audio-info" id="audio-info"></div>
   </div>
 
   <div id="text-panel">
@@ -200,8 +197,7 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 <script>
 var API = 'https://ridea.onrender.com';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
-var audioSource = 'mic';
-var audioCtx = null, analyserNode = null, animId = null, activeStream = null;
+var audioCtx = null, analyserNode = null, animId = null, activeStreams = [], mixedDest = null;
 
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
@@ -214,12 +210,6 @@ function setVisibility(val) {
   currentVisibility = val;
   document.getElementById('vis-personal').classList.toggle('active', val === 'personal');
   document.getElementById('vis-company').classList.toggle('active', val === 'company');
-}
-
-function setAudioSource(src) {
-  audioSource = src;
-  document.getElementById('src-mic').classList.toggle('active', src === 'mic');
-  document.getElementById('src-system').classList.toggle('active', src === 'system');
 }
 
 function show(id) {
@@ -292,41 +282,6 @@ function openAdmin() {
 }
 
 // -- Visualizer --
-function startVisualizer(stream) {
-  var canvas = document.getElementById('visualizer');
-  canvas.classList.add('active');
-  var ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth * 2;
-  canvas.height = canvas.offsetHeight * 2;
-
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  var source = audioCtx.createMediaStreamSource(stream);
-  analyserNode = audioCtx.createAnalyser();
-  analyserNode.fftSize = 128;
-  source.connect(analyserNode);
-
-  var bufLen = analyserNode.frequencyBinCount;
-  var data = new Uint8Array(bufLen);
-  var barW = canvas.width / bufLen;
-
-  function draw() {
-    animId = requestAnimationFrame(draw);
-    analyserNode.getByteFrequencyData(data);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0; i < bufLen; i++) {
-      var v = data[i] / 255;
-      var h = v * canvas.height;
-      var x = i * barW;
-      var r = 180 + Math.round(v * 59);
-      var g = 75 - Math.round(v * 30);
-      var b = 213 + Math.round(v * 42);
-      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
-      ctx.fillRect(x, canvas.height - h, barW - 1, h);
-    }
-  }
-  draw();
-}
-
 function stopVisualizer() {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
@@ -334,6 +289,13 @@ function stopVisualizer() {
   canvas.classList.remove('active');
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function stopAllStreams() {
+  activeStreams.forEach(function(s) {
+    s.getTracks().forEach(function(t) { t.stop(); });
+  });
+  activeStreams = [];
 }
 
 // -- Recording --
@@ -345,41 +307,107 @@ async function startRec() {
   var dept = document.getElementById('dept').value;
   var role = document.getElementById('role').value;
   if (!dept||!role) { setMsg('Vyber oddelenie a rolu','err'); return; }
+
+  var micStream = null;
+  var systemStream = null;
+  var sources = [];
+  activeStreams = [];
+
+  // Always get microphone
   try {
-    var stream;
-    if (audioSource === 'system') {
-      try {
-        var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        var audioTracks = displayStream.getAudioTracks();
-        if (audioTracks.length === 0) {
-          displayStream.getTracks().forEach(function(t) { t.stop(); });
-          setMsg('Zdielanie zvuku nebolo povolene','err');
-          return;
-        }
-        displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
-        stream = new MediaStream(audioTracks);
-      } catch(e) {
-        if (e.name === 'NotAllowedError') { setMsg('Zdielanie obrazovky odmietnte','err'); }
-        else { setMsg('Chyba: '+e.message,'err'); }
-        return;
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    activeStreams.push(micStream);
+    sources.push('mikrofon');
+  } catch(e) {
+    setMsg(e.name==='NotAllowedError'?'Mikrofon odmietnuty':'Chyba: '+e.message,'err');
+    return;
+  }
+
+  // Try to also get system audio
+  if (navigator.mediaDevices.getDisplayMedia) {
+    try {
+      var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      var sysAudioTracks = displayStream.getAudioTracks();
+      displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
+      if (sysAudioTracks.length > 0) {
+        systemStream = new MediaStream(sysAudioTracks);
+        activeStreams.push(systemStream);
+        sources.push('systemovy zvuk');
       }
-    } else {
-      stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    } catch(e) {
+      // User cancelled or not supported - continue with mic only
     }
-    activeStream = stream;
+  }
+
+  // Mix streams using AudioContext
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    mixedDest = audioCtx.createMediaStreamDestination();
+
+    var micSource = audioCtx.createMediaStreamSource(micStream);
+    micSource.connect(mixedDest);
+
+    if (systemStream) {
+      var sysSource = audioCtx.createMediaStreamSource(systemStream);
+      sysSource.connect(mixedDest);
+    }
+
+    // Analyser for visualizer
+    analyserNode = audioCtx.createAnalyser();
+    analyserNode.fftSize = 128;
+    micSource.connect(analyserNode);
+    if (systemStream) {
+      var sysSource2 = audioCtx.createMediaStreamSource(systemStream);
+      sysSource2.connect(analyserNode);
+    }
+
+    var mixedStream = mixedDest.stream;
+
+    // Show active sources
+    var infoEl = document.getElementById('audio-info');
+    infoEl.innerHTML = '<span class="active-src">' + sources.join(' + ') + '</span>';
+
+    // Start visualizer
+    var canvas = document.getElementById('visualizer');
+    canvas.classList.add('active');
+    var ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth * 2;
+    canvas.height = canvas.offsetHeight * 2;
+    var bufLen = analyserNode.frequencyBinCount;
+    var data = new Uint8Array(bufLen);
+    var barW = canvas.width / bufLen;
+
+    function draw() {
+      animId = requestAnimationFrame(draw);
+      analyserNode.getByteFrequencyData(data);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < bufLen; i++) {
+        var v = data[i] / 255;
+        var h = v * canvas.height;
+        var x = i * barW;
+        var r = 180 + Math.round(v * 59);
+        var g = 75 - Math.round(v * 30);
+        var b = 213 + Math.round(v * 42);
+        ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
+        ctx.fillRect(x, canvas.height - h, barW - 1, h);
+      }
+    }
+    draw();
+
+    // Record mixed stream
     chunks = [];
     var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-    mr = new MediaRecorder(stream, {mimeType:mime});
+    mr = new MediaRecorder(mixedStream, {mimeType:mime});
     mr.ondataavailable = function(e) { if (e.data.size>0) chunks.push(e.data); };
     mr.onstop = function() {
       blob = new Blob(chunks, {type:mime});
-      stream.getTracks().forEach(function(t){t.stop();});
+      stopAllStreams();
       stopVisualizer();
       document.getElementById('acts').style.display = 'flex';
       document.getElementById('rhint').textContent = 'Nahravka pripravena';
     };
     mr.start(1000);
-    startVisualizer(stream);
+
     document.getElementById('rbtn').classList.add('on');
     document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
@@ -390,7 +418,10 @@ async function startRec() {
       document.getElementById('rtime').textContent = m+':'+(s<10?'0':'')+s;
     }, 1000);
     clearMsg();
-  } catch(e) { setMsg(e.name==='NotAllowedError'?'Mikrofon odmietnuty':'Chyba: '+e.message,'err'); }
+  } catch(e) {
+    stopAllStreams();
+    setMsg('Chyba: '+e.message,'err');
+  }
 }
 
 function stopRec() {
@@ -401,12 +432,13 @@ function stopRec() {
 
 function discard() {
   blob=null; chunks=[];
-  if (activeStream) { activeStream.getTracks().forEach(function(t){t.stop();}); activeStream=null; }
+  stopAllStreams();
   stopVisualizer();
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
   document.getElementById('rtime').textContent = '\u2014';
   document.getElementById('rhint').textContent = 'Klikni pre nahravanie';
+  document.getElementById('audio-info').innerHTML = '';
   clearMsg();
 }
 
