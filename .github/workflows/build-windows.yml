@@ -98,6 +98,9 @@ jobs:
             --no-prune 2>&1
           echo "Packaging done"
 
+          echo "=== Verify packaged exe icon ==="
+          ls -la win-out/Ridea-win32-x64/Ridea.exe
+
       - name: Create Inno Setup script
         shell: pwsh
         run: |
@@ -123,9 +126,9 @@ jobs:
           Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
           [Icons]
-          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\assets\icon.ico"
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
           Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
-          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\assets\icon.ico"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
 
           [Run]
           Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
@@ -156,7 +159,7 @@ jobs:
           gh release create "v${VERSION}" \
             --repo "${REPO}" \
             --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI, opravena ikona" \
+            --notes "Ridea v${VERSION} - opravena ikona na ploche" \
             --latest 2>/dev/null || echo "Release already exists"
 
           gh release upload "v${VERSION}" \
