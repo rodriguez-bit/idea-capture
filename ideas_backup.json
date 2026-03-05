@@ -189,27 +189,6 @@
     "campaign_id": null
   },
   {
-    "author_id": 125,
-    "author_name": "Daniel Vighova",
-    "department": "marketing",
-    "role": "manager",
-    "audio_filename": "",
-    "duration_seconds": 10,
-    "transcript": "Neviem, prečo sa mi to sem dalo trikrát, prepačte, ale všetky tri nápady sú rovnaké, takže sou sorry.",
-    "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-04 20:40:30.430495+00",
-    "visibility": "personal",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 8,
     "author_name": "Raul Rodriguez",
     "department": "management",
