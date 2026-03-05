@@ -426,7 +426,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
           <button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button>
           <button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button>
         </div>
-        <button class="btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);display:none">🗑 Vymažať</button>
+        <button class="btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);display:none">🗑 Vymazať</button>
       </div>
     </div>
   </div>
@@ -472,7 +472,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
         </select>
       </div>
     </div>
-    <button id="u-save-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvorť používateľa</button>
+    <button id="u-save-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvoriť používateľa</button>
   </div>
 </div>
 
@@ -493,7 +493,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
       <label>Popis</label>
       <textarea id="m-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="O čom bude porada..."></textarea>
     </div>
-    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveMeeting()">Vytvorť poradu</button>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveMeeting()">Vytvoriť poradu</button>
   </div>
 </div>
 
@@ -520,7 +520,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
       <label>Popis</label>
       <textarea id="c-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Čo je cieľom kampane..."></textarea>
     </div>
-    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveCampaign()">Vytvorť kampaň</button>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveCampaign()">Vytvoriť kampaň</button>
   </div>
 </div>
 
@@ -587,7 +587,7 @@ async function init() {
   loadIdeas();
 }
 
-// ─── Pages ───────────────────────────────────────────────────────────────────────────────
+// ─── Pages ─────────────────────────────────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -601,7 +601,7 @@ function showPage(name) {
   if (name === 'kanban') loadKanban();
 }
 
-// ─── Ideas ───────────────────────────────────────────────────────────────────────────────
+// ─── Ideas ─────────────────────────────────────────────────────────────────────────────
 function debounceSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => { ideasPage = 0; loadIdeas(); }, 400);
@@ -669,7 +669,7 @@ function renderPagination(total) {
 
 function gotoPage(p) { ideasPage = p; loadIdeas(); }
 
-// ─── Idea detail ──────────────────────────────────────────────────────────────────────
+// ─── Idea detail ───────────────────────────────────────────────────────────────────────
 async function openIdea(id) {
   const r = await fetch(`/api/ideas/${id}`);
   currentIdea = await r.json();
@@ -734,7 +734,7 @@ async function openIdea(id) {
 
 async function deleteIdea() {
   if (!currentIdea) return;
-  if (!confirm(`Naozaj vymažať nápad #${currentIdea.id}? Táto akcia je nevratná.`)) return;
+  if (!confirm(`Naozaj vymazať nápad #${currentIdea.id}? Táto akcia je nevratná.`)) return;
   const r = await fetch(`/api/ideas/${currentIdea.id}`, { method: 'DELETE' });
   if (r.ok) {
     closeModal('idea-modal');
@@ -799,11 +799,11 @@ async function saveIdea() {
     body: JSON.stringify({status, reviewer_note: note, visibility, tags: JSON.stringify(currentTags), assigned_to, deadline})
   });
   if (r.ok) {
-    showToast('Uložené', 'success');
+    showToast('Uložeé', 'success');
     closeModal('idea-modal');
     loadIdeas();
   } else {
-    showToast('Chyba pri ukládaní', 'error');
+    showToast('Chyba pri ukladaní', 'error');
   }
 }
 
@@ -822,7 +822,7 @@ async function analyzeIdea() {
   }
 }
 
-// ─── Stats ───────────────────────────────────────────────────────────────────────────────
+// ─── Stats ─────────────────────────────────────────────────────────────────────────────
 let chartInstances = {};
 function destroyChart(key) {
   if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; }
@@ -977,7 +977,7 @@ async function loadKanban() {
   }
 }
 
-// ─── Users ───────────────────────────────────────────────────────────────────────────────
+// ─── Users ─────────────────────────────────────────────────────────────────────────────
 async function loadUsers() {
   const r = await fetch('/api/users');
   if (!r.ok) return;
@@ -1010,7 +1010,7 @@ function openUserModal() {
   document.getElementById('u-modal-title').textContent = 'Nový používateľ';
   document.getElementById('u-pass-label').textContent = 'Heslo';
   document.getElementById('u-pass').placeholder = 'Dočasné heslo';
-  document.getElementById('u-save-btn').textContent = 'Vytvorť používateľa';
+  document.getElementById('u-save-btn').textContent = 'Vytvoriť používateľa';
   document.getElementById('user-modal').classList.add('open');
 }
 
@@ -1058,7 +1058,7 @@ async function saveUser() {
     }
   } else {
     // Create mode — all fields required
-    if (!name || !email || !pass) { showToast('Vypľte všetky polia', 'error'); return; }
+    if (!name || !email || !pass) { showToast('Vyplňte všetky polia', 'error'); return; }
     const r = await fetch('/api/users', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -1084,13 +1084,13 @@ async function toggleUser(id, active) {
   loadUsers();
 }
 
-// ─── Auth ───────────────────────────────────────────────────────────────────────────────
+// ─── Auth ──────────────────────────────────────────────────────────────────────────────
 async function doLogout() {
   await fetch('/api/logout', {method: 'POST'});
   window.location.href = '/login';
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────────────
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   const s = document.getElementById('f-search');
@@ -1131,7 +1131,7 @@ function formatDate(s) {
   } catch { return s; }
 }
 
-// ─── Company Context ─────────────────────────────────────────────────────────────────
+// ─── Company Context ──────────────────────────────────────────────────────────────────
 async function loadCompanyContext() {
   try {
     const r = await fetch('/api/company-context');
@@ -1160,16 +1160,16 @@ async function saveCompanyContext() {
       body: JSON.stringify(body)
     });
     if (r.ok) {
-      showToast('Nastavenia uložené', 'success');
+      showToast('Nastavenia uložeé', 'success');
     } else {
-      showToast('Chyba pri ukládaní', 'error');
+      showToast('Chyba pri ukladaní', 'error');
     }
   } catch(e) {
     showToast('Chyba: ' + e.message, 'error');
   }
 }
 
-// ─── Comments ───────────────────────────────────────────────────────────────────────────
+// ─── Comments ─────────────────────────────────────────────────────────────────────────
 async function loadComments(ideaId) {
   const el = document.getElementById('modal-comments');
   try {
@@ -1219,7 +1219,7 @@ async function deleteComment(commentId, ideaId) {
   if (r.ok) loadComments(ideaId);
 }
 
-// ─── Votes ───────────────────────────────────────────────────────────────────────────
+// ─── Votes ─────────────────────────────────────────────────────────────────────────────
 async function loadVotes(ideaId) {
   try {
     const r = await fetch(`/api/ideas/${ideaId}/votes`);
@@ -1291,12 +1291,12 @@ async function saveMeeting() {
 }
 
 async function deleteMeeting(id) {
-  if (!confirm('Naozaj vymažať poradu?')) return;
+  if (!confirm('Naozaj vymazať poradu?')) return;
   const r = await fetch(`/api/meetings/${id}`, {method: 'DELETE'});
   if (r.ok) { loadMeetings(); showToast('Porada vymazaná', 'success'); }
 }
 
-// ─── Campaigns ──────────────────────────────────────────────────────────────────────
+// ─── Campaigns ───────────────────────────────────────────────────────────────────────
 async function loadCampaigns() {
   const r = await fetch('/api/campaigns');
   if (!r.ok) return;
@@ -1363,7 +1363,7 @@ async function endCampaign(id) {
 }
 
 async function deleteCampaign(id) {
-  if (!confirm('Naozaj vymažať kampaň?')) return;
+  if (!confirm('Naozaj vymazať kampaň?')) return;
   const r = await fetch(`/api/campaigns/${id}`, {method: 'DELETE'});
   if (r.ok) { loadCampaigns(); showToast('Kampaň vymazaná', 'success'); }
 }
@@ -1382,7 +1382,7 @@ function exportCSV() {
   window.location.href = '/api/ideas/export-csv?' + params;
 }
 
-// ─── Password Change ───────────────────────────────────────────────────────────────────
+// ─── Password Change ─────────────────────────────────────────────────────────────────
 function openPasswordModal() {
   document.getElementById('pw-current').value = '';
   document.getElementById('pw-new').value = '';
@@ -1395,7 +1395,7 @@ async function changePassword() {
   const newPw = document.getElementById('pw-new').value;
   const confirm = document.getElementById('pw-confirm').value;
 
-  if (!current || !newPw) { showToast('Vypľte všetky polia', 'error'); return; }
+  if (!current || !newPw) { showToast('Vyplňte všetky polia', 'error'); return; }
   if (newPw.length < 6) { showToast('Nové heslo musí mať aspoň 6 znakov', 'error'); return; }
   if (newPw !== confirm) { showToast('Heslá sa nezhodujú', 'error'); return; }
 
@@ -1405,7 +1405,7 @@ async function changePassword() {
     body: JSON.stringify({current_password: current, new_password: newPw})
   });
   if (r.ok) {
-    showToast('Heslo úspšne zmenené', 'success');
+    showToast('Heslo úspešne zmenené', 'success');
     closeModal('password-modal');
   } else {
     const d = await r.json();
@@ -1413,7 +1413,7 @@ async function changePassword() {
   }
 }
 
-// ─── All users cache for assigned_to dropdown ────────────────────────────────────────
+// ─── All users cache for assigned_to dropdown ───────────────────────────────────
 let allUsersCache = null;
 
 async function getAllUsers() {
