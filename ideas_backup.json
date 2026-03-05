@@ -334,5 +334,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 1,
+    "author_name": "Admin",
+    "department": "development",
+    "role": "c-level",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "vajca",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 14:20:35.02792+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
