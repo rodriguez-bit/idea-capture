@@ -81,7 +81,6 @@ jobs:
           cd ..
 
           echo "=== Verify icon ==="
-          ls -la electron/assets/icon.ico
           ls -la build-src/assets/icon.ico
 
           npx --yes @electron/packager@latest build-src Ridea \
@@ -93,6 +92,12 @@ jobs:
             --icon=build-src/assets/icon.ico \
             --no-prune 2>&1
           echo "Packaging done"
+
+          # Copy icon.ico to root of packaged app (next to Ridea.exe)
+          cp electron/assets/icon.ico win-out/Ridea-win32-x64/icon.ico
+          echo "=== Verify icon in output ==="
+          ls -la win-out/Ridea-win32-x64/icon.ico
+          ls -la win-out/Ridea-win32-x64/Ridea.exe
 
       - name: Create Inno Setup script
         shell: pwsh
@@ -112,19 +117,20 @@ jobs:
           SolidCompression=yes
           ArchitecturesAllowed=x64compatible
           ArchitecturesInstallIn64BitMode=x64compatible
-          UninstallDisplayIcon={app}\Ridea.exe
+          UninstallDisplayIcon={app}\icon.ico
           WizardStyle=modern
 
           [Files]
           Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
           [Icons]
-          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\icon.ico"
           Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
-          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\icon.ico"
 
           [Run]
           Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
+          Filename: "{sys}\ie4uinit.exe"; Parameters: "-show"; Flags: runhidden nowait
           "@
           Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
           Write-Host "Created installer.iss"
@@ -156,7 +162,9 @@ jobs:
 
           now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-          yml = f"""version: {version}
+          import textwrap
+          yml = textwrap.dedent(f"""\
+          version: {version}
           files:
             - url: Ridea-Setup-{version}.exe
               sha512: {sha512_b64}
@@ -164,11 +172,7 @@ jobs:
           path: Ridea-Setup-{version}.exe
           sha512: {sha512_b64}
           releaseDate: '{now}'
-          """
-
-          # Remove leading spaces from each line (dedent)
-          import textwrap
-          yml = textwrap.dedent(yml).strip() + "\n"
+          """)
 
           with open("latest.yml", "w") as f:
               f.write(yml)
@@ -188,7 +192,7 @@ jobs:
           gh release create "v${VERSION}" \
             --repo "${REPO}" \
             --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - auto-update podpora, opravena ikona" \
+            --notes "Ridea v${VERSION} - opravena ikona na ploche, auto-update" \
             --latest 2>/dev/null || echo "Release already exists"
 
           gh release upload "v${VERSION}" \
