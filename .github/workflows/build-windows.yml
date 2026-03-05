@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: write
     steps:
@@ -23,30 +23,36 @@ jobs:
 
       - name: Read version
         id: ver
+        shell: bash
         run: |
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Setup build directory
+      - name: Install dependencies
+        shell: bash
+        working-directory: electron
         run: |
-          cd electron
-          npm install
-          ls -la node_modules/ | head -20
+          npm install --no-audit --no-fund 2>&1
+          echo "--- node_modules contents ---"
+          ls node_modules/ | head -20
+          echo "--- electron binary ---"
+          npx electron --version 2>&1 || echo 'electron binary check done'
 
-      - name: Package for Windows with electron-builder
+      - name: Build Windows portable
+        shell: bash
+        working-directory: electron
         run: |
-          cd electron
-          npx electron-builder --win dir --publish never 2>&1 || true
-          npx electron-builder --win zip --publish never 2>&1
+          DEBUG=electron-builder npx electron-builder --win portable -c.extraMetadata.version=${{ steps.ver.outputs.version }} 2>&1
 
-      - name: Find output files
+      - name: List dist output
+        shell: bash
         run: |
-          find electron/dist -type f \( -name '*.exe' -o -name '*.zip' \) 2>/dev/null
           ls -laR electron/dist/ 2>/dev/null || echo 'No dist directory'
 
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
@@ -54,11 +60,12 @@ jobs:
             --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn #512D6D" \
             --latest 2>/dev/null || true
 
-      - name: Upload artifacts to Release
+      - name: Upload to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
-          for f in electron/dist/*.exe electron/dist/*.zip; do
+          for f in electron/dist/*.exe; do
             [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
               --repo ${{ github.repository }} --clobber
           done
