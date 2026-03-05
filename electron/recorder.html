@@ -8,14 +8,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; }
 
-/* Both screens fill the whole window */
 #login-screen, #rec-screen {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   display: none;
 }
 
-/* LOGIN — white card centered */
 #login-screen {
   align-items: center;
   justify-content: center;
@@ -45,7 +43,6 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .btn-in:hover { background: #3d1f54; }
 .lerr { font-size: 12px; color: #ef4444; text-align: center; margin-top: 8px; min-height: 18px; }
 
-/* RECORDER — dark, flex column */
 #rec-screen {
   flex-direction: column;
   padding: 14px 16px;
@@ -83,12 +80,13 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .rtime { font-size: 26px; font-weight: 700; letter-spacing: 3px; }
 .rhint { font-size: 11px; color: rgba(255,255,255,0.4); }
 
-/* Tabs for Voice / Text */
+#visualizer { width: 100%; max-width: 240px; height: 40px; border-radius: 8px; display: none; }
+#visualizer.active { display: block; }
+
 .tab-row { display: flex; gap: 0; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); }
 .tab-btn { flex: 1; padding: 8px 6px; background: rgba(255,255,255,0.04); border: none; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
 .tab-btn.active { background: rgba(255,255,255,0.15); color: #f0e6f6; }
 
-/* Text input area */
 #text-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
 #text-panel.active { display: flex; }
 #voice-panel { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; flex: 1; min-height: 0; }
@@ -106,6 +104,10 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 }
 .txt-send:hover { background: #f0e6f6; }
 .txt-send:disabled { opacity: .5; cursor: not-allowed; }
+
+.src-row { display: flex; gap: 6px; flex-shrink: 0; }
+.src-btn { flex: 1; padding: 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; transition: all .15s; text-align: center; }
+.src-btn.active { background: rgba(168,75,47,0.3); border-color: rgba(239,68,68,0.4); color: #f0e6f6; }
 
 .acts { display: flex; gap: 10px; flex-shrink: 0; }
 .bsend { flex: 1; padding: 10px; background: #fff; color: #512D6D; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -171,6 +173,11 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
   </div>
 
   <div id="voice-panel" class="active">
+    <div class="src-row" id="src-row">
+      <button type="button" class="src-btn active" id="src-mic" onclick="setAudioSource('mic')">Mikrofon</button>
+      <button type="button" class="src-btn" id="src-system" onclick="setAudioSource('system')">Systemovy zvuk</button>
+    </div>
+    <canvas id="visualizer"></canvas>
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div></button>
     <div class="rtime" id="rtime">&#8212;</div>
     <div class="rhint" id="rhint">Klikni pre nahravanie</div>
@@ -193,6 +200,8 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 <script>
 var API = 'https://ridea.onrender.com';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
+var audioSource = 'mic';
+var audioCtx = null, analyserNode = null, animId = null, activeStream = null;
 
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
@@ -205,6 +214,12 @@ function setVisibility(val) {
   currentVisibility = val;
   document.getElementById('vis-personal').classList.toggle('active', val === 'personal');
   document.getElementById('vis-company').classList.toggle('active', val === 'company');
+}
+
+function setAudioSource(src) {
+  audioSource = src;
+  document.getElementById('src-mic').classList.toggle('active', src === 'mic');
+  document.getElementById('src-system').classList.toggle('active', src === 'system');
 }
 
 function show(id) {
@@ -232,7 +247,6 @@ async function init() {
 
 async function showRec() {
   document.getElementById('uname').textContent = user.name;
-  // Restore saved dept/role preferences
   var savedDept = window.electron ? await window.electron.getStore('savedDept') : null;
   var savedRole = window.electron ? await window.electron.getStore('savedRole') : null;
   var dept = savedDept || user.department || '';
@@ -277,6 +291,52 @@ function openAdmin() {
   else window.open(API, '_blank');
 }
 
+// -- Visualizer --
+function startVisualizer(stream) {
+  var canvas = document.getElementById('visualizer');
+  canvas.classList.add('active');
+  var ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  var source = audioCtx.createMediaStreamSource(stream);
+  analyserNode = audioCtx.createAnalyser();
+  analyserNode.fftSize = 128;
+  source.connect(analyserNode);
+
+  var bufLen = analyserNode.frequencyBinCount;
+  var data = new Uint8Array(bufLen);
+  var barW = canvas.width / bufLen;
+
+  function draw() {
+    animId = requestAnimationFrame(draw);
+    analyserNode.getByteFrequencyData(data);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < bufLen; i++) {
+      var v = data[i] / 255;
+      var h = v * canvas.height;
+      var x = i * barW;
+      var r = 180 + Math.round(v * 59);
+      var g = 75 - Math.round(v * 30);
+      var b = 213 + Math.round(v * 42);
+      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
+      ctx.fillRect(x, canvas.height - h, barW - 1, h);
+    }
+  }
+  draw();
+}
+
+function stopVisualizer() {
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
+  var canvas = document.getElementById('visualizer');
+  canvas.classList.remove('active');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// -- Recording --
 async function toggleRec() {
   if (mr && mr.state==='recording') stopRec(); else await startRec();
 }
@@ -286,7 +346,27 @@ async function startRec() {
   var role = document.getElementById('role').value;
   if (!dept||!role) { setMsg('Vyber oddelenie a rolu','err'); return; }
   try {
-    var stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    var stream;
+    if (audioSource === 'system') {
+      try {
+        var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        var audioTracks = displayStream.getAudioTracks();
+        if (audioTracks.length === 0) {
+          displayStream.getTracks().forEach(function(t) { t.stop(); });
+          setMsg('Zdielanie zvuku nebolo povolene','err');
+          return;
+        }
+        displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
+        stream = new MediaStream(audioTracks);
+      } catch(e) {
+        if (e.name === 'NotAllowedError') { setMsg('Zdielanie obrazovky odmietnte','err'); }
+        else { setMsg('Chyba: '+e.message,'err'); }
+        return;
+      }
+    } else {
+      stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    }
+    activeStream = stream;
     chunks = [];
     var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
     mr = new MediaRecorder(stream, {mimeType:mime});
@@ -294,10 +374,12 @@ async function startRec() {
     mr.onstop = function() {
       blob = new Blob(chunks, {type:mime});
       stream.getTracks().forEach(function(t){t.stop();});
+      stopVisualizer();
       document.getElementById('acts').style.display = 'flex';
       document.getElementById('rhint').textContent = 'Nahravka pripravena';
     };
     mr.start(1000);
+    startVisualizer(stream);
     document.getElementById('rbtn').classList.add('on');
     document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
@@ -319,6 +401,8 @@ function stopRec() {
 
 function discard() {
   blob=null; chunks=[];
+  if (activeStream) { activeStream.getTracks().forEach(function(t){t.stop();}); activeStream=null; }
+  stopVisualizer();
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
   document.getElementById('rtime').textContent = '\u2014';

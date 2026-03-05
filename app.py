@@ -3,6 +3,8 @@ import io
 import csv
 import json
 import base64
+import re as re_module
+import subprocess
 import tempfile
 import threading
 import time
@@ -762,26 +764,165 @@ Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické
         print(f'Auto-analyze error for idea {idea_id}: {e}')
 
 
+def _split_audio_chunks(file_path, max_size_mb=20):
+    """Split audio file into chunks under max_size_mb for Whisper API (25MB limit)."""
+    file_size = os.path.getsize(file_path)
+    if file_size <= max_size_mb * 1024 * 1024:
+        return [file_path]
+
+    # Get duration using ffprobe
+    try:
+        result = subprocess.run(
+            ['ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
+             '-of', 'default=noprint_wrappers=1:nokey=1', file_path],
+            capture_output=True, text=True, timeout=30
+        )
+        total_duration = float(result.stdout.strip())
+    except Exception:
+        return [file_path]  # Fallback: send as-is
+
+    # Calculate chunk duration based on file size ratio
+    num_chunks = max(2, int(file_size / (max_size_mb * 1024 * 1024)) + 1)
+    chunk_duration = total_duration / num_chunks
+
+    chunks = []
+    for i in range(num_chunks):
+        start = i * chunk_duration
+        chunk_path = file_path + f'.chunk{i}.mp3'
+        try:
+            subprocess.run(
+                ['ffmpeg', '-y', '-i', file_path, '-ss', str(start),
+                 '-t', str(chunk_duration), '-ar', '16000', '-ac', '1',
+                 '-b:a', '64k', chunk_path],
+                capture_output=True, timeout=120
+            )
+            if os.path.exists(chunk_path) and os.path.getsize(chunk_path) > 1000:
+                chunks.append(chunk_path)
+        except Exception:
+            continue
+
+    return chunks if chunks else [file_path]
+
+
+def _clean_hallucinations(text):
+    """Remove repeated phrases that indicate Whisper hallucination."""
+    if not text or len(text) < 50:
+        return text
+
+    # Split into sentences
+    sentences = re_module.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    if len(sentences) < 3:
+        return text
+
+    # Count phrase frequency
+    phrase_count = {}
+    for s in sentences:
+        normalized = s.lower().strip()
+        if len(normalized) < 5:
+            continue
+        phrase_count[normalized] = phrase_count.get(normalized, 0) + 1
+
+    # Find hallucinated phrases (repeated 3+ times)
+    hallucinated = set()
+    for phrase, count in phrase_count.items():
+        if count >= 3 and count > len(sentences) * 0.2:
+            hallucinated.add(phrase)
+
+    if not hallucinated:
+        return text
+
+    # Remove hallucinated sentences, keep first occurrence
+    seen_hallucinated = set()
+    clean_sentences = []
+    for s in sentences:
+        normalized = s.lower().strip()
+        if normalized in hallucinated:
+            if normalized not in seen_hallucinated:
+                clean_sentences.append(s)
+                seen_hallucinated.add(normalized)
+        else:
+            clean_sentences.append(s)
+
+    cleaned = '. '.join(clean_sentences)
+    if cleaned and not cleaned.endswith('.'):
+        cleaned += '.'
+
+    # If we removed >80% of content, it was mostly hallucination
+    if len(cleaned) < len(text) * 0.2:
+        return ''
+
+    return cleaned
+
+
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
     try:
         client = openai.OpenAI(api_key=api_key)
-        with open(tmp_path, 'rb') as f:
-            transcription = client.audio.transcriptions.create(
-                model='whisper-1',
-                file=f,
-                language='sk',
-                response_format='verbose_json'
-            )
-        transcript_text = transcription.text or ''
-        duration = int(getattr(transcription, 'duration', 0) or 0)
+
+        file_size = os.path.getsize(tmp_path)
+        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB')
+
+        # Split large files into chunks for Whisper 25MB limit
+        chunks = _split_audio_chunks(tmp_path)
+        print(f'Upload job {job_id}: {len(chunks)} chunk(s)')
+
+        all_text = []
+        total_duration = 0
+
+        for i, chunk_path in enumerate(chunks):
+            chunk_size = os.path.getsize(chunk_path)
+            if chunk_size > 25 * 1024 * 1024:
+                print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
+                continue
+
+            with open(chunk_path, 'rb') as f:
+                transcription = client.audio.transcriptions.create(
+                    model='whisper-1',
+                    file=f,
+                    language='sk',
+                    response_format='verbose_json',
+                    prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
+                )
+
+            chunk_text = transcription.text or ''
+            chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
+            total_duration += chunk_dur
+
+            # Clean hallucinations from each chunk
+            cleaned = _clean_hallucinations(chunk_text)
+            if cleaned:
+                all_text.append(cleaned)
+
+            print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
+
+        # Clean up chunk files
+        for chunk_path in chunks:
+            if chunk_path != tmp_path and os.path.exists(chunk_path):
+                try:
+                    os.unlink(chunk_path)
+                except Exception:
+                    pass
+
+        transcript_text = ' '.join(all_text).strip()
+
+        # Final hallucination check on combined text
+        transcript_text = _clean_hallucinations(transcript_text)
+
+        if not transcript_text:
+            _upload_jobs[job_id] = {
+                'status': 'error',
+                'error': 'Nahravka neobsahuje rozpoznatelnu rec. Skuste nahrat znova s jasnejsim hlasom.'
+            }
+            return
 
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
                 INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
                 VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, duration, transcript_text, visibility))
+            ''', (user_id, user_name, department, role, total_duration, transcript_text, visibility))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
@@ -795,8 +936,8 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             'result': {
                 'id': idea_id,
                 'transcript': transcript_text,
-                'duration_seconds': duration,
-                'message': 'Nápad úspešne zaznamenaný'
+                'duration_seconds': total_duration,
+                'message': 'Napad uspesne zaznamenany'
             }
         }
     except Exception as e:

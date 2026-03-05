@@ -56,6 +56,11 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 #text-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
 #text-panel.active { display: flex; }
 
+.src-row { display: flex; gap: 6px; flex-shrink: 0; }
+.src-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer; transition: all .15s; text-align: center; }
+.src-btn.active { background: rgba(168,75,47,0.3); border-color: rgba(239,68,68,0.4); color: #f0e6f6; }
+.src-btn:hover { border-color: rgba(255,255,255,0.25); }
+
 .mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .rbtn {
   width: 88px; height: 88px; border-radius: 50%;
@@ -70,6 +75,9 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 .rbtn.on .rdot { background: #ef4444; border-radius: 7px; width: 26px; height: 26px; }
 .rtime { font-size: 30px; font-weight: 700; letter-spacing: 3px; }
 .rhint { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+#visualizer { width: 100%; max-width: 280px; height: 48px; border-radius: 8px; display: none; }
+#visualizer.active { display: block; }
 
 .txt-area {
   flex: 1; min-height: 100px; padding: 12px; border-radius: 8px;
@@ -105,48 +113,53 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 <div id="rec-screen">
   <div class="topbar">
     <span class="uname" id="uname">&#8212;</span>
-    <button class="btn-out" onclick="doLogout()">Odhlásiť</button>
+    <button class="btn-out" onclick="doLogout()">Odhl&#225;si&#357;</button>
   </div>
   <div class="sels">
     <select class="sel" id="dept" onchange="localStorage.setItem('savedDept', this.value)">
       <option value="">Oddelenie</option>
-      <option value="development">Vývoj</option>
+      <option value="development">V&#253;voj</option>
       <option value="marketing">Marketing</option>
       <option value="production">Produkcia</option>
-      <option value="management">Manažment</option>
-      <option value="other">Iné</option>
+      <option value="management">Mana&#382;ment</option>
+      <option value="other">In&#233;</option>
     </select>
     <select class="sel" id="role" onchange="localStorage.setItem('savedRole', this.value)">
       <option value="">Rola</option>
       <option value="c-level">C-level</option>
-      <option value="manager">Manažér</option>
+      <option value="manager">Mana&#382;&#233;r</option>
       <option value="employee">Zamestnanec</option>
     </select>
   </div>
   <div class="vis-row">
-    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Môj nápad</button>
-    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celú firmu</button>
+    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">M&#244;j n&#225;pad</button>
+    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre cel&#250; firmu</button>
   </div>
 
   <div class="tab-row">
-    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">Hlasový nápad</button>
-    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">Textový nápad</button>
+    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">Hlasov&#253; n&#225;pad</button>
+    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">Textov&#253; n&#225;pad</button>
   </div>
 
   <div id="voice-panel" class="active">
+    <div class="src-row" id="src-row">
+      <button type="button" class="src-btn active" id="src-mic" onclick="setAudioSource('mic')">&#127908; Mikrof&#243;n</button>
+      <button type="button" class="src-btn" id="src-system" onclick="setAudioSource('system')">&#128187; Syst&#233;mov&#253; zvuk</button>
+    </div>
+    <canvas id="visualizer"></canvas>
     <button class="rbtn" id="rbtn" onclick="toggleRecord()"><div class="rdot"></div></button>
     <div class="rtime" id="rtime">&#8212;</div>
-    <div class="rhint" id="rhint">Klikni pre nahrávanie</div>
+    <div class="rhint" id="rhint">Klikni pre nahr&#225;vanie</div>
   </div>
 
   <div id="text-panel">
-    <textarea class="txt-area" id="txtIdea" placeholder="Napíšte svoj nápad..."></textarea>
-    <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odoslať textový nápad</button>
+    <textarea class="txt-area" id="txtIdea" placeholder="Nap&#237;&#353;te svoj n&#225;pad..."></textarea>
+    <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odosla&#357; textov&#253; n&#225;pad</button>
   </div>
 
   <div class="acts" id="acts" style="display:none">
     <button class="bx" onclick="discardRecording()">&#10005;</button>
-    <button class="bsend" id="bsend" onclick="submitIdea()">Odoslať nápad</button>
+    <button class="bsend" id="bsend" onclick="submitIdea()">Odosla&#357; n&#225;pad</button>
   </div>
   <div class="bar"><div class="bfill" id="bfill"></div></div>
   <div class="smsg" id="smsg"></div>
@@ -162,6 +175,11 @@ let timerInterval = null;
 let seconds = 0;
 let currentUser = null;
 let currentVisibility = 'company';
+let audioSource = 'mic';
+let audioContext = null;
+let analyser = null;
+let animFrameId = null;
+let activeStream = null;
 
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
@@ -176,23 +194,33 @@ function setVisibility(val) {
   document.getElementById('vis-company').classList.toggle('active', val === 'company');
 }
 
+function setAudioSource(src) {
+  audioSource = src;
+  document.getElementById('src-mic').classList.toggle('active', src === 'mic');
+  document.getElementById('src-system').classList.toggle('active', src === 'system');
+}
+
 async function init() {
   try {
-    const r = await fetch(`${API_BASE}/api/current-user`, { credentials: 'include' });
+    const r = await fetch(API_BASE + '/api/current-user', { credentials: 'include' });
     if (!r.ok) { window.location.href = '/login'; return; }
     currentUser = await r.json();
     document.getElementById('uname').textContent = currentUser.name;
-    const savedDept = localStorage.getItem('savedDept') || currentUser.department || '';
-    const savedRole = localStorage.getItem('savedRole') || '';
+    var savedDept = localStorage.getItem('savedDept') || currentUser.department || '';
+    var savedRole = localStorage.getItem('savedRole') || '';
     if (savedDept) document.getElementById('dept').value = savedDept;
     if (savedRole) document.getElementById('role').value = savedRole;
   } catch(e) {
     setMsg('Chyba pripojenia k serveru', 'err');
   }
+  // Check if getDisplayMedia is available
+  if (!navigator.mediaDevices.getDisplayMedia) {
+    document.getElementById('src-row').style.display = 'none';
+  }
 }
 
 async function doLogout() {
-  try { await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'include' }); } catch(e) {}
+  try { await fetch(API_BASE + '/api/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
   window.location.href = '/login';
 }
 
@@ -200,41 +228,115 @@ function openAdmin() {
   window.location.href = '/admin';
 }
 
+// ── Visualizer ──
+function startVisualizer(stream) {
+  var canvas = document.getElementById('visualizer');
+  canvas.classList.add('active');
+  var ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  var source = audioContext.createMediaStreamSource(stream);
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 128;
+  source.connect(analyser);
+
+  var bufLen = analyser.frequencyBinCount;
+  var data = new Uint8Array(bufLen);
+  var barW = canvas.width / bufLen;
+
+  function draw() {
+    animFrameId = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(data);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (var i = 0; i < bufLen; i++) {
+      var v = data[i] / 255;
+      var h = v * canvas.height;
+      var x = i * barW;
+      // Purple gradient bars
+      var r = 180 + Math.round(v * 59);
+      var g = 75 - Math.round(v * 30);
+      var b = 213 + Math.round(v * 42);
+      ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
+      ctx.fillRect(x, canvas.height - h, barW - 1, h);
+    }
+  }
+  draw();
+}
+
+function stopVisualizer() {
+  if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+  if (audioContext) { audioContext.close().catch(function(){}); audioContext = null; }
+  var canvas = document.getElementById('visualizer');
+  canvas.classList.remove('active');
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Recording ──
 async function toggleRecord() {
   if (mediaRecorder && mediaRecorder.state === 'recording') stopRecording();
   else await startRecording();
 }
 
 async function startRecording() {
-  const dept = document.getElementById('dept').value;
-  const role = document.getElementById('role').value;
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    var stream;
+    if (audioSource === 'system') {
+      try {
+        var displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        var audioTracks = displayStream.getAudioTracks();
+        if (audioTracks.length === 0) {
+          displayStream.getTracks().forEach(function(t) { t.stop(); });
+          setMsg('Zdie\u013Eanie zvuku nebolo povolen\u00E9. Skontroluj nastavenia.', 'err');
+          return;
+        }
+        // Stop video track, keep only audio
+        displayStream.getVideoTracks().forEach(function(t) { t.stop(); });
+        stream = new MediaStream(audioTracks);
+      } catch(e) {
+        if (e.name === 'NotAllowedError') {
+          setMsg('Zdie\u013Eanie obrazovky odmietnut\u00E9', 'err');
+        } else {
+          setMsg('Chyba: ' + e.message, 'err');
+        }
+        return;
+      }
+    } else {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+    activeStream = stream;
     audioChunks = [];
-    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+    var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
     mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
+    mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = function() {
       audioBlob = new Blob(audioChunks, { type: mime });
-      stream.getTracks().forEach(t => t.stop());
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      stopVisualizer();
       document.getElementById('acts').style.display = 'flex';
-      document.getElementById('rhint').textContent = 'Nahrávka pripravená';
+      document.getElementById('rhint').textContent = 'Nahr\u00E1vka pripraven\u00E1';
     };
     mediaRecorder.start(1000);
+    startVisualizer(stream);
     document.getElementById('rbtn').classList.add('on');
-    document.getElementById('rhint').textContent = 'Nahrávam... klikni pre zastavenie';
+    document.getElementById('rhint').textContent = 'Nahr\u00E1vam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
     seconds = 0;
     document.getElementById('rtime').textContent = '0:00';
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(function() {
       seconds++;
-      const m = Math.floor(seconds / 60), s = seconds % 60;
-      document.getElementById('rtime').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+      var m = Math.floor(seconds / 60), s = seconds % 60;
+      document.getElementById('rtime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
     }, 1000);
     clearMsg();
   } catch(e) {
-    setMsg(e.name === 'NotAllowedError' ? 'Mikrofón odmietnutý' : 'Chyba: ' + e.message, 'err');
+    setMsg(e.name === 'NotAllowedError' ? 'Mikrof\u00F3n odmietnut\u00FD' : 'Chyba: ' + e.message, 'err');
   }
 }
 
@@ -246,113 +348,114 @@ function stopRecording() {
 
 function discardRecording() {
   audioBlob = null; audioChunks = [];
+  if (activeStream) { activeStream.getTracks().forEach(function(t) { t.stop(); }); activeStream = null; }
+  stopVisualizer();
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
   document.getElementById('rtime').textContent = '\u2014';
-  document.getElementById('rhint').textContent = 'Klikni pre nahrávanie';
+  document.getElementById('rhint').textContent = 'Klikni pre nahr\u00E1vanie';
   clearMsg();
 }
 
 async function submitIdea() {
   if (!audioBlob) return;
-  const dept = document.getElementById('dept').value;
-  const role = document.getElementById('role').value;
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
-  const btn = document.getElementById('bsend');
+  var btn = document.getElementById('bsend');
   btn.disabled = true; btn.textContent = 'Odosiela sa...';
-  setMsg('Nahrávam súbor...', 'inf');
-  const fill = document.getElementById('bfill');
+  setMsg('Nahr\u00E1vam s\u00FAbor...', 'inf');
+  var fill = document.getElementById('bfill');
   fill.style.width = '15%';
   try {
-    const ext = audioBlob.type.includes('ogg') ? 'ogg' : audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    const fd = new FormData();
-    fd.append('audio', audioBlob, `idea_${Date.now()}.${ext}`);
+    var ext = audioBlob.type.indexOf('ogg') >= 0 ? 'ogg' : audioBlob.type.indexOf('mp4') >= 0 ? 'mp4' : 'webm';
+    var fd = new FormData();
+    fd.append('audio', audioBlob, 'idea_' + Date.now() + '.' + ext);
     fd.append('department', dept);
     fd.append('role', role);
     fd.append('visibility', currentVisibility);
-    const r = await fetch(`${API_BASE}/api/ideas/upload`, { method: 'POST', body: fd, credentials: 'include' });
+    var r = await fetch(API_BASE + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include' });
     if (!r.ok) {
-      const d = await r.json().catch(() => ({}));
+      var d = await r.json().catch(function() { return {}; });
       setMsg(d.error || 'Chyba', 'err');
-      btn.disabled = false; btn.textContent = 'Odoslať nápad';
+      btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
       fill.style.width = '0%';
       return;
     }
-    const data = await r.json();
+    var data = await r.json();
     if (data.job_id) {
-      setMsg('Prepísujem... 10\u201330 sekúnd', 'inf');
+      setMsg('Prep\u00EDsujem... 10\u201330 sek\u00FAnd', 'inf');
       fill.style.width = '40%';
       await pollJob(data.job_id, fill, btn);
     } else {
       fill.style.width = '100%';
-      setMsg('\u2713 Nápad odoslaný!', 'ok');
-      setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
-      btn.disabled = false; btn.textContent = 'Odoslať nápad';
+      setMsg('\u2713 N\u00E1pad odoslan\u00FD!', 'ok');
+      setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
+      btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
     }
   } catch(e) {
     setMsg('Chyba: ' + e.message, 'err');
-    btn.disabled = false; btn.textContent = 'Odoslať nápad';
+    btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
     fill.style.width = '0%';
   }
 }
 
 async function sendTextIdea() {
-  const text = document.getElementById('txtIdea').value.trim();
-  if (!text) { setMsg('Napíšte text nápadu', 'err'); return; }
-  const dept = document.getElementById('dept').value;
-  const role = document.getElementById('role').value;
+  var text = document.getElementById('txtIdea').value.trim();
+  if (!text) { setMsg('Nap\u00ED\u0161te text n\u00E1padu', 'err'); return; }
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
-  const btn = document.getElementById('txtSend');
+  var btn = document.getElementById('txtSend');
   btn.disabled = true; btn.textContent = 'Odosiela sa...';
-  const fill = document.getElementById('bfill');
-  let w = 0;
-  const p = setInterval(() => { w = Math.min(w + 5, 85); fill.style.width = w + '%'; if (w >= 85) clearInterval(p); }, 300);
+  var fill = document.getElementById('bfill');
+  var w = 0;
+  var p = setInterval(function() { w = Math.min(w + 5, 85); fill.style.width = w + '%'; if (w >= 85) clearInterval(p); }, 300);
   try {
-    const r = await fetch(`${API_BASE}/api/ideas/text`, {
+    var r = await fetch(API_BASE + '/api/ideas/text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, department: dept, role, visibility: currentVisibility }),
+      body: JSON.stringify({ text: text, department: dept, role: role, visibility: currentVisibility }),
       credentials: 'include'
     });
     clearInterval(p); fill.style.width = '100%';
     if (r.ok) {
-      setMsg('\u2713 Textový nápad odoslaný!', 'ok');
+      setMsg('\u2713 Textov\u00FD n\u00E1pad odoslan\u00FD!', 'ok');
       document.getElementById('txtIdea').value = '';
-      setTimeout(() => { fill.style.width = '0%'; clearMsg(); }, 2500);
+      setTimeout(function() { fill.style.width = '0%'; clearMsg(); }, 2500);
     } else {
-      const d = await r.json().catch(() => ({}));
+      var d = await r.json().catch(function() { return {}; });
       setMsg(d.error || 'Chyba', 'err');
     }
   } catch(e) {
     clearInterval(p);
     setMsg('Chyba: ' + e.message, 'err');
   }
-  finally { btn.disabled = false; btn.textContent = 'Odoslať textový nápad'; setTimeout(() => { fill.style.width = '0%'; }, 2000); }
+  finally { btn.disabled = false; btn.textContent = 'Odosla\u0165 textov\u00FD n\u00E1pad'; setTimeout(function() { fill.style.width = '0%'; }, 2000); }
 }
 
 async function pollJob(jobId, fill, btn) {
-  let attempts = 0;
-  while (attempts < 40) {
-    await new Promise(r => setTimeout(r, 3000));
+  var attempts = 0;
+  while (attempts < 60) {
+    await new Promise(function(r) { setTimeout(r, 3000); });
     attempts++;
     try {
-      const r = await fetch(`${API_BASE}/api/ideas/job/${jobId}`, { credentials: 'include' });
+      var r = await fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' });
       if (r.status === 202) {
-        fill.style.width = Math.min(40 + attempts * 3, 90) + '%';
+        fill.style.width = Math.min(40 + attempts * 2, 90) + '%';
         continue;
       }
       if (r.ok) {
         fill.style.width = '100%';
-        setMsg('\u2713 Nápad odoslaný!', 'ok');
-        setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
+        setMsg('\u2713 N\u00E1pad odoslan\u00FD!', 'ok');
+        setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
       } else if (r.status === 404) {
-        // Job may have completed and been cleaned up - treat as success since upload worked
         fill.style.width = '100%';
-        setMsg('\u2713 Nápad spracovaný!', 'ok');
-        setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
+        setMsg('\u2713 N\u00E1pad spracovan\u00FD!', 'ok');
+        setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
       } else {
-        const d = await r.json().catch(() => ({}));
-        setMsg(d.error || 'Chyba pri spracovaní', 'err');
+        var d = await r.json().catch(function() { return {}; });
+        setMsg(d.error || 'Chyba pri spracovan\u00ED', 'err');
         fill.style.width = '0%';
       }
       break;
@@ -360,26 +463,26 @@ async function pollJob(jobId, fill, btn) {
       continue;
     }
   }
-  if (attempts >= 40) {
-    setMsg('Timeout \u2014 skús znova', 'err');
+  if (attempts >= 60) {
+    setMsg('Timeout \u2014 sk\u00FAs znova', 'err');
     fill.style.width = '0%';
   }
-  btn.disabled = false; btn.textContent = 'Odoslať nápad';
+  btn.disabled = false; btn.textContent = 'Odosla\u0165 n\u00E1pad';
 }
 
-function setMsg(t, c) { const e = document.getElementById('smsg'); e.textContent = t; e.className = 'smsg ' + c; }
-function clearMsg() { const e = document.getElementById('smsg'); e.textContent = ''; e.className = 'smsg'; }
+function setMsg(t, c) { var e = document.getElementById('smsg'); e.textContent = t; e.className = 'smsg ' + c; }
+function clearMsg() { var e = document.getElementById('smsg'); e.textContent = ''; e.className = 'smsg'; }
 
 init();
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'SW_UPDATED') {
-      if (confirm('Dostupná nová verzia aplikácie. Obnoviť teraz?')) window.location.reload();
+  navigator.serviceWorker.register('/sw.js').catch(function() {});
+  navigator.serviceWorker.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'SW_UPDATED') {
+      if (confirm('Dostupn\u00E1 nov\u00E1 verzia aplik\u00E1cie. Obnovi\u0165 teraz?')) window.location.reload();
     }
   });
-  navigator.serviceWorker.addEventListener('controllerchange', () => { window.location.reload(); });
+  navigator.serviceWorker.addEventListener('controllerchange', function() { window.location.reload(); });
 }
 </script>
 </body>
