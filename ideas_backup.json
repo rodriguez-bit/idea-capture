@@ -1,26 +1,5 @@
 [
   {
-    "author_id": 7,
-    "author_name": "Lucia Stoffova",
-    "department": "marketing",
-    "role": "manager",
-    "audio_filename": "",
-    "duration_seconds": 23,
-    "transcript": "Moje nápad je, že by sme si mali dneska dobrý obed a pri ňom vymyslieť, či pôjdeme natáčať také jedno video, čo by som chcela. Aké video? Aj so mnou? Aj s tebou. Aleby toho mám dosť. Nie, nie, že do mesta, ak ma drža.",
-    "status": "new",
-    "ai_score": 2,
-    "ai_analysis": "{\"score\": 2, \"clarity\": 1, \"feasibility\": 3, \"summary\": \"Nápad sa týka možného natáčania videa, ktoré by bolo súčasťou marketingovej stratégie. Nápad je však vyslovený nejasne a neobsahuje konkrétne špecifikácie, ciele ani technické detaily.\", \"strengths\": [\"Video marketing je efektívnym nástrojom pre presadzovanie značky\", \"Kolaboratívny prístup (diskusia pri obede)\"], \"weaknesses\": [\"Veľmi nízka jasnosť a nedostatočne špecifikovaný nápad\", \"Chýbajú konkrétne ciele, tému a žiadaný obsah videa\", \"Nie je jasné, aký by bol prínos pre podnik\", \"Nejasná komunikácia bez jednotného odkazu\"], \"next_steps\": [\"Požiadať zamestnanca o podrobný opis: typ videa, cieľová skupina, očakávané výsledky\", \"Vyjasnenie rozpočtu, časového harmonogramu a potrebných zdrojov\", \"Formálna prezentácia nápadu s konkrétnym plánom a KPI metrikami\"], \"category\": \"other\", \"tags\": [\"marketing\", \"innovation\", \"product\"]}",
-    "reviewer_note": "Dobry napad. suhlasim ze by sme toto mohli spravit \n",
-    "reviewed_by": "David Varga",
-    "reviewed_at": "2026-03-04T13:42:39.533345",
-    "created_at": "2026-03-04 09:24:07",
-    "visibility": "personal",
-    "tags": "[\"marketing\", \"innovation\", \"product\"]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 1,
     "author_name": "Admin",
     "department": "management",
