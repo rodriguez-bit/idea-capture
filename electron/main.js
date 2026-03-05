@@ -79,7 +79,7 @@ function createWindow() {
       nodeIntegration: false
     },
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    backgroundColor: '#0f172a'
+    backgroundColor: '#512D6D'
   });
 
   // Remove native menu bar (File, Edit, View...)
