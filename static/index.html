@@ -761,7 +761,7 @@ function renderIdeas(ideas) {
       <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
       <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
       <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:12px;cursor:pointer">${formatDate(i.created_at)}</td>
-      <td onclick="event.stopPropagation()">${i.audio_filename ? `<button onclick="playAudio(${i.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px">▶</button>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
+      <td onclick="event.stopPropagation()">${i.audio_data ? `<button onclick="playAudio(${i.id})" style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px">▶</button>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
     </tr>
   `).join('');
 }
@@ -800,7 +800,7 @@ async function openIdea(id) {
   document.getElementById('modal-transcript').textContent = i.transcript || '(prázdny transkript)';
 
   const audioSection = document.getElementById('modal-audio-section');
-  if (i.audio_filename) {
+  if (i.audio_data) {
     audioSection.style.display = '';
     document.getElementById('modal-audio-player').src = `/api/ideas/${i.id}/audio`;
   } else {
