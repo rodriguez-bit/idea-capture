@@ -600,9 +600,30 @@ def api_idea_update(idea_id):
     return jsonify({'ok': True})
 
 
+AUDIO_UPLOADS_DIR = 'audio_uploads'
+
+
+def _save_audio_backup(tmp_path, ext, user_id):
+    """Save audio file permanently before transcription."""
+    try:
+        os.makedirs(AUDIO_UPLOADS_DIR, exist_ok=True)
+        filename = f'{user_id}_{int(time.time())}{ext}'
+        dest = os.path.join(AUDIO_UPLOADS_DIR, filename)
+        import shutil
+        shutil.copy2(tmp_path, dest)
+        return filename
+    except Exception as e:
+        print(f'Audio backup error: {e}')
+        return ''
+
+
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
+    audio_filename = ''
     try:
+        # Save audio backup BEFORE transcription
+        audio_filename = _save_audio_backup(tmp_path, ext, user_id)
+
         client = openai.OpenAI(api_key=api_key)
         with open(tmp_path, 'rb') as f:
             transcription = client.audio.transcriptions.create(
@@ -617,9 +638,9 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
-                INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
-                VALUES (?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, duration, transcript_text, visibility))
+                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, duration_seconds, transcript, status, visibility)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)
+            ''', (user_id, user_name, department, role, audio_filename, duration, transcript_text, visibility))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
@@ -709,6 +730,21 @@ def api_ideas_job(job_id):
         return jsonify({'error': err}), 500
     else:
         return jsonify({'status': 'processing'}), 202
+
+
+@app.route('/api/ideas/<int:idea_id>/audio', methods=['GET'])
+@login_required
+def api_idea_audio(idea_id):
+    db = get_db()
+    idea = db.execute('SELECT audio_filename FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    db.close()
+    if not idea or not idea['audio_filename']:
+        return jsonify({'error': 'Audio nenájdené'}), 404
+    audio_path = os.path.join(AUDIO_UPLOADS_DIR, idea['audio_filename'])
+    if not os.path.exists(audio_path):
+        return jsonify({'error': 'Súbor neexistuje'}), 404
+    from flask import send_file
+    return send_file(audio_path, as_attachment=False)
 
 
 @app.route('/api/ideas/<int:idea_id>/analyze', methods=['POST'])

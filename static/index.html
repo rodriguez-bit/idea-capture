@@ -202,6 +202,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
             <th>Tagy</th>
             <th>Status</th>
             <th>Viditeľnosť</th>
+            <th>Audio</th>
             <th>Dátum</th>
           </tr>
         </thead>
@@ -254,6 +255,11 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
     <button class="modal-close" onclick="closeModal('idea-modal')">×</button>
     <h2 id="modal-title">Nápad #</h2>
     <div class="detail-meta" id="modal-meta"></div>
+
+    <div class="detail-section" id="modal-audio-section" style="display:none">
+      <label>Nahrávka</label>
+      <audio id="modal-audio-player" controls style="width:100%;border-radius:8px;margin-top:4px"></audio>
+    </div>
 
     <div class="detail-section">
       <label>Transkript</label>
@@ -429,10 +435,17 @@ function renderTags(tagsJson) {
   } catch { return '—'; }
 }
 
+let _audioPlayer = null;
+function playAudio(id) {
+  if (_audioPlayer) { _audioPlayer.pause(); _audioPlayer = null; }
+  _audioPlayer = new Audio(`/api/ideas/${id}/audio`);
+  _audioPlayer.play().catch(e => showToast('Chyba prehrávania: ' + e.message, 'error'));
+}
+
 function renderIdeas(ideas) {
   const tbody = document.getElementById('ideas-tbody');
   if (!ideas.length) {
-    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
     return;
   }
   tbody.innerHTML = ideas.map(i => `
@@ -446,6 +459,7 @@ function renderIdeas(ideas) {
       <td>${renderTags(i.tags)}</td>
       <td><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
       <td>${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
+      <td onclick="event.stopPropagation()">${i.audio_filename ? `<button onclick="playAudio(${i.id})" style="background:var(--primary);border:none;border-radius:6px;color:#fff;padding:4px 10px;cursor:pointer;font-size:13px">▶</button>` : '<span style="color:var(--muted)">—</span>'}</td>
       <td style="color:var(--muted);font-size:12px">${formatDate(i.created_at)}</td>
     </tr>
   `).join('');
@@ -481,6 +495,14 @@ async function openIdea(id) {
     ${(() => { try { const t = JSON.parse(i.tags||'[]'); return t.map(tag=>`<span class="badge badge-tag">${esc(tag)}</span>`).join(''); } catch{return '';} })()}
   `;
   document.getElementById('modal-transcript').textContent = i.transcript || '(prázdny transkript)';
+
+  const audioSection = document.getElementById('modal-audio-section');
+  if (i.audio_filename) {
+    audioSection.style.display = '';
+    document.getElementById('modal-audio-player').src = `/api/ideas/${i.id}/audio`;
+  } else {
+    audioSection.style.display = 'none';
+  }
 
   const aiSection = document.getElementById('modal-ai-section');
   if (i.ai_analysis) {
