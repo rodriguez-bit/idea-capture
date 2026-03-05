@@ -187,26 +187,5 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
-  },
-  {
-    "author_id": 8,
-    "author_name": "Raul Rodriguez",
-    "department": "management",
-    "role": "manager",
-    "audio_filename": "",
-    "duration_seconds": 4,
-    "transcript": "Ďakujem za pozornosť.",
-    "status": "new",
-    "ai_score": 1,
-    "ai_analysis": "{\"score\": 1, \"clarity\": 1, \"feasibility\": 1, \"relevance\": 1, \"summary\": \"Príspevok neobsahuje žiadny konkrétny nápad ani návrh na zlepšenie. Jedná sa iba o formálne poďakovanie za pozornosť bez obsahového vyjadrenia.\", \"strengths\": [], \"weaknesses\": [\"Úplná absence konkrétneho nápadu\", \"Žiadny obsah alebo návrh na riešenie\", \"Nezaslúži si analýzu ani ďalšie kroky\"], \"next_steps\": [\"Požiadať zamestnanca o predloženie skutočného nápadu s konkrétnym popisom\", \"Poskytnúť pokyny na správny formát a obsah interného nápadu\"], \"category\": \"other\", \"tags\": []}",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-05 00:16:12.599747+00",
-    "visibility": "company",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
   }
 ]
