@@ -67,107 +67,20 @@ jobs:
           print(f"Created ICO with sizes: {sizes}")
           print(f"ICO size: {os.path.getsize('electron/assets/icon.ico')} bytes")
 
-      - name: Prepare and package
-        shell: bash
-        run: |
-          mkdir build-src
-          cp electron/main.js build-src/
-          cp electron/preload.js build-src/
-          cp electron/recorder.html build-src/
-          cp -r electron/assets build-src/ 2>/dev/null || true
-          cd build-src
-          npm init -y
-          npm install electron@28.3.3 electron-updater@6.8.3
-          cd ..
+      - name: Install dependencies
+        working-directory: electron
+        run: npm install
 
-          echo "=== Verify icon ==="
-          ls -la electron/assets/icon.ico
-          ls -la build-src/assets/icon.ico
-
-          echo "=== Verify source files ==="
-          grep "512D6D" build-src/recorder.html | head -1
-          grep "512D6D" build-src/main.js | head -1
-
-          npx --yes @electron/packager@latest build-src Ridea \
-            --platform=win32 \
-            --arch=x64 \
-            --out=win-out \
-            --overwrite \
-            --app-version=${{ steps.ver.outputs.version }} \
-            --icon=build-src/assets/icon.ico \
-            --no-prune 2>&1
-          echo "Packaging done"
-
-          echo "=== Verify packaged exe icon ==="
-          ls -la win-out/Ridea-win32-x64/Ridea.exe
-
-      - name: Create Inno Setup script
-        shell: pwsh
-        run: |
-          $version = "${{ steps.ver.outputs.version }}"
-          $iss = @"
-          [Setup]
-          AppName=Ridea
-          AppVersion=$version
-          AppPublisher=Dajana Rodriguez
-          DefaultDirName={autopf}\Ridea
-          DefaultGroupName=Ridea
-          OutputDir=installer-out
-          OutputBaseFilename=Ridea-Setup-$version
-          SetupIconFile=electron\assets\icon.ico
-          Compression=lzma2
-          SolidCompression=yes
-          ArchitecturesAllowed=x64compatible
-          ArchitecturesInstallIn64BitMode=x64compatible
-          UninstallDisplayIcon={app}\Ridea.exe
-          WizardStyle=modern
-
-          [Files]
-          Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-          [Icons]
-          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
-          Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
-          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
-
-          [Run]
-          Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
-          "@
-          Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
-          Write-Host "Created installer.iss"
-
-      - name: Build installer with Inno Setup
-        shell: cmd
-        run: |
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-
-      - name: Create ZIP too
-        if: success()
-        shell: pwsh
-        run: |
-          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
-
-      - name: Create Release and Upload
-        if: success()
+      - name: Build with electron-builder
+        working-directory: electron
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --publish always
+
+      - name: List output
         shell: bash
         run: |
-          VERSION="${{ steps.ver.outputs.version }}"
-          REPO="${{ github.repository }}"
-
-          gh release create "v${VERSION}" \
-            --repo "${REPO}" \
-            --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - opravena ikona na ploche" \
-            --latest 2>/dev/null || echo "Release already exists"
-
-          gh release upload "v${VERSION}" \
-            "installer-out/Ridea-Setup-${VERSION}.exe" \
-            --repo "${REPO}" --clobber || echo "Installer upload failed"
-
-          gh release upload "v${VERSION}" \
-            "Ridea-${VERSION}-win-x64.zip" \
-            --repo "${REPO}" --clobber || echo "ZIP upload failed"
-
-          echo "Upload complete"
+          echo "=== Build output ==="
+          ls -la electron/dist/ || true
+          echo "=== Latest yml ==="
+          cat electron/dist/latest.yml || true
