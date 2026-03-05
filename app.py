@@ -1864,9 +1864,9 @@ def api_idea_audio(idea_id):
 
 # ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
-@login_required
 def index():
-    return send_from_directory('static', 'index.html')
+    from flask import redirect, url_for
+    return redirect(url_for('recorder_page'))
 
 
 @app.route('/admin')
