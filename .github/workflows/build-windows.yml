@@ -16,8 +16,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - uses: actions/setup-node@v4
         with:
@@ -30,7 +28,7 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Generate proper ICO icon
+      - name: Generate RI icon
         shell: bash
         run: |
           pip install Pillow
@@ -65,38 +63,41 @@ jobs:
           print(f"Created ICO with sizes: {sizes}")
           PYEOF
 
-      - name: Verify source files
+      - name: Prepare build source
         shell: bash
         run: |
-          echo "=== recorder.html first line check ==="
-          head -10 electron/recorder.html
-          echo "=== main.js background check ==="
-          grep -n "512D6D\|height\|backgroundColor" electron/main.js
-          echo "=== package.json version ==="
-          node -p "require('./electron/package.json').version"
-          echo "=== files list ==="
-          ls -la electron/main.js electron/recorder.html electron/preload.js electron/package.json
+          mkdir build-src
+          cp electron/main.js build-src/
+          cp electron/preload.js build-src/
+          cp electron/recorder.html build-src/
+          cp -r electron/assets build-src/ 2>/dev/null || true
+          cd build-src
+          npm init -y
+          npm install electron@28.3.3 electron-updater@6.8.3
+          echo "=== Verify files ==="
+          grep "512D6D" recorder.html | head -1
+          grep "512D6D" main.js | head -1
 
-      - name: Install dependencies
+      - name: Package with electron-packager
         shell: bash
-        working-directory: electron
         run: |
-          npm install
-          echo "Dependencies installed"
+          npx --yes @electron/packager@latest build-src Ridea \
+            --platform=win32 \
+            --arch=x64 \
+            --out=win-out \
+            --overwrite \
+            --app-version=${{ steps.ver.outputs.version }} \
+            --icon=electron/assets/icon.ico \
+            --no-prune 2>&1
+          echo "Packaging done"
+          ls -la win-out/
 
-      - name: Build NSIS installer
-        shell: bash
-        working-directory: electron
+      - name: Create ZIP
+        if: success()
+        shell: pwsh
         run: |
-          npx electron-builder --win nsis --x64 --publish never 2>&1
-          echo "Build done"
-
-      - name: List output files
-        if: always()
-        shell: bash
-        run: |
-          echo "=== dist contents ==="
-          find electron/dist -type f 2>/dev/null | head -20
+          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+          Get-ChildItem *.zip
 
       - name: Create Release and Upload
         if: success()
@@ -110,13 +111,11 @@ jobs:
           gh release create "v${VERSION}" \
             --repo "${REPO}" \
             --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - NSIS installer, fialovy dizajn, textove napady, logo RI" \
+            --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || echo "Release already exists"
 
-          # Find and upload all .exe files
-          find electron/dist -name "*.exe" -type f | while read f; do
-            echo "Uploading: $f"
-            gh release upload "v${VERSION}" "$f" --repo "${REPO}" --clobber || echo "Upload failed for $f"
-          done
+          gh release upload "v${VERSION}" \
+            "Ridea-${VERSION}-win-x64.zip" \
+            --repo "${REPO}" --clobber
 
           echo "Upload complete"
