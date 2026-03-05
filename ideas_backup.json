@@ -168,27 +168,6 @@
     "campaign_id": null
   },
   {
-    "author_id": 125,
-    "author_name": "Daniel Vighova",
-    "department": "marketing",
-    "role": "manager",
-    "audio_filename": "",
-    "duration_seconds": 57,
-    "transcript": "Ja som mala nápad, ktorý som hovorila aj na jednom mítingu v Prahe, že vlastne celá značka Raul da Fuego by mala začať takým uvodným videom, kde by sa povedal celý Raulov príbeh, vlastne to, ako zhorel, možno by tam mohli byť aj nejaké fotky, mohlo by to byť proste ako nejaký rozhovor s Raulom, alebo to už proste nech sa potom dorieši, možno nejaká výpovedť alebo čo. No a vlastne bolo by to preto, aby tu ľudia vlastne pochopili tú spojitosť, že prečo sa to vlastne volá Raul da Fuego, aj ten Fuego moment a proste všetko, aby sa im tak spojilo, lebo ako keby my vieme, že čo sa mu stalo vo firme a jeho blízke okolie, ale takýto, že zákazníci a tak to nevedia a vlastne, aby to všetko dávalo pekne spolu zmysel.",
-    "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-04 20:37:06.3488+00",
-    "visibility": "personal",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 8,
     "author_name": "Raul Rodriguez",
     "department": "management",
