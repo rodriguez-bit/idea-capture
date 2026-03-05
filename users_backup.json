@@ -205,5 +205,14 @@
     "department": "development",
     "active": 1,
     "created_at": "2026-03-05 10:34:40.107564+00"
+  },
+  {
+    "email": "hodul@dajanarodriguez.com",
+    "display_name": "Monika Hodul",
+    "password_hash": "scrypt:32768:8:1$tNIB2FOs9y0tmDEw$3ef063f04ce5f1cd2e748389075971c90ff254662d979a1c3a2441f14c19e5a8b40662348526ed0254dd92aa1e67ac335c993b0225e4501158ae4abe10db85fb",
+    "role": "submitter",
+    "department": "other",
+    "active": 1,
+    "created_at": "2026-03-05 10:36:08.032946+00"
   }
 ]
