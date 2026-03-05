@@ -63,7 +63,7 @@ jobs:
           print(f"Created ICO with sizes: {sizes}")
           PYEOF
 
-      - name: Prepare build source
+      - name: Prepare and package
         shell: bash
         run: |
           mkdir build-src
@@ -74,13 +74,7 @@ jobs:
           cd build-src
           npm init -y
           npm install electron@28.3.3 electron-updater@6.8.3
-          echo "=== Verify files ==="
-          grep "512D6D" recorder.html | head -1
-          grep "512D6D" main.js | head -1
-
-      - name: Package with electron-packager
-        shell: bash
-        run: |
+          cd ..
           npx --yes @electron/packager@latest build-src Ridea \
             --platform=win32 \
             --arch=x64 \
@@ -90,14 +84,56 @@ jobs:
             --icon=electron/assets/icon.ico \
             --no-prune 2>&1
           echo "Packaging done"
-          ls -la win-out/
 
-      - name: Create ZIP
+      - name: Create Inno Setup script
+        shell: bash
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          cat > installer.iss << ISSEOF
+          [Setup]
+          AppName=Ridea
+          AppVersion=${VERSION}
+          AppPublisher=Dajana Rodriguez
+          DefaultDirName={autopf}\Ridea
+          DefaultGroupName=Ridea
+          OutputDir=installer-out
+          OutputBaseFilename=Ridea-Setup-${VERSION}
+          SetupIconFile=electron\assets\icon.ico
+          Compression=lzma2
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          UninstallDisplayIcon={app}\Ridea.exe
+          WizardStyle=modern
+
+          [Languages]
+          Name: "sk"; MessagesFile: "compiler:Default.isl"
+
+          [Tasks]
+          Name: "desktopicon"; Description: "Vytvorit skratku na ploche"; GroupDescription: "Dalsie moznosti:"; Flags: checked
+
+          [Files]
+          Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+          [Icons]
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{group}\Odinštalovať Ridea"; Filename: "{uninstallexe}"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; Tasks: desktopicon
+
+          [Run]
+          Filename: "{app}\Ridea.exe"; Description: "Spustit Ridea"; Flags: nowait postinstall skipifsilent
+          ISSEOF
+
+      - name: Build installer with Inno Setup
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Create ZIP too
         if: success()
         shell: pwsh
         run: |
           Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
-          Get-ChildItem *.zip
 
       - name: Create Release and Upload
         if: success()
@@ -114,8 +150,14 @@ jobs:
             --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || echo "Release already exists"
 
+          # Upload installer
+          gh release upload "v${VERSION}" \
+            "installer-out/Ridea-Setup-${VERSION}.exe" \
+            --repo "${REPO}" --clobber || echo "Installer upload failed"
+
+          # Upload ZIP too
           gh release upload "v${VERSION}" \
             "Ridea-${VERSION}-win-x64.zip" \
-            --repo "${REPO}" --clobber
+            --repo "${REPO}" --clobber || echo "ZIP upload failed"
 
           echo "Upload complete"
