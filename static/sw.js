@@ -1,5 +1,5 @@
 // Ridea Service Worker — versioned cache, network-first API, SW_UPDATED notify
-const CACHE = 'ridea-v2.2.0';
+const CACHE = 'ridea-v2.3.0';
 const SHELL = ['/recorder', '/static/manifest.json'];
 
 self.addEventListener('install', e => {

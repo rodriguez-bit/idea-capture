@@ -29,10 +29,8 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Generate RI icon
-        shell: bash
+        shell: python
         run: |
-          pip install Pillow
-          python3 << 'PYEOF'
           from PIL import Image, ImageDraw, ImageFont
 
           def make_icon_image(size):
@@ -61,7 +59,9 @@ jobs:
           images[0].save('electron/assets/icon.ico', format='ICO', sizes=[(s, s) for s in sizes])
           images[0].save('electron/assets/icon.png', format='PNG')
           print(f"Created ICO with sizes: {sizes}")
-          PYEOF
+
+          import os
+          print(f"ICO size: {os.path.getsize('electron/assets/icon.ico')} bytes")
 
       - name: Prepare and package
         shell: bash
@@ -75,13 +75,22 @@ jobs:
           npm init -y
           npm install electron@28.3.3 electron-updater@6.8.3
           cd ..
+
+          echo "=== Verify icon ==="
+          ls -la electron/assets/icon.ico
+          ls -la build-src/assets/icon.ico
+
+          echo "=== Verify source files ==="
+          grep "512D6D" build-src/recorder.html | head -1
+          grep "512D6D" build-src/main.js | head -1
+
           npx --yes @electron/packager@latest build-src Ridea \
             --platform=win32 \
             --arch=x64 \
             --out=win-out \
             --overwrite \
             --app-version=${{ steps.ver.outputs.version }} \
-            --icon=electron/assets/icon.ico \
+            --icon=build-src/assets/icon.ico \
             --no-prune 2>&1
           echo "Packaging done"
 
@@ -110,16 +119,15 @@ jobs:
           Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
           [Icons]
-          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\assets\icon.ico"
           Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
-          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\assets\icon.ico"
 
           [Run]
           Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
           "@
           Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
           Write-Host "Created installer.iss"
-          Get-Content installer.iss
 
       - name: Build installer with Inno Setup
         shell: cmd

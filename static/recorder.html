@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ridea — Nahrať nápad</title>
+<title>Ridea</title>
 <link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#512D6D">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,8 +23,9 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
   padding: 18px 20px;
   padding-top: max(18px, env(safe-area-inset-top));
   padding-bottom: max(18px, env(safe-area-inset-bottom));
-  gap: 12px;
+  gap: 10px;
   color: #f0e6f6;
+  overflow-y: auto;
 }
 
 .topbar { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -35,11 +36,25 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 .sels { display: flex; gap: 8px; flex-shrink: 0; }
 .sel {
   flex: 1; padding: 9px 10px;
-  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15);
+  background: #3d1f54; border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px; color: #f0e6f6; font-size: 13px;
-  outline: none; appearance: none; cursor: pointer; text-align: center;
+  outline: none; cursor: pointer; text-align: center;
 }
+.sel option { background: #3d1f54; color: #f0e6f6; }
 .sel:focus { border-color: rgba(255,255,255,0.4); }
+
+.vis-row { display: flex; gap: 6px; flex-shrink: 0; }
+.vis-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; transition: all .15s; }
+.vis-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #f0e6f6; }
+
+.tab-row { display: flex; gap: 0; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); }
+.tab-btn { flex: 1; padding: 8px 6px; background: rgba(255,255,255,0.04); border: none; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.tab-btn.active { background: rgba(255,255,255,0.15); color: #f0e6f6; }
+
+#voice-panel { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; min-height: 0; }
+#voice-panel.active { display: flex; }
+#text-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+#text-panel.active { display: flex; }
 
 .mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .rbtn {
@@ -56,9 +71,19 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 .rtime { font-size: 30px; font-weight: 700; letter-spacing: 3px; }
 .rhint { font-size: 12px; color: rgba(255,255,255,0.4); }
 
-.vis-row { display: flex; gap: 6px; flex-shrink: 0; }
-.vis-btn { flex: 1; padding: 7px 6px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; transition: all .15s; }
-.vis-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #f0e6f6; }
+.txt-area {
+  flex: 1; min-height: 100px; padding: 12px; border-radius: 8px;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15);
+  color: #f0e6f6; font-size: 14px; font-family: inherit; resize: none; outline: none;
+}
+.txt-area::placeholder { color: rgba(255,255,255,0.3); }
+.txt-area:focus { border-color: rgba(255,255,255,0.4); }
+.txt-send {
+  padding: 12px; background: #fff; color: #512D6D; border: none;
+  border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.txt-send:hover { background: #f0e6f6; }
+.txt-send:disabled { opacity: .5; cursor: not-allowed; }
 
 .acts { display: flex; gap: 10px; flex-shrink: 0; }
 .bsend { flex: 1; padding: 12px; background: #fff; color: #512D6D; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -79,7 +104,7 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 
 <div id="rec-screen">
   <div class="topbar">
-    <span class="uname" id="uname">—</span>
+    <span class="uname" id="uname">&#8212;</span>
     <button class="btn-out" onclick="doLogout()">Odhlásiť</button>
   </div>
   <div class="sels">
@@ -102,18 +127,30 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
     <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Môj nápad</button>
     <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celú firmu</button>
   </div>
-  <div class="mid">
+
+  <div class="tab-row">
+    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">Hlasový nápad</button>
+    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">Textový nápad</button>
+  </div>
+
+  <div id="voice-panel" class="active">
     <button class="rbtn" id="rbtn" onclick="toggleRecord()"><div class="rdot"></div></button>
-    <div class="rtime" id="rtime">—</div>
+    <div class="rtime" id="rtime">&#8212;</div>
     <div class="rhint" id="rhint">Klikni pre nahrávanie</div>
   </div>
+
+  <div id="text-panel">
+    <textarea class="txt-area" id="txtIdea" placeholder="Napíšte svoj nápad..."></textarea>
+    <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odoslať textový nápad</button>
+  </div>
+
   <div class="acts" id="acts" style="display:none">
-    <button class="bx" onclick="discardRecording()">✕</button>
+    <button class="bx" onclick="discardRecording()">&#10005;</button>
     <button class="bsend" id="bsend" onclick="submitIdea()">Odoslať nápad</button>
   </div>
   <div class="bar"><div class="bfill" id="bfill"></div></div>
   <div class="smsg" id="smsg"></div>
-  <div class="adml" onclick="openAdmin()">⚙ Admin konzola</div>
+  <div class="adml" onclick="openAdmin()">&#9881; Admin konzola</div>
 </div>
 
 <script>
@@ -125,6 +162,13 @@ let timerInterval = null;
 let seconds = 0;
 let currentUser = null;
 let currentVisibility = 'company';
+
+function switchTab(tab) {
+  document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
+  document.getElementById('tab-text').classList.toggle('active', tab === 'text');
+  document.getElementById('voice-panel').classList.toggle('active', tab === 'voice');
+  document.getElementById('text-panel').classList.toggle('active', tab === 'text');
+}
 
 function setVisibility(val) {
   currentVisibility = val;
@@ -204,7 +248,7 @@ function discardRecording() {
   audioBlob = null; audioChunks = [];
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
-  document.getElementById('rtime').textContent = '—';
+  document.getElementById('rtime').textContent = '\u2014';
   document.getElementById('rhint').textContent = 'Klikni pre nahrávanie';
   clearMsg();
 }
@@ -236,12 +280,12 @@ async function submitIdea() {
     }
     const data = await r.json();
     if (data.job_id) {
-      setMsg('Prepísujem... 10–30 sekúnd', 'inf');
+      setMsg('Prepísujem... 10\u201330 sekúnd', 'inf');
       fill.style.width = '40%';
       await pollJob(data.job_id, fill, btn);
     } else {
       fill.style.width = '100%';
-      setMsg('✓ Nápad odoslaný!', 'ok');
+      setMsg('\u2713 Nápad odoslaný!', 'ok');
       setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
       btn.disabled = false; btn.textContent = 'Odoslať nápad';
     }
@@ -250,6 +294,40 @@ async function submitIdea() {
     btn.disabled = false; btn.textContent = 'Odoslať nápad';
     fill.style.width = '0%';
   }
+}
+
+async function sendTextIdea() {
+  const text = document.getElementById('txtIdea').value.trim();
+  if (!text) { setMsg('Napíšte text nápadu', 'err'); return; }
+  const dept = document.getElementById('dept').value;
+  const role = document.getElementById('role').value;
+  if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
+  const btn = document.getElementById('txtSend');
+  btn.disabled = true; btn.textContent = 'Odosiela sa...';
+  const fill = document.getElementById('bfill');
+  let w = 0;
+  const p = setInterval(() => { w = Math.min(w + 5, 85); fill.style.width = w + '%'; if (w >= 85) clearInterval(p); }, 300);
+  try {
+    const r = await fetch(`${API_BASE}/api/ideas/text`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, department: dept, role, visibility: currentVisibility }),
+      credentials: 'include'
+    });
+    clearInterval(p); fill.style.width = '100%';
+    if (r.ok) {
+      setMsg('\u2713 Textový nápad odoslaný!', 'ok');
+      document.getElementById('txtIdea').value = '';
+      setTimeout(() => { fill.style.width = '0%'; clearMsg(); }, 2500);
+    } else {
+      const d = await r.json().catch(() => ({}));
+      setMsg(d.error || 'Chyba', 'err');
+    }
+  } catch(e) {
+    clearInterval(p);
+    setMsg('Chyba: ' + e.message, 'err');
+  }
+  finally { btn.disabled = false; btn.textContent = 'Odoslať textový nápad'; setTimeout(() => { fill.style.width = '0%'; }, 2000); }
 }
 
 async function pollJob(jobId, fill, btn) {
@@ -265,7 +343,12 @@ async function pollJob(jobId, fill, btn) {
       }
       if (r.ok) {
         fill.style.width = '100%';
-        setMsg('✓ Nápad odoslaný!', 'ok');
+        setMsg('\u2713 Nápad odoslaný!', 'ok');
+        setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
+      } else if (r.status === 404) {
+        // Job may have completed and been cleaned up - treat as success since upload worked
+        fill.style.width = '100%';
+        setMsg('\u2713 Nápad spracovaný!', 'ok');
         setTimeout(() => { discardRecording(); fill.style.width = '0%'; }, 2500);
       } else {
         const d = await r.json().catch(() => ({}));
@@ -278,7 +361,7 @@ async function pollJob(jobId, fill, btn) {
     }
   }
   if (attempts >= 40) {
-    setMsg('Timeout — skús znova', 'err');
+    setMsg('Timeout \u2014 skús znova', 'err');
     fill.style.width = '0%';
   }
   btn.disabled = false; btn.textContent = 'Odoslať nápad';
