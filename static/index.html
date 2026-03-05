@@ -215,7 +215,6 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
         <option value="c-level">C-level</option>
         <option value="manager">Manažér</option>
         <option value="employee">Zamestnanec</option>
-        <option value="majo-markech">Majo markech je kral</option>
       </select>
       <input type="email" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" aria-hidden="true" autocomplete="email">
       <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." autocomplete="off" data-lpignore="true">
@@ -613,7 +612,6 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
           <option value="c-level">C-level</option>
           <option value="manager">Manažér</option>
           <option value="employee">Zamestnanec</option>
-          <option value="majo-markech">Majo markech je kral</option>
         </select>
       </div>
     </div>
@@ -621,8 +619,8 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
       <label style="display:flex;align-items:center;gap:10px">
         <span>Viditelnosť</span>
         <select id="add-visibility" style="flex:1">
+          <option value="company">Firemný (pre celú firmu)</option>
           <option value="personal">Osobný (iba ja)</option>
-          <option value="company">Firemný (zdieľať s tímom)</option>
         </select>
       </label>
     </div>
@@ -1218,7 +1216,7 @@ function deptLabel(d) {
 }
 
 function roleLabel(r) {
-  return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec','majo-markech':'Majo markech je kral'}[r] || r || '—';
+  return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec'}[r] || r || '—';
 }
 
 function formatDate(s) {
@@ -1612,12 +1610,14 @@ function openAddIdeaModal() {
   const fi = document.getElementById('file-info');
   if (fi) fi.style.display = 'none';
   switchAddTab('text');
-  // Pre-select user department/role if available
-  if (currentUser) {
-    const deptSel = document.getElementById('add-dept');
-    const roleSel = document.getElementById('add-role');
-    if (currentUser.department && deptSel) deptSel.value = currentUser.department;
-  }
+  // Pre-select department/role from localStorage or user profile
+  const deptSel = document.getElementById('add-dept');
+  const roleSel = document.getElementById('add-role');
+  const savedDept = localStorage.getItem('ridea_last_dept');
+  const savedRole = localStorage.getItem('ridea_last_role');
+  if (savedDept && deptSel) deptSel.value = savedDept;
+  else if (currentUser && currentUser.department && deptSel) deptSel.value = currentUser.department;
+  if (savedRole && roleSel) roleSel.value = savedRole;
   document.getElementById('add-idea-modal').classList.add('open');
 }
 
@@ -1665,6 +1665,10 @@ async function submitIdea() {
   const role = document.getElementById('add-role').value;
   const visibility = document.getElementById('add-visibility').value;
   const btn = document.getElementById('add-submit-btn');
+
+  // Save last used dept/role to localStorage
+  localStorage.setItem('ridea_last_dept', dept);
+  localStorage.setItem('ridea_last_role', role);
 
   if (addIdeaTab === 'text') {
     const text = document.getElementById('add-text').value.trim();
