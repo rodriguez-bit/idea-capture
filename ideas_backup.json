@@ -15,7 +15,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-03 15:18:21",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -33,7 +36,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 07:36:58",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -51,7 +57,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 08:36:38",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -69,7 +78,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 08:54:17",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 7,
@@ -87,7 +99,10 @@
     "reviewed_at": "2026-03-04T13:42:39.533345",
     "created_at": "2026-03-04 09:24:07",
     "visibility": "personal",
-    "tags": "[\"marketing\", \"innovation\", \"product\"]"
+    "tags": "[\"marketing\", \"innovation\", \"product\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -105,7 +120,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 09:54:24",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -123,7 +141,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 11:10:24",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -141,7 +162,10 @@
     "reviewed_at": "2026-03-04T13:36:39.621852",
     "created_at": "2026-03-04 13:36:06.174275+00",
     "visibility": "company",
-    "tags": "[\"automation\", \"innovation\", \"process\", \"technical\", \"cost_reduction\"]"
+    "tags": "[\"automation\", \"innovation\", \"process\", \"technical\", \"cost_reduction\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -159,7 +183,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 13:47:14.737706+00",
     "visibility": "personal",
-    "tags": "[\"incomplete\"]"
+    "tags": "[\"incomplete\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -177,7 +204,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 13:47:54.396943+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -195,7 +225,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 13:49:55.036189+00",
     "visibility": "company",
-    "tags": "[\"hr\", \"team_building\"]"
+    "tags": "[\"hr\", \"team_building\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 6,
@@ -213,7 +246,10 @@
     "reviewed_at": "2026-03-04T14:16:20.722068",
     "created_at": "2026-03-04 14:02:35.06182+00",
     "visibility": "company",
-    "tags": "[\"hr\", \"process\", \"cost_reduction\"]"
+    "tags": "[\"hr\", \"process\", \"cost_reduction\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 1,
@@ -231,7 +267,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:06:49.785388+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 7,
@@ -249,7 +288,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:11:27.993142+00",
     "visibility": "company",
-    "tags": "[\"cost_reduction\", \"technical\", \"quality\", \"process\"]"
+    "tags": "[\"cost_reduction\", \"technical\", \"quality\", \"process\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 32,
@@ -267,7 +309,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:12:16.909988+00",
     "visibility": "company",
-    "tags": "[\"marketing\", \"customer\", \"quick_win\", \"innovation\"]"
+    "tags": "[\"marketing\", \"customer\", \"quick_win\", \"innovation\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -285,7 +330,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:34:07.157231+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -303,7 +351,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:35:21.378911+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -321,7 +372,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 14:59:19.366556+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -339,7 +393,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 15:03:55.427941+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 53,
@@ -357,7 +414,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 15:19:13.80422+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -375,7 +435,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 15:25:16.649184+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -393,7 +456,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 15:28:38.788137+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -411,7 +477,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 16:46:15.392415+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -429,7 +498,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 16:46:23.861249+00",
     "visibility": "personal",
-    "tags": "[\"product\", \"innovation\", \"marketing\"]"
+    "tags": "[\"product\", \"innovation\", \"marketing\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -447,7 +519,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 17:01:03.544292+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -465,7 +540,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 18:04:40.093152+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -483,7 +561,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 18:04:44.271091+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -501,7 +582,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 18:43:09.711327+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 7,
@@ -519,7 +603,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 19:08:54.824897+00",
     "visibility": "company",
-    "tags": "[\"process\", \"product\", \"automation\", \"quick_win\", \"marketing\"]"
+    "tags": "[\"process\", \"product\", \"automation\", \"quick_win\", \"marketing\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -537,7 +624,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 20:35:36.841575+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -555,7 +645,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 20:35:49.849462+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -573,7 +666,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 20:37:06.3488+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -591,7 +687,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 20:40:30.430495+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 125,
@@ -609,7 +708,10 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 20:40:39.247102+00",
     "visibility": "personal",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   },
   {
     "author_id": 8,
@@ -627,6 +729,30 @@
     "reviewed_at": "",
     "created_at": "2026-03-04 21:29:27.841082+00",
     "visibility": "company",
-    "tags": "[]"
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 30,
+    "transcript": "Potrebujem spraviť aplikáciu na optimalizáciu výroby, kde náhodíme všetky výrobné modely, kde náhodíme informácie o ľuďoch, kto čo vie, koľko ľudí pracuje u nás. Už som tú aplikáciu robil, ale budeme sa na novo ešte raz prerobiť. A toto sa týka kompletnej optimalizácie výroby.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 00:15:16.857863+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
