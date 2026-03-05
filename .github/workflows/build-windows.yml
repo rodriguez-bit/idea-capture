@@ -28,28 +28,91 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Generate proper ICO icon
+        shell: bash
+        run: |
+          pip install Pillow
+          python3 << 'PYEOF'
+          from PIL import Image, ImageDraw, ImageFont
+          import struct
+
+          def make_icon_image(size):
+              img = Image.new('RGBA', (size, size), (81, 45, 109, 255))
+              draw = ImageDraw.Draw(img)
+              pad = int(size * 0.12)
+              r = int(size * 0.2)
+              draw.rounded_rectangle([pad, pad, size-pad, size-pad], radius=r, fill=(61, 31, 84, 255))
+              fs = int(size * 0.45)
+              try:
+                  font = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", fs)
+              except:
+                  try:
+                      font = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", fs)
+                  except:
+                      font = ImageFont.load_default()
+              text = "RI"
+              bbox = draw.textbbox((0,0), text, font=font)
+              x = (size - (bbox[2]-bbox[0])) // 2 - bbox[0]
+              y = (size - (bbox[3]-bbox[1])) // 2 - bbox[1]
+              draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+              return img
+
+          sizes = [256, 128, 64, 48, 32, 16]
+          images = [make_icon_image(s) for s in sizes]
+          images[0].save('electron/assets/icon.ico', format='ICO', sizes=[(s, s) for s in sizes])
+          images[0].save('electron/assets/icon.png', format='PNG')
+          print(f"Created ICO with sizes: {sizes}")
+          PYEOF
+
       - name: Install dependencies
         shell: bash
         working-directory: electron
         run: |
           npm install
           echo "Dependencies installed"
-          ls -la node_modules/.bin/ | head -20
 
       - name: Build NSIS installer
         shell: bash
         working-directory: electron
+        env:
+          DEBUG: "electron-builder"
         run: |
-          npx electron-builder --win nsis --x64 --publish never 2>&1
-          echo "Build done"
-          ls -la dist/ 2>/dev/null || true
+          npx electron-builder --win nsis --x64 --publish never 2>&1 || true
+          echo "=== checking dist ==="
+          ls -la dist/ 2>/dev/null || echo "No dist folder found"
+          find dist -type f -name "*.exe" 2>/dev/null || echo "No exe files"
 
-      - name: List output files
-        if: always()
+      - name: Fallback - use electron-packager if builder failed
+        if: success()
         shell: bash
         run: |
-          echo "=== dist contents ==="
-          find electron/dist -type f 2>/dev/null || echo "No dist folder"
+          if [ ! -f electron/dist/*.exe ] 2>/dev/null; then
+            echo "electron-builder failed, falling back to electron-packager"
+            mkdir -p build-src
+            cp electron/main.js build-src/
+            cp electron/preload.js build-src/
+            cp electron/recorder.html build-src/
+            cp -r electron/assets build-src/ 2>/dev/null || true
+            cd build-src
+            npm init -y
+            npm install electron@28.3.3 electron-updater@6.8.3
+            cd ..
+            npx --yes @electron/packager@latest build-src Ridea \
+              --platform=win32 --arch=x64 --out=win-out --overwrite \
+              --app-version=${{ steps.ver.outputs.version }} \
+              --icon=electron/assets/icon.ico \
+              --no-prune 2>&1
+            echo "Packager done"
+          fi
+
+      - name: Create ZIP from packager output
+        if: success()
+        shell: pwsh
+        run: |
+          if (Test-Path "win-out\Ridea-win32-x64") {
+            Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+            Write-Host "Created ZIP"
+          }
 
       - name: Create Release and Upload
         if: success()
@@ -63,8 +126,14 @@ jobs:
             --notes "Ridea v${{ steps.ver.outputs.version }} - NSIS installer, fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || true
 
-          # Upload NSIS installer .exe
+          # Upload NSIS installer .exe if exists
           for f in electron/dist/*.exe; do
             [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
-              --repo ${{ github.repository }} --clobber
+              --repo ${{ github.repository }} --clobber && echo "Uploaded $f"
+          done
+
+          # Upload ZIP fallback if exists
+          for f in *.zip; do
+            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+              --repo ${{ github.repository }} --clobber && echo "Uploaded $f"
           done
