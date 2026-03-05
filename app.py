@@ -1050,7 +1050,8 @@ def api_idea_audio(idea_id):
     db.close()
     if not idea or not idea['audio_filename']:
         return jsonify({'error': 'Audio nenájdené'}), 404
-    audio_path = os.path.join(AUDIO_UPLOADS_DIR, idea['audio_filename'])
+    audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
+    audio_path = os.path.join(audio_dir, idea['audio_filename'])
     if not os.path.exists(audio_path):
         return jsonify({'error': 'Súbor neexistuje'}), 404
     from flask import send_file
