@@ -13,6 +13,8 @@
   --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
 }
 body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* NAV */
 nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 16px; height: 56px; position: sticky; top: 0; z-index: 100; }
 .nav-logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .nav-logo span { color: var(--primary); }
@@ -26,9 +28,15 @@ nav { background: var(--surface); border-bottom: 1px solid var(--border); paddin
 .btn-primary:hover { background: var(--primary-hover); }
 .btn-ghost { background: var(--surface2); color: var(--text); }
 .btn-ghost:hover { background: var(--border); }
+
+/* MAIN */
 main { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+/* PAGES */
 .page { display: none; }
 .page.active { display: block; }
+
+/* STATS CARDS */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
 .stat-value { font-size: 32px; font-weight: 700; }
@@ -37,12 +45,16 @@ main { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
 .stat-card.yellow .stat-value { color: var(--yellow); }
 .stat-card.red .stat-value { color: var(--red); }
 .stat-card.blue .stat-value { color: var(--blue); }
+
+/* FILTERS BAR */
 .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
 .filter-select, .filter-input { padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
 .filter-select:focus, .filter-input:focus { border-color: var(--primary); }
 .filter-input { flex: 1; min-width: 200px; }
 #f-search[contenteditable]:empty::before { content: attr(data-placeholder); color: var(--muted); pointer-events: none; }
 #f-search[contenteditable] { cursor: text; white-space: nowrap; overflow: hidden; }
+
+/* IDEAS TABLE */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 table { width: 100%; border-collapse: collapse; }
 th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); background: var(--surface2); }
@@ -50,6 +62,8 @@ td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border)
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--surface2); cursor: pointer; }
 .truncate { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* BADGES */
 .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
 .badge-new { background: rgba(59,130,246,0.15); color: #60a5fa; }
 .badge-in_review { background: rgba(234,179,8,0.15); color: #facc15; }
@@ -67,12 +81,16 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 .tag-add-row { display: flex; gap: 8px; margin-top: 8px; }
 .tag-add-input { flex: 1; padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
 .tag-add-input:focus { border-color: rgba(168,85,247,0.5); }
+
+/* MODAL */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; position: relative; }
 .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 .modal-close { position: absolute; top: 16px; right: 16px; background: var(--surface2); border: none; color: var(--muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
 .modal-close:hover { color: var(--text); }
+
+/* DETAIL */
 .detail-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .detail-section { margin-bottom: 20px; }
 .detail-section label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px; }
@@ -85,6 +103,8 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 .ai-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
 .ai-list { padding-left: 16px; font-size: 14px; color: var(--muted); }
 .ai-list li { margin-bottom: 4px; }
+
+/* USERS PAGE */
 .users-grid { display: grid; gap: 12px; }
 .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
@@ -92,26 +112,51 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 .user-name { font-weight: 600; }
 .user-email { font-size: 13px; color: var(--muted); }
 .user-actions { display: flex; gap: 8px; }
+
+/* FORM */
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
 .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; }
 .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* SECTION HEADER */
 .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .section-header h2 { font-size: 20px; font-weight: 700; }
 .section-header .ml-auto { margin-left: auto; }
+
+/* EMPTY */
 .empty { text-align: center; padding: 64px 24px; color: var(--muted); }
 .empty .icon { font-size: 48px; margin-bottom: 12px; }
 .empty p { font-size: 15px; }
+
+/* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; font-size: 14px; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 340px; }
 .toast.show { transform: translateY(0); opacity: 1; }
 .toast.success { border-color: var(--green); color: var(--green); }
 .toast.error { border-color: var(--red); color: var(--red); }
+
+/* PAGINATION */
 .pagination { display: flex; align-items: center; gap: 8px; margin-top: 16px; justify-content: flex-end; }
 .pagination button { padding: 6px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-size: 14px; }
 .pagination button:disabled { opacity: 0.4; cursor: default; }
 .pagination button.active { background: var(--primary); border-color: var(--primary); }
 .pagination span { font-size: 13px; color: var(--muted); }
+
+/* BULK BAR */
+.bulk-bar { display: none; align-items: center; gap: 12px; padding: 10px 16px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; margin-bottom: 12px; }
+.bulk-bar.visible { display: flex; }
+.bulk-bar .bulk-count { font-size: 14px; font-weight: 600; color: var(--red); }
+.bulk-bar .btn-bulk-delete { padding: 6px 16px; background: var(--red); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.bulk-bar .btn-bulk-delete:hover { background: #dc2626; }
+.bulk-bar .btn-bulk-cancel { padding: 6px 14px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; }
+.bulk-bar .btn-bulk-cancel:hover { color: var(--text); }
+table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+/* CHART FIX */
+.chart-container { position: relative; height: 220px; width: 100%; }
+
+/* KANBAN */
 .kanban-col { min-width: 240px; flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column; max-height: 70vh; }
 .kanban-col-header { padding: 12px 16px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
 .kanban-col-header .count { background: var(--surface2); padding: 2px 8px; border-radius: 12px; font-size: 11px; }
@@ -145,6 +190,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 </nav>
 
 <main>
+  <!-- IDEAS PAGE -->
   <div class="page active" id="page-ideas">
     <div class="filters">
       <select class="filter-select" id="f-status" onchange="loadIdeas()">
@@ -174,21 +220,39 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
       <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." autocomplete="off" data-lpignore="true">
       <button class="btn-sm btn-ghost" onclick="exportCSV()" title="Export CSV">📥 CSV</button>
     </div>
+
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-count" id="bulk-count">0 označených</span>
+      <button class="btn-bulk-delete" onclick="bulkDelete()">🗑 Vymazať označené</button>
+      <button class="btn-bulk-cancel" onclick="clearSelection()">Zrušiť výber</button>
+    </div>
+
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>#</th><th>Autor</th><th>Oddelenie</th><th>Rola</th><th>Transkript</th><th>AI</th><th>Tagy</th><th>Status</th><th>Viditeľnosť</th><th>Dátum</th>
+            <th style="width:40px;display:none" id="th-select-all"><input type="checkbox" id="select-all" onclick="toggleSelectAll()" title="Označiť všetky"></th>
+            <th>#</th>
+            <th>Autor</th>
+            <th>Oddelenie</th>
+            <th>Rola</th>
+            <th>Transkript</th>
+            <th>AI</th>
+            <th>Tagy</th>
+            <th>Status</th>
+            <th>Viditeľnosť</th>
+            <th>Dátum</th>
           </tr>
         </thead>
         <tbody id="ideas-tbody">
-          <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</td></tr>
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</td></tr>
         </tbody>
       </table>
     </div>
     <div class="pagination" id="pagination"></div>
   </div>
 
+  <!-- STATS PAGE -->
   <div class="page" id="page-stats">
     <div class="stats-grid" id="stats-grid">
       <div class="stat-card"><div class="stat-value" id="s-total">—</div><div class="stat-label">Celkovo nápadov</div></div>
@@ -201,55 +265,100 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
       <div class="table-wrap" style="padding:20px">
         <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Nápady podľa statusu</h3>
-        <canvas id="chart-status" height="200"></canvas>
+        <div class="chart-container"><canvas id="chart-status"></canvas></div>
       </div>
       <div class="table-wrap" style="padding:20px">
         <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Priemerné AI skóre podľa oddelenia</h3>
-        <canvas id="chart-dept-score" height="200"></canvas>
+        <div class="chart-container"><canvas id="chart-dept-score"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
       <div class="table-wrap" style="padding:20px">
         <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Trend nápadov (posledných 30 dní)</h3>
-        <canvas id="chart-trend" height="200"></canvas>
+        <div class="chart-container"><canvas id="chart-trend"></canvas></div>
       </div>
       <div class="table-wrap" style="padding:20px">
         <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Posledné nápady</h3>
-        <div id="recent-ideas"></div>
+        <div id="recent-ideas" style="max-height:220px;overflow-y:auto"></div>
       </div>
     </div>
   </div>
 
+  <!-- USERS PAGE -->
   <div class="page" id="page-users">
-    <div class="section-header"><h2>Používatelia</h2><div class="ml-auto"><button class="btn-sm btn-primary" onclick="openUserModal()">+ Pridať používateľa</button></div></div>
-    <div class="users-grid" id="users-grid"><div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div></div>
-  </div>
-
-  <div class="page" id="page-kanban">
-    <div class="section-header"><h2>Kanban Board</h2></div>
-    <div id="kanban-board" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;min-height:400px"></div>
-  </div>
-
-  <div class="page" id="page-settings">
-    <div class="section-header"><h2>⚙ Nastavenia firmy</h2></div>
-    <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Tieto informácie používa AI pri analýze nápadov. Čím lepšie opíšete firmu, tým presnejšie bude hodnotenie.</p>
-    <div style="display:grid;gap:20px;max-width:720px">
-      <div class="form-group"><label>O firme</label><textarea id="ctx-company" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Dajana Rodriguez je firma zameraná na výrobu luxusných kabeliek a módnych doplnkov. Pôsobíme v Česku a Španielsku..."></textarea></div>
-      <div class="form-group"><label>Ciele a priority</label><textarea id="ctx-goals" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Expandovať do 3 nových krajov, znížiť náklady výroby o 15%, spustiť nový e-shop..."></textarea></div>
-      <div class="form-group"><label>Hodnoty značky</label><textarea id="ctx-brand" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Kvalita, udržateľnosť, originálny dizajn, osobný prístup k zákazníkom..."></textarea></div>
-      <div class="form-group"><label>Čo hľadáme v nápadoch</label><textarea id="ctx-criteria" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Uprednostňujeme nápady na zníženie nákladov, zlepšenie zákazníckej skúsenosti a inovácie v produkte..."></textarea></div>
-      <div><button class="btn-sm btn-primary" style="padding:12px 32px" onclick="saveCompanyContext()">Uložiť nastavenia</button></div>
+    <div class="section-header">
+      <h2>Používatelia</h2>
+      <div class="ml-auto">
+        <button class="btn-sm btn-primary" onclick="openUserModal()">+ Pridať používateľa</button>
+      </div>
+    </div>
+    <div class="users-grid" id="users-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
     </div>
   </div>
 
-  <div class="page" id="page-meetings">
-    <div class="section-header"><h2>Porady</h2><div class="ml-auto" id="meetings-add-btn" style="display:none"><button class="btn-sm btn-primary" onclick="openMeetingModal()">+ Nová porada</button></div></div>
-    <div class="users-grid" id="meetings-grid"><div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div></div>
+  <!-- KANBAN PAGE -->
+  <div class="page" id="page-kanban">
+    <div class="section-header">
+      <h2>Kanban Board</h2>
+    </div>
+    <div id="kanban-board" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;min-height:400px"></div>
   </div>
 
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="section-header">
+      <h2>⚙ Nastavenia firmy</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Tieto informácie používa AI pri analýze nápadov. Čím lepšie opíšete firmu, tým presnejšie bude hodnotenie.</p>
+
+    <div style="display:grid;gap:20px;max-width:720px">
+      <div class="form-group">
+        <label>O firme</label>
+        <textarea id="ctx-company" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Dajana Rodriguez je firma zameraná na výrobu luxusných kabeliek a módnych doplnkov. Pôsobíme v Česku a Španielsku..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ciele a priority</label>
+        <textarea id="ctx-goals" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Expandovať do 3 nových krajov, znížiť náklady výroby o 15%, spustiť nový e-shop..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Hodnoty značky</label>
+        <textarea id="ctx-brand" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Kvalita, udržateľnosť, originálny dizajn, osobný prístup k zákazníkom..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Čo hľadáme v nápadoch</label>
+        <textarea id="ctx-criteria" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Uprednostňujeme nápady na zníženie nákladov, zlepšenie zákazníckej skúsenosti a inovácie v produkte..."></textarea>
+      </div>
+      <div>
+        <button class="btn-sm btn-primary" style="padding:12px 32px" onclick="saveCompanyContext()">Uložiť nastavenia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETINGS PAGE -->
+  <div class="page" id="page-meetings">
+    <div class="section-header">
+      <h2>Porady</h2>
+      <div class="ml-auto" id="meetings-add-btn" style="display:none">
+        <button class="btn-sm btn-primary" onclick="openMeetingModal()">+ Nová porada</button>
+      </div>
+    </div>
+    <div class="users-grid" id="meetings-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
+    </div>
+  </div>
+
+  <!-- CAMPAIGNS PAGE -->
   <div class="page" id="page-campaigns">
-    <div class="section-header"><h2>Kampane</h2><div class="ml-auto" id="campaigns-add-btn" style="display:none"><button class="btn-sm btn-primary" onclick="openCampaignModal()">+ Nová kampaň</button></div></div>
-    <div class="users-grid" id="campaigns-grid"><div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div></div>
+    <div class="section-header">
+      <h2>Kampane</h2>
+      <div class="ml-auto" id="campaigns-add-btn" style="display:none">
+        <button class="btn-sm btn-primary" onclick="openCampaignModal()">+ Nová kampaň</button>
+      </div>
+    </div>
+    <div class="users-grid" id="campaigns-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
+    </div>
   </div>
 </main>
 
@@ -259,31 +368,84 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
     <button class="modal-close" onclick="closeModal('idea-modal')">×</button>
     <h2 id="modal-title">Nápad #</h2>
     <div class="detail-meta" id="modal-meta"></div>
-    <div class="detail-section"><label>Transkript</label><p id="modal-transcript"></p></div>
-    <div class="detail-section" id="modal-ai-section" style="display:none"><label>AI Analýza</label><div class="ai-analysis" id="modal-ai"></div></div>
+
     <div class="detail-section">
-      <label style="display:flex;align-items:center;gap:8px"><span>👍 Hlasovanie</span><button class="btn-sm btn-ghost" id="modal-vote-btn" onclick="toggleVote()" style="font-size:13px">—</button><span id="modal-vote-count" style="font-size:13px;color:var(--muted)"></span></label>
+      <label>Transkript</label>
+      <p id="modal-transcript"></p>
     </div>
+
+    <div class="detail-section" id="modal-ai-section" style="display:none">
+      <label>AI Analýza</label>
+      <div class="ai-analysis" id="modal-ai"></div>
+    </div>
+
+    <div class="detail-section">
+      <label style="display:flex;align-items:center;gap:8px">
+        <span>👍 Hlasovanie</span>
+        <button class="btn-sm btn-ghost" id="modal-vote-btn" onclick="toggleVote()" style="font-size:13px">—</button>
+        <span id="modal-vote-count" style="font-size:13px;color:var(--muted)"></span>
+      </label>
+    </div>
+
     <div class="detail-section">
       <label>Komentáre</label>
       <div id="modal-comments" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
-      <div style="display:flex;gap:8px"><input id="modal-comment-input" class="filter-input" style="flex:1;min-width:0" placeholder="Napíšte komentár..." onkeydown="if(event.key==='Enter'){event.preventDefault();addComment();}"><button class="btn-sm btn-primary" onclick="addComment()">Odoslať</button></div>
+      <div style="display:flex;gap:8px">
+        <input id="modal-comment-input" class="filter-input" style="flex:1;min-width:0" placeholder="Napíšte komentár..." onkeydown="if(event.key==='Enter'){event.preventDefault();addComment();}">
+        <button class="btn-sm btn-primary" onclick="addComment()">Odoslať</button>
+      </div>
     </div>
+
     <div class="detail-actions" id="modal-actions" style="display:none">
-      <div style="width:100%"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Zmeniť status</label><select id="modal-status-select"><option value="new">Nový</option><option value="in_review">V prehliadke</option><option value="accepted">Prijatý</option><option value="v_realizacii">V realizácii</option><option value="rejected">Zamietnutý</option></select></div>
-      <div style="width:100%"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Viditeľnosť</label><select id="modal-visibility-select"><option value="personal">🔒 Osobný</option><option value="company">🌐 Firemný</option></select></div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Zmeniť status</label>
+        <select id="modal-status-select">
+          <option value="new">Nový</option>
+          <option value="in_review">V prehliadke</option>
+          <option value="accepted">Prijatý</option>
+          <option value="v_realizacii">V realizácii</option>
+          <option value="rejected">Zamietnutý</option>
+        </select>
+      </div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Viditeľnosť</label>
+        <select id="modal-visibility-select">
+          <option value="personal">🔒 Osobný</option>
+          <option value="company">🌐 Firemný</option>
+        </select>
+      </div>
       <div style="width:100%">
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Tagy</label>
         <div class="tag-chips" id="modal-tag-chips"></div>
-        <div style="margin-top:8px"><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="modal-tag-presets"></div><div class="tag-add-row"><input class="tag-add-input" id="modal-tag-input" placeholder="Vlastný tag..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}"><button class="btn-sm btn-ghost" onclick="addCustomTag()">Pridať</button></div></div>
+        <div style="margin-top:8px">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="modal-tag-presets"></div>
+          <div class="tag-add-row">
+            <input class="tag-add-input" id="modal-tag-input" placeholder="Vlastný tag..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}">
+            <button class="btn-sm btn-ghost" onclick="addCustomTag()">Pridať</button>
+          </div>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%">
-        <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Priradené komu</label><select id="modal-assigned" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none"><option value="">— nepriradené —</option></select></div>
-        <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Deadline</label><input type="date" id="modal-deadline" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none"></div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Priradené komu</label>
+          <select id="modal-assigned" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+            <option value="">— nepriradené —</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Deadline</label>
+          <input type="date" id="modal-deadline" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+        </div>
       </div>
-      <div style="width:100%"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Poznámka recenzenta</label><textarea id="modal-note" placeholder="Voliteľná poznámka..."></textarea></div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Poznámka recenzenta</label>
+        <textarea id="modal-note" placeholder="Voliteľná poznámka..."></textarea>
+      </div>
       <div style="display:flex;gap:10px;width:100%;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:10px"><button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button><button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button>
+          <button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button>
+        </div>
         <button class="btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);display:none">🗑 Vymazať</button>
       </div>
     </div>
@@ -295,9 +457,41 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
   <div class="modal" style="max-width:480px">
     <button class="modal-close" onclick="closeModal('user-modal')">×</button>
     <h2 id="u-modal-title">Nový používateľ</h2>
-    <div class="form-row"><div class="form-group"><label>Meno</label><input type="text" id="u-name" placeholder="Ján Novák"></div><div class="form-group"><label>E-mail</label><input type="email" id="u-email" placeholder="jan@firma.sk"></div></div>
-    <div class="form-group" id="u-pass-group"><label id="u-pass-label">Heslo</label><input type="password" id="u-pass" placeholder="Dočasné heslo"></div>
-    <div class="form-row"><div class="form-group"><label>Rola</label><select id="u-role"><option value="submitter">Prispievateľ</option><option value="reviewer">Recenzent</option><option value="admin">Admin</option></select></div><div class="form-group"><label>Oddelenie</label><select id="u-dept"><option value="">— vyber —</option><option value="development">Vývoj</option><option value="marketing">Marketing</option><option value="production">Produkcia</option><option value="management">Manažment</option><option value="other">Iné</option></select></div></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Meno</label>
+        <input type="text" id="u-name" placeholder="Ján Novák">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="u-email" placeholder="jan@firma.sk">
+      </div>
+    </div>
+    <div class="form-group" id="u-pass-group">
+      <label id="u-pass-label">Heslo</label>
+      <input type="password" id="u-pass" placeholder="Dočasné heslo">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Rola</label>
+        <select id="u-role">
+          <option value="submitter">Prispievateľ</option>
+          <option value="reviewer">Recenzent</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Oddelenie</label>
+        <select id="u-dept">
+          <option value="">— vyber —</option>
+          <option value="development">Vývoj</option>
+          <option value="marketing">Marketing</option>
+          <option value="production">Produkcia</option>
+          <option value="management">Manažment</option>
+          <option value="other">Iné</option>
+        </select>
+      </div>
+    </div>
     <button id="u-save-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvoriť používateľa</button>
   </div>
 </div>
@@ -307,9 +501,18 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
   <div class="modal" style="max-width:520px">
     <button class="modal-close" onclick="closeModal('meeting-modal')">×</button>
     <h2 id="meeting-modal-title">Nová porada</h2>
-    <div class="form-group"><label>Názov</label><input type="text" id="m-title" placeholder="Napr. Týždenný review nápadov"></div>
-    <div class="form-group"><label>Dátum porady</label><input type="date" id="m-date"></div>
-    <div class="form-group"><label>Popis</label><textarea id="m-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="O čom bude porada..."></textarea></div>
+    <div class="form-group">
+      <label>Názov</label>
+      <input type="text" id="m-title" placeholder="Napr. Týždenný review nápadov">
+    </div>
+    <div class="form-group">
+      <label>Dátum porady</label>
+      <input type="date" id="m-date">
+    </div>
+    <div class="form-group">
+      <label>Popis</label>
+      <textarea id="m-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="O čom bude porada..."></textarea>
+    </div>
     <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveMeeting()">Vytvoriť poradu</button>
   </div>
 </div>
@@ -319,9 +522,24 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
   <div class="modal" style="max-width:520px">
     <button class="modal-close" onclick="closeModal('campaign-modal')">×</button>
     <h2 id="campaign-modal-title">Nová kampaň</h2>
-    <div class="form-group"><label>Názov</label><input type="text" id="c-title" placeholder="Napr. Inovácie Q1 2026"></div>
-    <div class="form-row"><div class="form-group"><label>Začiatok</label><input type="date" id="c-start"></div><div class="form-group"><label>Koniec</label><input type="date" id="c-end"></div></div>
-    <div class="form-group"><label>Popis</label><textarea id="c-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Čo je cieľom kampane..."></textarea></div>
+    <div class="form-group">
+      <label>Názov</label>
+      <input type="text" id="c-title" placeholder="Napr. Inovácie Q1 2026">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Začiatok</label>
+        <input type="date" id="c-start">
+      </div>
+      <div class="form-group">
+        <label>Koniec</label>
+        <input type="date" id="c-end">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Popis</label>
+      <textarea id="c-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Čo je cieľom kampane..."></textarea>
+    </div>
     <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveCampaign()">Vytvoriť kampaň</button>
   </div>
 </div>
@@ -331,9 +549,18 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
   <div class="modal" style="max-width:400px">
     <button class="modal-close" onclick="closeModal('password-modal')">×</button>
     <h2>🔒 Zmena hesla</h2>
-    <div class="form-group"><label>Aktuálne heslo</label><input type="password" id="pw-current" placeholder="Zadajte aktuálne heslo"></div>
-    <div class="form-group"><label>Nové heslo</label><input type="password" id="pw-new" placeholder="Minimálne 6 znakov"></div>
-    <div class="form-group"><label>Potvrdenie nového hesla</label><input type="password" id="pw-confirm" placeholder="Zopakujte nové heslo"></div>
+    <div class="form-group">
+      <label>Aktuálne heslo</label>
+      <input type="password" id="pw-current" placeholder="Zadajte aktuálne heslo">
+    </div>
+    <div class="form-group">
+      <label>Nové heslo</label>
+      <input type="password" id="pw-new" placeholder="Minimálne 6 znakov">
+    </div>
+    <div class="form-group">
+      <label>Potvrdenie nového hesla</label>
+      <input type="password" id="pw-confirm" placeholder="Zopakujte nové heslo">
+    </div>
     <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="changePassword()">Zmeniť heslo</button>
   </div>
 </div>
@@ -349,11 +576,13 @@ let editingUserId = null;
 let usersData = [];
 let searchTimer = null;
 
+// ─── Init ──────────────────────────────────────────────────────────────────────────────
 async function init() {
   const r = await fetch('/api/current-user');
   if (!r.ok) { window.location.href = '/login'; return; }
   currentUser = await r.json();
   document.getElementById('user-badge').textContent = `${currentUser.name} (${currentUser.role})`;
+  // Replace search input dynamically — Chrome does not autofill dynamically inserted elements
   const _old = document.getElementById('f-search');
   const _fresh = document.createElement('div');
   _fresh.className = _old.className;
@@ -375,9 +604,14 @@ async function init() {
     document.getElementById('meetings-add-btn').style.display = '';
     document.getElementById('campaigns-add-btn').style.display = '';
   }
+  // Show bulk selection for admins
+  if (currentUser.role === 'admin') {
+    document.getElementById('th-select-all').style.display = '';
+  }
   loadIdeas();
 }
 
+// ─── Pages ─────────────────────────────────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -391,12 +625,18 @@ function showPage(name) {
   if (name === 'kanban') loadKanban();
 }
 
+// ─── Ideas ─────────────────────────────────────────────────────────────────────────────
 function debounceSearch() {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => { ideasPage = 0; loadIdeas(); }, 400);
 }
 
 async function loadIdeas() {
+  // Reset bulk selection
+  const _sa = document.getElementById('select-all');
+  if (_sa) _sa.checked = false;
+  const _bb = document.getElementById('bulk-bar');
+  if (_bb) _bb.classList.remove('visible');
   const params = new URLSearchParams();
   const status = document.getElementById('f-status').value;
   const dept = document.getElementById('f-dept').value;
@@ -408,6 +648,7 @@ async function loadIdeas() {
   if (search) params.set('search', search);
   params.set('limit', PAGE_SIZE);
   params.set('offset', ideasPage * PAGE_SIZE);
+
   const r = await fetch('/api/ideas?' + params);
   const data = await r.json();
   renderIdeas(data.data);
@@ -423,23 +664,25 @@ function renderTags(tagsJson) {
 }
 
 function renderIdeas(ideas) {
+  const isAdmin = currentUser && currentUser.role === 'admin';
   const tbody = document.getElementById('ideas-tbody');
   if (!ideas.length) {
-    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';
     return;
   }
   tbody.innerHTML = ideas.map(i => `
-    <tr onclick="openIdea(${i.id})">
-      <td style="color:var(--muted)">#${i.id}</td>
-      <td style="font-weight:500">${esc(i.author_name)}</td>
-      <td><span class="badge badge-dept">${deptLabel(i.department)}</span></td>
-      <td style="color:var(--muted);font-size:13px">${roleLabel(i.role)}</td>
-      <td class="truncate" style="color:var(--muted)">${esc(i.transcript) || '—'}</td>
-      <td>${i.ai_score > 0 ? `<span class="badge badge-score">⭐ ${i.ai_score}/10</span>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
-      <td>${renderTags(i.tags)}</td>
-      <td><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
-      <td>${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
-      <td style="color:var(--muted);font-size:12px">${formatDate(i.created_at)}</td>
+    <tr>
+      ${isAdmin ? '<td onclick="event.stopPropagation()"><input type="checkbox" class="idea-cb" value="'+i.id+'" onchange="updateBulkBar()"></td>' : ''}
+      <td style="color:var(--muted);cursor:pointer" onclick="openIdea(${i.id})">#${i.id}</td>
+      <td style="font-weight:500;cursor:pointer" onclick="openIdea(${i.id})">${esc(i.author_name)}</td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-dept">${deptLabel(i.department)}</span></td>
+      <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:13px;cursor:pointer">${roleLabel(i.role)}</td>
+      <td onclick="openIdea(${i.id})" class="truncate" style="color:var(--muted);cursor:pointer">${esc(i.transcript) || '—'}</td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.ai_score > 0 ? `<span class="badge badge-score">⭐ ${i.ai_score}/10</span>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${renderTags(i.tags)}</td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
+      <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:12px;cursor:pointer">${formatDate(i.created_at)}</td>
     </tr>
   `).join('');
 }
@@ -448,15 +691,21 @@ function renderPagination(total) {
   const pages = Math.ceil(total / PAGE_SIZE);
   const pg = document.getElementById('pagination');
   if (pages <= 1) { pg.innerHTML = ''; return; }
-  pg.innerHTML = `<button onclick="gotoPage(${ideasPage-1})" ${ideasPage===0?'disabled':''}>‹</button><span>${ideasPage+1} / ${pages} (${total} celkovo)</span><button onclick="gotoPage(${ideasPage+1})" ${ideasPage>=pages-1?'disabled':''}>›</button>`;
+  pg.innerHTML = `
+    <button onclick="gotoPage(${ideasPage-1})" ${ideasPage===0?'disabled':''}>‹</button>
+    <span>${ideasPage+1} / ${pages} (${total} celkovo)</span>
+    <button onclick="gotoPage(${ideasPage+1})" ${ideasPage>=pages-1?'disabled':''}>›</button>
+  `;
 }
 
 function gotoPage(p) { ideasPage = p; loadIdeas(); }
 
+// ─── Idea detail ───────────────────────────────────────────────────────────────────────
 async function openIdea(id) {
   const r = await fetch(`/api/ideas/${id}`);
   currentIdea = await r.json();
   const i = currentIdea;
+
   document.getElementById('modal-title').textContent = `Nápad #${i.id}`;
   document.getElementById('modal-meta').innerHTML = `
     <span class="badge badge-${i.status}">${statusLabel(i.status)}</span>
@@ -470,6 +719,7 @@ async function openIdea(id) {
     ${(() => { try { const t = JSON.parse(i.tags||'[]'); return t.map(tag=>`<span class="badge badge-tag">${esc(tag)}</span>`).join(''); } catch{return '';} })()}
   `;
   document.getElementById('modal-transcript').textContent = i.transcript || '(prázdny transkript)';
+
   const aiSection = document.getElementById('modal-ai-section');
   if (i.ai_analysis) {
     try {
@@ -485,7 +735,10 @@ async function openIdea(id) {
         ${a.next_steps?.length ? `<div style="margin-top:10px"><strong style="font-size:12px;color:var(--primary)">→ Ďalšie kroky</strong><ul class="ai-list" style="margin-top:6px">${a.next_steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
       `;
     } catch(e) { aiSection.style.display = 'none'; }
-  } else { aiSection.style.display = 'none'; }
+  } else {
+    aiSection.style.display = 'none';
+  }
+
   const actions = document.getElementById('modal-actions');
   if (currentUser.role === 'reviewer' || currentUser.role === 'admin') {
     actions.style.display = '';
@@ -495,9 +748,17 @@ async function openIdea(id) {
     document.getElementById('modal-deadline').value = i.deadline || '';
     populateAssignedDropdown(i.assigned_to || '');
     initTagEditor(i.tags);
-  } else { actions.style.display = 'none'; }
-  document.getElementById('btn-delete-idea').style.display = currentUser.role === 'admin' ? '' : 'none';
+  } else {
+    actions.style.display = 'none';
+  }
+
+  // Show delete button only for admins
+  document.getElementById('btn-delete-idea').style.display =
+    currentUser.role === 'admin' ? '' : 'none';
+
   document.getElementById('idea-modal').classList.add('open');
+
+  // Load comments and votes
   loadComments(i.id);
   loadVotes(i.id);
 }
@@ -506,8 +767,13 @@ async function deleteIdea() {
   if (!currentIdea) return;
   if (!confirm(`Naozaj vymazať nápad #${currentIdea.id}? Táto akcia je nevratná.`)) return;
   const r = await fetch(`/api/ideas/${currentIdea.id}`, { method: 'DELETE' });
-  if (r.ok) { closeModal('idea-modal'); loadIdeas(); showToast('Nápad vymazaný', 'success'); }
-  else { showToast('Chyba pri mazaní', 'error'); }
+  if (r.ok) {
+    closeModal('idea-modal');
+    loadIdeas();
+    showToast('Nápad vymazaný', 'success');
+  } else {
+    showToast('Chyba pri mazaní', 'error');
+  }
 }
 
 const PRESET_TAGS = ['quick_win','cost_reduction','product','process','customer','technical','innovation','urgent','automation','hr','marketing','quality'];
@@ -519,10 +785,12 @@ function initTagEditor(tagsJson) {
 }
 
 function renderTagEditor() {
-  document.getElementById('modal-tag-chips').innerHTML = currentTags.map((t, i) =>
+  const chips = document.getElementById('modal-tag-chips');
+  chips.innerHTML = currentTags.map((t, i) =>
     `<span class="tag-chip">${esc(t)} <span class="tag-x" onclick="removeTag(${i})">×</span></span>`
   ).join('');
-  document.getElementById('modal-tag-presets').innerHTML = PRESET_TAGS.map(t =>
+  const presets = document.getElementById('modal-tag-presets');
+  presets.innerHTML = PRESET_TAGS.map(t =>
     `<button type="button" class="tag-chip${currentTags.includes(t) ? ' selected' : ''}" onclick="togglePresetTag('${t}')" style="font-size:11px">${t}</button>`
   ).join('');
 }
@@ -533,35 +801,68 @@ function togglePresetTag(tag) {
   else if (currentTags.length < 10) currentTags.push(tag);
   renderTagEditor();
 }
-function removeTag(idx) { currentTags.splice(idx, 1); renderTagEditor(); }
+
+function removeTag(idx) {
+  currentTags.splice(idx, 1);
+  renderTagEditor();
+}
+
 function addCustomTag() {
   const input = document.getElementById('modal-tag-input');
   const val = input.value.trim().toLowerCase().replace(/\s+/g, '_');
-  if (val && !currentTags.includes(val) && currentTags.length < 10) { currentTags.push(val); renderTagEditor(); }
+  if (val && !currentTags.includes(val) && currentTags.length < 10) {
+    currentTags.push(val);
+    renderTagEditor();
+  }
   input.value = '';
 }
 
 async function saveIdea() {
   if (!currentIdea) return;
+  const status = document.getElementById('modal-status-select').value;
+  const visibility = document.getElementById('modal-visibility-select').value;
+  const note = document.getElementById('modal-note').value;
+  const assigned_to = document.getElementById('modal-assigned').value;
+  const deadline = document.getElementById('modal-deadline').value;
   const r = await fetch(`/api/ideas/${currentIdea.id}`, {
-    method: 'PATCH', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({status: document.getElementById('modal-status-select').value, reviewer_note: document.getElementById('modal-note').value, visibility: document.getElementById('modal-visibility-select').value, tags: JSON.stringify(currentTags), assigned_to: document.getElementById('modal-assigned').value, deadline: document.getElementById('modal-deadline').value})
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status, reviewer_note: note, visibility, tags: JSON.stringify(currentTags), assigned_to, deadline})
   });
-  if (r.ok) { showToast('Uložené', 'success'); closeModal('idea-modal'); loadIdeas(); }
-  else { showToast('Chyba pri ukladaní', 'error'); }
+  if (r.ok) {
+    showToast('Uložené', 'success');
+    closeModal('idea-modal');
+    loadIdeas();
+  } else {
+    showToast('Chyba pri ukladaní', 'error');
+  }
 }
 
 async function analyzeIdea() {
   if (!currentIdea) return;
   showToast('Spúšťam AI analýzu...', '');
   const r = await fetch(`/api/ideas/${currentIdea.id}/analyze`, {method: 'POST'});
-  if (r.ok) { showToast('AI analýza dokončená', 'success'); closeModal('idea-modal'); await openIdea(currentIdea.id); loadIdeas(); }
-  else { const d = await r.json(); showToast(d.error || 'AI analýza zlyhala', 'error'); }
+  if (r.ok) {
+    showToast('AI analýza dokončená', 'success');
+    closeModal('idea-modal');
+    await openIdea(currentIdea.id);
+    loadIdeas();
+  } else {
+    const d = await r.json();
+    showToast(d.error || 'AI analýza zlyhala', 'error');
+  }
 }
 
+// ─── Stats ─────────────────────────────────────────────────────────────────────────────
 let chartInstances = {};
-function destroyChart(key) { if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; } }
-const chartColors = { new: '#3b82f6', in_review: '#eab308', accepted: '#22c55e', v_realizacii: '#a855f7', rejected: '#ef4444' };
+function destroyChart(key) {
+  if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; }
+}
+
+const chartColors = {
+  new: '#3b82f6', in_review: '#eab308', accepted: '#22c55e',
+  v_realizacii: '#a855f7', rejected: '#ef4444'
+};
 
 async function loadStats() {
   const r = await fetch('/api/stats');
@@ -572,22 +873,102 @@ async function loadStats() {
   document.getElementById('s-new').textContent = d.by_status?.new || 0;
   document.getElementById('s-rejected').textContent = d.by_status?.rejected || 0;
   document.getElementById('s-v_realizacii').textContent = d.by_status?.v_realizacii || 0;
-  Chart.defaults.color = '#94a3b8'; Chart.defaults.borderColor = '#334155';
+
+  // Chart defaults
+  Chart.defaults.color = '#94a3b8';
+  Chart.defaults.borderColor = '#334155';
+
+  // 1) Status Pie/Doughnut Chart
   const statusLabels = ['Nový','V prehliadke','Prijaté','V realizácii','Zamietnuté'];
   const statusKeys = ['new','in_review','accepted','v_realizacii','rejected'];
+  const statusData = statusKeys.map(k => d.by_status?.[k] || 0);
+  const statusColors = statusKeys.map(k => chartColors[k]);
+
   destroyChart('status');
-  chartInstances['status'] = new Chart(document.getElementById('chart-status'), { type: 'doughnut', data: { labels: statusLabels, datasets: [{ data: statusKeys.map(k => d.by_status?.[k] || 0), backgroundColor: statusKeys.map(k => chartColors[k]), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } } } } });
+  chartInstances['status'] = new Chart(document.getElementById('chart-status'), {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels,
+      datasets: [{ data: statusData, backgroundColor: statusColors, borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' } } }
+    }
+  });
+
+  // 2) Avg AI Score by Department Bar Chart
   const deptKeys = Object.keys(d.avg_score_by_dept || {});
+  const deptLabelsArr = deptKeys.map(k => deptLabel(k));
+  const deptScores = deptKeys.map(k => d.avg_score_by_dept[k]);
+
   destroyChart('deptScore');
-  chartInstances['deptScore'] = new Chart(document.getElementById('chart-dept-score'), { type: 'bar', data: { labels: deptKeys.map(k => deptLabel(k)), datasets: [{ label: 'Priemerné skóre', data: deptKeys.map(k => d.avg_score_by_dept[k]), backgroundColor: 'rgba(99,102,241,0.6)', borderColor: '#6366f1', borderWidth: 1, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 10, grid: { color: '#1e293b' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+  chartInstances['deptScore'] = new Chart(document.getElementById('chart-dept-score'), {
+    type: 'bar',
+    data: {
+      labels: deptLabelsArr,
+      datasets: [{
+        label: 'Priemerné skóre',
+        data: deptScores,
+        backgroundColor: 'rgba(99,102,241,0.6)',
+        borderColor: '#6366f1',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, max: 10, grid: { color: '#1e293b' } }, x: { grid: { display: false } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // 3) Trend Line Chart (last 30 days)
   const trendData = (d.trend || []).reverse();
+  const trendLabels = trendData.map(t => {
+    const parts = (t.day || '').split('-');
+    return parts.length >= 3 ? `${parts[2]}.${parts[1]}` : t.day;
+  });
+  const trendCounts = trendData.map(t => t.count);
+
   destroyChart('trend');
-  chartInstances['trend'] = new Chart(document.getElementById('chart-trend'), { type: 'line', data: { labels: trendData.map(t => { const p = (t.day||'').split('-'); return p.length >= 3 ? `${p[2]}.${p[1]}` : t.day; }), datasets: [{ label: 'Nápady', data: trendData.map(t => t.count), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#6366f1' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#1e293b' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } } });
+  chartInstances['trend'] = new Chart(document.getElementById('chart-trend'), {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Nápady',
+        data: trendCounts,
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: '#6366f1'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#1e293b' } }, x: { grid: { display: false } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // 4) Recent ideas list
   const recentEl = document.getElementById('recent-ideas');
-  if (d.recent?.length) { recentEl.innerHTML = d.recent.map(i => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer" onclick="openIdea(${i.id})"><div style="font-weight:500">${esc(i.author_name)} <span style="color:var(--muted)">· ${deptLabel(i.department)}</span></div><div style="color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px">${esc(i.transcript) || '—'}</div></div>`).join(''); }
-  else { recentEl.innerHTML = '<p style="color:var(--muted);font-size:14px">Žiadne nápady</p>'; }
+  if (d.recent?.length) {
+    recentEl.innerHTML = d.recent.map(i =>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer" onclick="openIdea(${i.id})">
+        <div style="font-weight:500">${esc(i.author_name)} <span style="color:var(--muted)">· ${deptLabel(i.department)}</span></div>
+        <div style="color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px">${esc(i.transcript) || '—'}</div>
+      </div>`
+    ).join('');
+  } else {
+    recentEl.innerHTML = '<p style="color:var(--muted);font-size:14px">Žiadne nápady</p>';
+  }
 }
 
+// ─── Kanban ───────────────────────────────────────────────────────────────────────────
 const kanbanStatusLabels = {new:'Nový',in_review:'V prehliadke',accepted:'Prijaté',v_realizacii:'V realizácii',rejected:'Zamietnuté'};
 const kanbanStatusColors = {new:'var(--blue)',in_review:'var(--yellow)',accepted:'var(--green)',v_realizacii:'#a855f7',rejected:'var(--red)'};
 
@@ -600,17 +981,57 @@ async function loadKanban() {
     const statuses = ['new','in_review','accepted','v_realizacii','rejected'];
     board.innerHTML = statuses.map(s => {
       const items = data[s] || [];
-      return `<div class="kanban-col"><div class="kanban-col-header" style="border-top:3px solid ${kanbanStatusColors[s]}"><span>${kanbanStatusLabels[s]}</span><span class="count">${items.length}</span></div><div class="kanban-cards" data-status="${s}">${items.length ? items.map(i => `<div class="kanban-card" onclick="openIdea(${i.id})"><div class="kc-title">${esc((i.transcript || '').substring(0,80) || 'Bez textu')}</div><div class="kc-meta"><span>👤 ${esc(i.author_name)}</span>${i.ai_score > 0 ? `<span>⭐ ${i.ai_score}/10</span>` : ''}${i.assigned_to ? `<span>→ ${esc(i.assigned_to)}</span>` : ''}${i.deadline ? `<span>📅 ${i.deadline}</span>` : ''}</div></div>`).join('') : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Prázdne</div>'}</div></div>`;
+      return `
+        <div class="kanban-col">
+          <div class="kanban-col-header" style="border-top:3px solid ${kanbanStatusColors[s]}">
+            <span>${kanbanStatusLabels[s]}</span>
+            <span class="count">${items.length}</span>
+          </div>
+          <div class="kanban-cards" data-status="${s}">
+            ${items.length ? items.map(i => `
+              <div class="kanban-card" onclick="openIdea(${i.id})">
+                <div class="kc-title">${esc((i.transcript || '').substring(0,80) || 'Bez textu')}</div>
+                <div class="kc-meta">
+                  <span>👤 ${esc(i.author_name)}</span>
+                  ${i.ai_score > 0 ? `<span>⭐ ${i.ai_score}/10</span>` : ''}
+                  ${i.assigned_to ? `<span>→ ${esc(i.assigned_to)}</span>` : ''}
+                  ${i.deadline ? `<span>📅 ${i.deadline}</span>` : ''}
+                </div>
+              </div>
+            `).join('') : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Prázdne</div>'}
+          </div>
+        </div>
+      `;
     }).join('');
-  } catch(e) { board.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);width:100%">Chyba pri načítaní kanban boardu</div>'; }
+  } catch(e) {
+    board.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);width:100%">Chyba pri načítaní kanban boardu</div>';
+  }
 }
 
+// ─── Users ─────────────────────────────────────────────────────────────────────────────
 async function loadUsers() {
-  const r = await fetch('/api/users'); if (!r.ok) return;
-  const users = await r.json(); usersData = users;
+  const r = await fetch('/api/users');
+  if (!r.ok) return;
+  const users = await r.json();
+  usersData = users;
   const grid = document.getElementById('users-grid');
-  if (!users.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadni používatelia</div>'; return; }
-  grid.innerHTML = users.map(u => `<div class="user-card"><div class="user-avatar">${u.display_name[0].toUpperCase()}</div><div class="user-info"><div class="user-name">${esc(u.display_name)} ${u.active ? '' : '<span style="color:var(--red);font-size:12px">(neaktívny)</span>'}</div><div class="user-email">${esc(u.email)} · <span class="badge badge-dept" style="font-size:11px">${u.role}</span> ${u.department ? `· ${deptLabel(u.department)}` : ''}</div></div><div class="user-actions"><button class="btn-sm btn-ghost" onclick="openEditUserModal(${u.id})">Upraviť</button><button class="btn-sm btn-ghost" onclick="toggleUser(${u.id}, ${u.active})">${u.active ? 'Deaktivovať' : 'Aktivovať'}</button></div></div>`).join('');
+  if (!users.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadni používatelia</div>';
+    return;
+  }
+  grid.innerHTML = users.map(u => `
+    <div class="user-card">
+      <div class="user-avatar">${u.display_name[0].toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${esc(u.display_name)} ${u.active ? '' : '<span style="color:var(--red);font-size:12px">(neaktívny)</span>'}</div>
+        <div class="user-email">${esc(u.email)} · <span class="badge badge-dept" style="font-size:11px">${u.role}</span> ${u.department ? `· ${deptLabel(u.department)}` : ''}</div>
+      </div>
+      <div class="user-actions">
+        <button class="btn-sm btn-ghost" onclick="openEditUserModal(${u.id})">Upraviť</button>
+        <button class="btn-sm btn-ghost" onclick="toggleUser(${u.id}, ${u.active})">${u.active ? 'Deaktivovať' : 'Aktivovať'}</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 function openUserModal() {
@@ -625,7 +1046,8 @@ function openUserModal() {
 }
 
 function openEditUserModal(id) {
-  const u = usersData.find(x => x.id === id); if (!u) return;
+  const u = usersData.find(x => x.id === id);
+  if (!u) return;
   editingUserId = id;
   document.getElementById('u-name').value = u.display_name;
   document.getElementById('u-email').value = u.email;
@@ -646,139 +1068,468 @@ async function saveUser() {
   const pass = document.getElementById('u-pass').value;
   const role = document.getElementById('u-role').value;
   const dept = document.getElementById('u-dept').value;
+
   if (editingUserId) {
+    // Edit mode — email not changeable, password optional
     if (!name) { showToast('Zadajte meno', 'error'); return; }
     const body = {display_name: name, role, department: dept};
     if (pass) body.password = pass;
-    const r = await fetch(`/api/users/${editingUserId}`, { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-    if (r.ok) { showToast('Používateľ uložený', 'success'); closeModal('user-modal'); loadUsers(); }
-    else { const d = await r.json(); showToast(d.error || 'Chyba', 'error'); }
+    const r = await fetch(`/api/users/${editingUserId}`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('Používateľ uložený', 'success');
+      closeModal('user-modal');
+      loadUsers();
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Chyba', 'error');
+    }
   } else {
+    // Create mode — all fields required
     if (!name || !email || !pass) { showToast('Vyplňte všetky polia', 'error'); return; }
-    const r = await fetch('/api/users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({display_name: name, email, password: pass, role, department: dept}) });
-    if (r.ok) { showToast('Používateľ vytvorený', 'success'); closeModal('user-modal'); loadUsers(); }
-    else { const d = await r.json(); showToast(d.error || 'Chyba', 'error'); }
+    const r = await fetch('/api/users', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({display_name: name, email, password: pass, role, department: dept})
+    });
+    if (r.ok) {
+      showToast('Používateľ vytvorený', 'success');
+      closeModal('user-modal');
+      loadUsers();
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Chyba', 'error');
+    }
   }
 }
 
 async function toggleUser(id, active) {
-  await fetch(`/api/users/${id}`, { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({active: active ? 0 : 1}) });
+  await fetch(`/api/users/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({active: active ? 0 : 1})
+  });
   loadUsers();
 }
 
-async function doLogout() { await fetch('/api/logout', {method: 'POST'}); window.location.href = '/login'; }
+// ─── Auth ──────────────────────────────────────────────────────────────────────────────
+async function doLogout() {
+  await fetch('/api/logout', {method: 'POST'});
+  window.location.href = '/login';
+}
 
+// ─── Helpers ───────────────────────────────────────────────────────────────────────────
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   const s = document.getElementById('f-search');
   if (s) { s.textContent = ''; setTimeout(() => { s.textContent = ''; }, 300); }
 }
-document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }); });
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
 
-function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = `toast ${type} show`; setTimeout(() => t.classList.remove('show'), 3000); }
-function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function statusLabel(s) { return {new:'Nový',in_review:'V prehliadke',accepted:'Prijatý',rejected:'Zamietnutý',v_realizacii:'V realizácii'}[s] || s; }
-function deptLabel(d) { return {development:'Vývoj',marketing:'Marketing',production:'Produkcia',management:'Manažment',other:'Iné'}[d] || d || '—'; }
-function roleLabel(r) { return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec','majo-markech':'Majo markech je kral'}[r] || r || '—'; }
-function formatDate(s) { if (!s) return '—'; try { const d = new Date(s); return d.toLocaleDateString('sk-SK', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch { return s; } }
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function statusLabel(s) {
+  return {new:'Nový',in_review:'V prehliadke',accepted:'Prijatý',rejected:'Zamietnutý',v_realizacii:'V realizácii'}[s] || s;
+}
+
+function deptLabel(d) {
+  return {development:'Vývoj',marketing:'Marketing',production:'Produkcia',management:'Manažment',other:'Iné'}[d] || d || '—';
+}
+
+function roleLabel(r) {
+  return {'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec','majo-markech':'Majo markech je kral'}[r] || r || '—';
+}
+
+function formatDate(s) {
+  if (!s) return '—';
+  try {
+    const d = new Date(s);
+    return d.toLocaleDateString('sk-SK', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  } catch { return s; }
+}
+
+// ─── Company Context ──────────────────────────────────────────────────────────────────
 async function loadCompanyContext() {
-  try { const r = await fetch('/api/company-context'); if (!r.ok) return; const data = await r.json(); document.getElementById('ctx-company').value = data.company_description || ''; document.getElementById('ctx-goals').value = data.goals_priorities || ''; document.getElementById('ctx-brand').value = data.brand_values || ''; document.getElementById('ctx-criteria').value = data.idea_criteria || ''; }
-  catch(e) { showToast('Chyba pri načítaní nastavení', 'error'); }
+  try {
+    const r = await fetch('/api/company-context');
+    if (!r.ok) return;
+    const data = await r.json();
+    document.getElementById('ctx-company').value = data.company_description || '';
+    document.getElementById('ctx-goals').value = data.goals_priorities || '';
+    document.getElementById('ctx-brand').value = data.brand_values || '';
+    document.getElementById('ctx-criteria').value = data.idea_criteria || '';
+  } catch(e) {
+    showToast('Chyba pri načítaní nastaveni', 'error');
+  }
 }
 
 async function saveCompanyContext() {
   try {
-    const r = await fetch('/api/company-context', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ company_description: document.getElementById('ctx-company').value, goals_priorities: document.getElementById('ctx-goals').value, brand_values: document.getElementById('ctx-brand').value, idea_criteria: document.getElementById('ctx-criteria').value }) });
-    if (r.ok) { showToast('Nastavenia uložené', 'success'); } else { showToast('Chyba pri ukladaní', 'error'); }
-  } catch(e) { showToast('Chyba: ' + e.message, 'error'); }
+    const body = {
+      company_description: document.getElementById('ctx-company').value,
+      goals_priorities: document.getElementById('ctx-goals').value,
+      brand_values: document.getElementById('ctx-brand').value,
+      idea_criteria: document.getElementById('ctx-criteria').value,
+    };
+    const r = await fetch('/api/company-context', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      showToast('Nastavenia uložené', 'success');
+    } else {
+      showToast('Chyba pri ukladaní', 'error');
+    }
+  } catch(e) {
+    showToast('Chyba: ' + e.message, 'error');
+  }
 }
 
+// ─── Comments ───────────────────────────────────────────────────────────────────────────
 async function loadComments(ideaId) {
   const el = document.getElementById('modal-comments');
   try {
-    const r = await fetch(`/api/ideas/${ideaId}/comments`); const comments = await r.json();
-    if (!comments.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0">Žiadne komentáre</p>'; return; }
-    el.innerHTML = comments.map(c => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><strong style="color:var(--primary)">${esc(c.user_name)}</strong><span style="color:var(--muted);font-size:11px">${formatDate(c.created_at)}${(c.user_id === currentUser.id || currentUser.role === 'admin') ? ` <span style="cursor:pointer;margin-left:4px" onclick="deleteComment(${c.id}, ${ideaId})">✕</span>` : ''}</span></div><div style="color:var(--text);margin-top:4px">${esc(c.text)}</div></div>`).join('');
-  } catch { el.innerHTML = '<p style="color:var(--red);font-size:13px">Chyba pri načítaní komentárov</p>'; }
+    const r = await fetch(`/api/ideas/${ideaId}/comments`);
+    const comments = await r.json();
+    if (!comments.length) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0">Žiadne komentáre</p>';
+      return;
+    }
+    el.innerHTML = comments.map(c => `
+      <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--primary)">${esc(c.user_name)}</strong>
+          <span style="color:var(--muted);font-size:11px">${formatDate(c.created_at)}
+            ${(c.user_id === currentUser.id || currentUser.role === 'admin') ? `<span style="cursor:pointer;margin-left:4px" onclick="deleteComment(${c.id}, ${ideaId})">✕</span>` : ''}
+          </span>
+        </div>
+        <div style="color:var(--text);margin-top:4px">${esc(c.text)}</div>
+      </div>
+    `).join('');
+  } catch {
+    el.innerHTML = '<p style="color:var(--red);font-size:13px">Chyba pri načítaní komentárov</p>';
+  }
 }
 
 async function addComment() {
   if (!currentIdea) return;
-  const input = document.getElementById('modal-comment-input'); const text = input.value.trim(); if (!text) return;
-  const r = await fetch(`/api/ideas/${currentIdea.id}/comments`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text}) });
-  if (r.ok) { input.value = ''; loadComments(currentIdea.id); } else { const d = await r.json(); showToast(d.error || 'Chyba', 'error'); }
+  const input = document.getElementById('modal-comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const r = await fetch(`/api/ideas/${currentIdea.id}/comments`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({text})
+  });
+  if (r.ok) {
+    input.value = '';
+    loadComments(currentIdea.id);
+  } else {
+    const d = await r.json();
+    showToast(d.error || 'Chyba', 'error');
+  }
 }
 
-async function deleteComment(commentId, ideaId) { const r = await fetch(`/api/comments/${commentId}`, {method: 'DELETE'}); if (r.ok) loadComments(ideaId); }
+async function deleteComment(commentId, ideaId) {
+  const r = await fetch(`/api/comments/${commentId}`, {method: 'DELETE'});
+  if (r.ok) loadComments(ideaId);
+}
 
+// ─── Votes ─────────────────────────────────────────────────────────────────────────────
 async function loadVotes(ideaId) {
-  try { const r = await fetch(`/api/ideas/${ideaId}/votes`); const data = await r.json(); document.getElementById('modal-vote-btn').textContent = data.user_voted ? '👍 Odhlasovať' : '👍 Hlasovať'; document.getElementById('modal-vote-btn').style.background = data.user_voted ? 'rgba(99,102,241,0.2)' : ''; document.getElementById('modal-vote-count').textContent = `${data.count} hlas${data.count === 1 ? '' : 'ov'}`; } catch {}
+  try {
+    const r = await fetch(`/api/ideas/${ideaId}/votes`);
+    const data = await r.json();
+    document.getElementById('modal-vote-btn').textContent = data.user_voted ? '👍 Odhlasovať' : '👍 Hlasovať';
+    document.getElementById('modal-vote-btn').style.background = data.user_voted ? 'rgba(99,102,241,0.2)' : '';
+    document.getElementById('modal-vote-count').textContent = `${data.count} hlas${data.count === 1 ? '' : 'ov'}`;
+  } catch {}
 }
 
-async function toggleVote() { if (!currentIdea) return; const r = await fetch(`/api/ideas/${currentIdea.id}/votes`, {method: 'POST'}); if (r.ok) loadVotes(currentIdea.id); }
+async function toggleVote() {
+  if (!currentIdea) return;
+  const r = await fetch(`/api/ideas/${currentIdea.id}/votes`, {method: 'POST'});
+  if (r.ok) loadVotes(currentIdea.id);
+}
 
+// ─── Meetings ────────────────────────────────────────────────────────────────────────
 async function loadMeetings() {
-  const r = await fetch('/api/meetings'); if (!r.ok) return; const meetings = await r.json();
+  const r = await fetch('/api/meetings');
+  if (!r.ok) return;
+  const meetings = await r.json();
   const grid = document.getElementById('meetings-grid');
-  if (!meetings.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne porady</div>'; return; }
-  grid.innerHTML = meetings.map(m => `<div class="user-card"><div class="user-avatar" style="background:var(--blue)">📅</div><div class="user-info"><div class="user-name">${esc(m.title)}</div><div class="user-email">${m.meeting_date || 'Bez dátumu'} · ${esc(m.created_by_name)} · <span class="badge badge-${m.status === 'completed' ? 'accepted' : 'new'}" style="font-size:11px">${m.status === 'completed' ? 'Ukončená' : 'Plánovaná'}</span> · ${m.ideas_count} nápadov</div>${m.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(m.description).substring(0,100)}</div>` : ''}</div><div class="user-actions">${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost" style="color:var(--red)" onclick="deleteMeeting(${m.id})">🗑</button>` : ''}</div></div>`).join('');
+  if (!meetings.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne porady</div>';
+    return;
+  }
+  grid.innerHTML = meetings.map(m => `
+    <div class="user-card">
+      <div class="user-avatar" style="background:var(--blue)">📅</div>
+      <div class="user-info">
+        <div class="user-name">${esc(m.title)}</div>
+        <div class="user-email">${m.meeting_date || 'Bez dátumu'} · ${esc(m.created_by_name)} · <span class="badge badge-${m.status === 'completed' ? 'accepted' : 'new'}" style="font-size:11px">${m.status === 'completed' ? 'Ukončená' : 'Plánovaná'}</span> · ${m.ideas_count} nápadov</div>
+        ${m.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(m.description).substring(0,100)}</div>` : ''}
+      </div>
+      <div class="user-actions">
+        ${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost" style="color:var(--red)" onclick="deleteMeeting(${m.id})">🗑</button>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
-function openMeetingModal() { document.getElementById('m-title').value = ''; document.getElementById('m-date').value = ''; document.getElementById('m-desc').value = ''; document.getElementById('meeting-modal').classList.add('open'); }
+function openMeetingModal() {
+  document.getElementById('m-title').value = '';
+  document.getElementById('m-date').value = '';
+  document.getElementById('m-desc').value = '';
+  document.getElementById('meeting-modal').classList.add('open');
+}
 
 async function saveMeeting() {
-  const title = document.getElementById('m-title').value.trim(); if (!title) { showToast('Zadajte názov', 'error'); return; }
-  const r = await fetch('/api/meetings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ title, meeting_date: document.getElementById('m-date').value, description: document.getElementById('m-desc').value }) });
-  if (r.ok) { showToast('Porada vytvorená', 'success'); closeModal('meeting-modal'); loadMeetings(); } else { const d = await r.json(); showToast(d.error || 'Chyba', 'error'); }
+  const title = document.getElementById('m-title').value.trim();
+  if (!title) { showToast('Zadajte názov', 'error'); return; }
+  const r = await fetch('/api/meetings', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      title,
+      meeting_date: document.getElementById('m-date').value,
+      description: document.getElementById('m-desc').value
+    })
+  });
+  if (r.ok) {
+    showToast('Porada vytvorená', 'success');
+    closeModal('meeting-modal');
+    loadMeetings();
+  } else {
+    const d = await r.json();
+    showToast(d.error || 'Chyba', 'error');
+  }
 }
 
-async function deleteMeeting(id) { if (!confirm('Naozaj vymazať poradu?')) return; const r = await fetch(`/api/meetings/${id}`, {method: 'DELETE'}); if (r.ok) { loadMeetings(); showToast('Porada vymazaná', 'success'); } }
+async function deleteMeeting(id) {
+  if (!confirm('Naozaj vymazať poradu?')) return;
+  const r = await fetch(`/api/meetings/${id}`, {method: 'DELETE'});
+  if (r.ok) { loadMeetings(); showToast('Porada vymazaná', 'success'); }
+}
 
+// ─── Campaigns ───────────────────────────────────────────────────────────────────────
 async function loadCampaigns() {
-  const r = await fetch('/api/campaigns'); if (!r.ok) return; const campaigns = await r.json();
+  const r = await fetch('/api/campaigns');
+  if (!r.ok) return;
+  const campaigns = await r.json();
   const grid = document.getElementById('campaigns-grid');
-  if (!campaigns.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne kampane</div>'; return; }
-  grid.innerHTML = campaigns.map(c => `<div class="user-card"><div class="user-avatar" style="background:var(--green)">🎯</div><div class="user-info"><div class="user-name">${esc(c.title)}</div><div class="user-email">${c.start_date || '?'} → ${c.end_date || '?'} · <span class="badge badge-${c.status === 'active' ? 'accepted' : 'rejected'}" style="font-size:11px">${c.status === 'active' ? 'Aktívna' : 'Ukončená'}</span> · ${c.ideas_count} nápadov</div>${c.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(c.description).substring(0,100)}</div>` : ''}</div><div class="user-actions">${c.status === 'active' ? `<button class="btn-sm btn-ghost" onclick="endCampaign(${c.id})">Ukončiť</button>` : ''}${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost" style="color:var(--red)" onclick="deleteCampaign(${c.id})">🗑</button>` : ''}</div></div>`).join('');
+  if (!campaigns.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne kampane</div>';
+    return;
+  }
+  grid.innerHTML = campaigns.map(c => `
+    <div class="user-card">
+      <div class="user-avatar" style="background:var(--green)">🎯</div>
+      <div class="user-info">
+        <div class="user-name">${esc(c.title)}</div>
+        <div class="user-email">${c.start_date || '?'} → ${c.end_date || '?'} · <span class="badge badge-${c.status === 'active' ? 'accepted' : 'rejected'}" style="font-size:11px">${c.status === 'active' ? 'Aktívna' : 'Ukončená'}</span> · ${c.ideas_count} nápadov</div>
+        ${c.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(c.description).substring(0,100)}</div>` : ''}
+      </div>
+      <div class="user-actions">
+        ${c.status === 'active' ? `<button class="btn-sm btn-ghost" onclick="endCampaign(${c.id})">Ukončiť</button>` : ''}
+        ${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost" style="color:var(--red)" onclick="deleteCampaign(${c.id})">🗑</button>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
-function openCampaignModal() { document.getElementById('c-title').value = ''; document.getElementById('c-start').value = ''; document.getElementById('c-end').value = ''; document.getElementById('c-desc').value = ''; document.getElementById('campaign-modal').classList.add('open'); }
+function openCampaignModal() {
+  document.getElementById('c-title').value = '';
+  document.getElementById('c-start').value = '';
+  document.getElementById('c-end').value = '';
+  document.getElementById('c-desc').value = '';
+  document.getElementById('campaign-modal').classList.add('open');
+}
 
 async function saveCampaign() {
-  const title = document.getElementById('c-title').value.trim(); if (!title) { showToast('Zadajte názov', 'error'); return; }
-  const r = await fetch('/api/campaigns', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ title, start_date: document.getElementById('c-start').value, end_date: document.getElementById('c-end').value, description: document.getElementById('c-desc').value }) });
-  if (r.ok) { showToast('Kampaň vytvorená', 'success'); closeModal('campaign-modal'); loadCampaigns(); } else { const d = await r.json(); showToast(d.error || 'Chyba', 'error'); }
+  const title = document.getElementById('c-title').value.trim();
+  if (!title) { showToast('Zadajte názov', 'error'); return; }
+  const r = await fetch('/api/campaigns', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      title,
+      start_date: document.getElementById('c-start').value,
+      end_date: document.getElementById('c-end').value,
+      description: document.getElementById('c-desc').value
+    })
+  });
+  if (r.ok) {
+    showToast('Kampaň vytvorená', 'success');
+    closeModal('campaign-modal');
+    loadCampaigns();
+  } else {
+    const d = await r.json();
+    showToast(d.error || 'Chyba', 'error');
+  }
 }
 
-async function endCampaign(id) { const r = await fetch(`/api/campaigns/${id}`, { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'ended'}) }); if (r.ok) { loadCampaigns(); showToast('Kampaň ukončená', 'success'); } }
+async function endCampaign(id) {
+  const r = await fetch(`/api/campaigns/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status: 'ended'})
+  });
+  if (r.ok) { loadCampaigns(); showToast('Kampaň ukončená', 'success'); }
+}
 
-async function deleteCampaign(id) { if (!confirm('Naozaj vymazať kampaň?')) return; const r = await fetch(`/api/campaigns/${id}`, {method: 'DELETE'}); if (r.ok) { loadCampaigns(); showToast('Kampaň vymazaná', 'success'); } }
+async function deleteCampaign(id) {
+  if (!confirm('Naozaj vymazať kampaň?')) return;
+  const r = await fetch(`/api/campaigns/${id}`, {method: 'DELETE'});
+  if (r.ok) { loadCampaigns(); showToast('Kampaň vymazaná', 'success'); }
+}
 
+// ─── Bulk Selection & Delete ───────────────────────────────────────────────────────────
+function getSelectedIds() {
+  return [...document.querySelectorAll('.idea-cb:checked')].map(cb => parseInt(cb.value));
+}
+
+function updateBulkBar() {
+  const ids = getSelectedIds();
+  const bar = document.getElementById('bulk-bar');
+  const allCb = document.getElementById('select-all');
+  const total = document.querySelectorAll('.idea-cb').length;
+  if (ids.length > 0) {
+    bar.classList.add('visible');
+    document.getElementById('bulk-count').textContent = `${ids.length} označených`;
+  } else {
+    bar.classList.remove('visible');
+  }
+  allCb.checked = total > 0 && ids.length === total;
+  allCb.indeterminate = ids.length > 0 && ids.length < total;
+}
+
+function toggleSelectAll() {
+  const allCb = document.getElementById('select-all');
+  document.querySelectorAll('.idea-cb').forEach(cb => cb.checked = allCb.checked);
+  updateBulkBar();
+}
+
+function clearSelection() {
+  document.querySelectorAll('.idea-cb').forEach(cb => cb.checked = false);
+  document.getElementById('select-all').checked = false;
+  updateBulkBar();
+}
+
+async function bulkDelete() {
+  const ids = getSelectedIds();
+  if (!ids.length) return;
+  if (!confirm(`Naozaj vymazať ${ids.length} nápad${ids.length === 1 ? '' : ids.length < 5 ? 'y' : 'ov'}? Táto akcia je nevratná.`)) return;
+  try {
+    const r = await fetch('/api/ideas/bulk-delete', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ids})
+    });
+    if (r.ok) {
+      const d = await r.json();
+      showToast(`Vymazaných ${d.deleted} nápadov`, 'success');
+      clearSelection();
+      loadIdeas();
+    } else {
+      const d = await r.json();
+      showToast(d.error || 'Chyba pri mazaní', 'error');
+    }
+  } catch(e) {
+    showToast('Chyba: ' + e.message, 'error');
+  }
+}
+
+// ─── CSV Export ───────────────────────────────────────────────────────────────────────
 function exportCSV() {
   const params = new URLSearchParams();
-  const status = document.getElementById('f-status').value; const dept = document.getElementById('f-dept').value; const role = document.getElementById('f-role').value; const search = (document.getElementById('f-search').textContent || '').trim();
-  if (status) params.set('status', status); if (dept) params.set('department', dept); if (role) params.set('role', role); if (search) params.set('search', search);
+  const status = document.getElementById('f-status').value;
+  const dept = document.getElementById('f-dept').value;
+  const role = document.getElementById('f-role').value;
+  const search = (document.getElementById('f-search').textContent || '').trim();
+  if (status) params.set('status', status);
+  if (dept) params.set('department', dept);
+  if (role) params.set('role', role);
+  if (search) params.set('search', search);
   window.location.href = '/api/ideas/export-csv?' + params;
 }
 
-function openPasswordModal() { document.getElementById('pw-current').value = ''; document.getElementById('pw-new').value = ''; document.getElementById('pw-confirm').value = ''; document.getElementById('password-modal').classList.add('open'); }
+// ─── Password Change ─────────────────────────────────────────────────────────────────
+function openPasswordModal() {
+  document.getElementById('pw-current').value = '';
+  document.getElementById('pw-new').value = '';
+  document.getElementById('pw-confirm').value = '';
+  document.getElementById('password-modal').classList.add('open');
+}
 
 async function changePassword() {
-  const current = document.getElementById('pw-current').value; const newPw = document.getElementById('pw-new').value; const confirm = document.getElementById('pw-confirm').value;
+  const current = document.getElementById('pw-current').value;
+  const newPw = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+
   if (!current || !newPw) { showToast('Vyplňte všetky polia', 'error'); return; }
   if (newPw.length < 6) { showToast('Nové heslo musí mať aspoň 6 znakov', 'error'); return; }
   if (newPw !== confirm) { showToast('Heslá sa nezhodujú', 'error'); return; }
-  const r = await fetch('/api/change-password', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({current_password: current, new_password: newPw}) });
-  if (r.ok) { showToast('Heslo úspešne zmenené', 'success'); closeModal('password-modal'); } else { const d = await r.json(); showToast(d.error || 'Chyba pri zmene hesla', 'error'); }
+
+  const r = await fetch('/api/change-password', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({current_password: current, new_password: newPw})
+  });
+  if (r.ok) {
+    showToast('Heslo úspešne zmenené', 'success');
+    closeModal('password-modal');
+  } else {
+    const d = await r.json();
+    showToast(d.error || 'Chyba pri zmene hesla', 'error');
+  }
 }
 
+// ─── All users cache for assigned_to dropdown ───────────────────────────────────────
 let allUsersCache = null;
-async function getAllUsers() { if (allUsersCache) return allUsersCache; try { const r = await fetch('/api/users'); if (r.ok) { allUsersCache = await r.json(); } else { allUsersCache = []; } } catch { allUsersCache = []; } return allUsersCache; }
+
+async function getAllUsers() {
+  if (allUsersCache) return allUsersCache;
+  // Only admin/reviewer can see users—submitters get empty
+  try {
+    const r = await fetch('/api/users');
+    if (r.ok) {
+      allUsersCache = await r.json();
+    } else {
+      allUsersCache = [];
+    }
+  } catch {
+    allUsersCache = [];
+  }
+  return allUsersCache;
+}
 
 async function populateAssignedDropdown(selectedValue) {
-  const sel = document.getElementById('modal-assigned'); sel.innerHTML = '<option value="">— nepriradené —</option>';
+  const sel = document.getElementById('modal-assigned');
+  sel.innerHTML = '<option value="">— nepriradené —</option>';
   const users = await getAllUsers();
-  for (const u of users) { if (!u.active) continue; const opt = document.createElement('option'); opt.value = u.display_name; opt.textContent = `${u.display_name} (${u.email})`; sel.appendChild(opt); }
+  for (const u of users) {
+    if (!u.active) continue;
+    const opt = document.createElement('option');
+    opt.value = u.display_name;
+    opt.textContent = `${u.display_name} (${u.email})`;
+    sel.appendChild(opt);
+  }
   sel.value = selectedValue || '';
 }
 
