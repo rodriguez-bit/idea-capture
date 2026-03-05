@@ -334,5 +334,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "c-level",
+    "audio_filename": "1a4b5b10-e85e-4adc-b340-da32e5c6924d.webm",
+    "duration_seconds": 34,
+    "transcript": "Mám napad, že vlastne túto aplikáciu využijeme v e-mailingu, alebo v e-mailingu, keď ľuďom príde naša kabelka, že prosím len kliknite a ohodnotte zákaznické správanie vlastnými slovami a vlastne takto zbiera si feedback od našich zákazníkov. Nemusia to vypísať ručne, ale náhrajú ich feedback na to, čo chcú povedať o firme.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 15:28:14.047058+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
