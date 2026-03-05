@@ -16,6 +16,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - uses: actions/setup-node@v4
         with:
@@ -63,6 +65,18 @@ jobs:
           print(f"Created ICO with sizes: {sizes}")
           PYEOF
 
+      - name: Verify source files
+        shell: bash
+        run: |
+          echo "=== recorder.html first line check ==="
+          head -10 electron/recorder.html
+          echo "=== main.js background check ==="
+          grep -n "512D6D\|height\|backgroundColor" electron/main.js
+          echo "=== package.json version ==="
+          node -p "require('./electron/package.json').version"
+          echo "=== files list ==="
+          ls -la electron/main.js electron/recorder.html electron/preload.js electron/package.json
+
       - name: Install dependencies
         shell: bash
         working-directory: electron
@@ -82,7 +96,6 @@ jobs:
         shell: bash
         run: |
           echo "=== dist contents ==="
-          find electron/dist -type f -name "*.exe" 2>/dev/null || echo "No exe files"
           find electron/dist -type f 2>/dev/null | head -20
 
       - name: Create Release and Upload
