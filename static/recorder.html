@@ -96,12 +96,11 @@ body { background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Seg
       <option value="c-level">C-level</option>
       <option value="manager">Manažér</option>
       <option value="employee">Zamestnanec</option>
-      <option value="majo-markech">Majo markech je kral</option>
     </select>
   </div>
   <div class="vis-row">
-    <button type="button" class="vis-btn active" id="vis-personal" onclick="setVisibility('personal')">🔒 Môj nápad</button>
-    <button type="button" class="vis-btn" id="vis-company" onclick="setVisibility('company')">🌐 Pre celú firmu</button>
+    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Môj nápad</button>
+    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celú firmu</button>
   </div>
   <div class="mid">
     <button class="rbtn" id="rbtn" onclick="toggleRecord()"><div class="rdot"></div></button>
@@ -125,7 +124,7 @@ let audioBlob = null;
 let timerInterval = null;
 let seconds = 0;
 let currentUser = null;
-let currentVisibility = 'personal';
+let currentVisibility = 'company';
 
 function setVisibility(val) {
   currentVisibility = val;

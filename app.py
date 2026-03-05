@@ -40,7 +40,7 @@ ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.w
 ALLOWED_DOCUMENT_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt', '.md', '.rtf', '.png', '.jpg', '.jpeg', '.gif', '.webp'}
 
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
-ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
+ROLES = ['c-level', 'manager', 'employee']
 
 # ─── Failed login tracking ───────────────────────────────────────────────────
 _failed_logins = {}
@@ -713,8 +713,7 @@ def _auto_analyze(idea_id):
 
             prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
-{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
-Oddelenie: {idea['department']}
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
 "{idea['transcript']}"
@@ -900,8 +899,7 @@ def api_idea_analyze(idea_id):
 
     prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
-{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
-Oddelenie: {idea['department']}
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
 "{transcript}"
