@@ -1,0 +1,65 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Prepare clean source
+        shell: bash
+        run: |
+          mkdir -p src-clean
+          cp electron/main.js src-clean/
+          cp electron/preload.js src-clean/
+          cp electron/recorder.html src-clean/
+          cp -r electron/assets src-clean/ 2>/dev/null || true
+          cat > src-clean/package.json << 'EOF'
+          {"name":"ridea","version":"1.1.0","main":"main.js","dependencies":{}}
+          EOF
+
+      - name: Package app (x64)
+        shell: bash
+        run: |
+          npx --yes @electron/packager src-clean Ridea \
+            --platform=win32 \
+            --arch=x64 \
+            --electron-version=28.3.3 \
+            --out=win-out \
+            --overwrite \
+            --app-version=1.1.0 \
+            --icon=electron/assets/icon.ico
+
+      - name: Create portable ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-1.1.0-win-x64.zip"
+
+      - name: Create or get GitHub Release v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release create v1.1.0 \
+            --repo ${{ github.repository }} \
+            --title "Ridea v1.1.0 — Fialový dizajn" \
+            --notes "Nový fialový dizajn #512D6D pre Windows, Mac a Android" \
+            --latest \
+            2>/dev/null || true
+
+      - name: Upload to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release upload v1.1.0 "Ridea-1.1.0-win-x64.zip" \
+            --repo ${{ github.repository }} --clobber
