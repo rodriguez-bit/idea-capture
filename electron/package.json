@@ -1,7 +1,7 @@
 {
   "name": "ridea",
-  "version": "1.1.1",
-  "description": "Interný nástroj pre zachytávanie hlasových nápadov",
+  "version": "1.2.0",
+  "description": "Interny nastroj pre zachytavanie hlasovych napadov",
   "main": "main.js",
   "scripts": {
     "start": "electron .",

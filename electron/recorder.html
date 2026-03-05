@@ -27,7 +27,7 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
   width: 300px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-.card-title { font-size: 20px; font-weight: 700; color: #111827; text-align: center; margin-bottom: 4px; }
+.card-title { font-size: 20px; font-weight: 700; color: #512D6D; text-align: center; margin-bottom: 4px; }
 .card-sub   { font-size: 13px; color: #6b7280; text-align: center; margin-bottom: 20px; }
 .f {
   display: block; width: 100%; padding: 10px 13px; margin-bottom: 10px;
@@ -48,9 +48,10 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 /* RECORDER — dark, flex column */
 #rec-screen {
   flex-direction: column;
-  padding: 18px 20px;
-  gap: 12px;
+  padding: 14px 16px;
+  gap: 8px;
   color: #f0e6f6;
+  overflow-y: auto;
 }
 .topbar { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
 .uname { font-weight: 600; font-size: 15px; }
@@ -60,15 +61,16 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .sels { display: flex; gap: 8px; flex-shrink: 0; }
 .sel {
   flex: 1; padding: 9px 10px;
-  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15);
+  background: #3d1f54; border: 1px solid rgba(255,255,255,0.15);
   border-radius: 8px; color: #f0e6f6; font-size: 13px;
-  outline: none; appearance: none; cursor: pointer; text-align: center;
+  outline: none; cursor: pointer; text-align: center;
 }
+.sel option { background: #3d1f54; color: #f0e6f6; padding: 6px; }
 .sel:focus { border-color: rgba(255,255,255,0.4); }
 
-.mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.mid { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
 .rbtn {
-  width: 88px; height: 88px; border-radius: 50%;
+  width: 72px; height: 72px; border-radius: 50%;
   border: 3px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.08);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: transform .15s;
@@ -76,16 +78,40 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .rbtn:hover { transform: scale(1.05); }
 .rbtn.on { border-color: #ef4444; animation: g 1.5s infinite; }
 @keyframes g { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 70%{box-shadow:0 0 0 14px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
-.rdot { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all .15s; }
-.rbtn.on .rdot { background: #ef4444; border-radius: 7px; width: 26px; height: 26px; }
-.rtime { font-size: 30px; font-weight: 700; letter-spacing: 3px; }
-.rhint { font-size: 12px; color: rgba(255,255,255,0.4); }
+.rdot { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: all .15s; }
+.rbtn.on .rdot { background: #ef4444; border-radius: 7px; width: 22px; height: 22px; }
+.rtime { font-size: 26px; font-weight: 700; letter-spacing: 3px; }
+.rhint { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* Tabs for Voice / Text */
+.tab-row { display: flex; gap: 0; flex-shrink: 0; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); }
+.tab-btn { flex: 1; padding: 8px 6px; background: rgba(255,255,255,0.04); border: none; color: rgba(255,255,255,0.4); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.tab-btn.active { background: rgba(255,255,255,0.15); color: #f0e6f6; }
+
+/* Text input area */
+#text-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+#text-panel.active { display: flex; }
+#voice-panel { display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; flex: 1; min-height: 0; }
+#voice-panel.active { display: flex; }
+.txt-area {
+  flex: 1; min-height: 80px; padding: 10px; border-radius: 8px;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15);
+  color: #f0e6f6; font-size: 13px; font-family: inherit; resize: none; outline: none;
+}
+.txt-area::placeholder { color: rgba(255,255,255,0.3); }
+.txt-area:focus { border-color: rgba(255,255,255,0.4); }
+.txt-send {
+  padding: 10px; background: #fff; color: #512D6D; border: none;
+  border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.txt-send:hover { background: #f0e6f6; }
+.txt-send:disabled { opacity: .5; cursor: not-allowed; }
 
 .acts { display: flex; gap: 10px; flex-shrink: 0; }
-.bsend { flex: 1; padding: 12px; background: #fff; color: #512D6D; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.bsend { flex: 1; padding: 10px; background: #fff; color: #512D6D; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .bsend:hover { background: #f0e6f6; }
 .bsend:disabled { opacity: .5; cursor: not-allowed; }
-.bx { padding: 12px 15px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 14px; cursor: pointer; }
+.bx { padding: 10px 15px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 14px; cursor: pointer; }
 .bx:hover { color: #ef4444; border-color: #ef4444; }
 
 .bar { height: 3px; background: rgba(255,255,255,0.12); border-radius: 3px; flex-shrink: 0; }
@@ -103,58 +129,77 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 
 <div id="login-screen">
   <div class="card">
-    <div class="card-title">💡 Ridea</div>
-    <div class="card-sub">Zachytávač nápadov</div>
+    <div class="card-title">RI Ridea</div>
+    <div class="card-sub">Zachytavac napadov</div>
     <input class="f" type="email"    id="le" placeholder="E-mail"  autocomplete="username">
     <input class="f" type="password" id="lp" placeholder="Heslo"   autocomplete="current-password">
-    <div class="chk"><input type="checkbox" id="lr" checked><label for="lr">Zapamätať prihlásenie</label></div>
-    <button class="btn-in" onclick="doLogin()">Prihlásiť sa</button>
+    <div class="chk"><input type="checkbox" id="lr" checked><label for="lr">Zapamata prihlasenie</label></div>
+    <button class="btn-in" onclick="doLogin()">Prihlasit sa</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
 <div id="rec-screen">
   <div class="topbar">
-    <span class="uname" id="uname">—</span>
-    <button class="btn-out" onclick="doLogout()">Odhlásiť</button>
+    <span class="uname" id="uname">&#8212;</span>
+    <button class="btn-out" onclick="doLogout()">Odhlasit</button>
   </div>
   <div class="sels">
     <select class="sel" id="dept" onchange="savePref('savedDept', this.value)">
       <option value="">Oddelenie</option>
-      <option value="development">Vývoj</option>
+      <option value="development">Vyvoj</option>
       <option value="marketing">Marketing</option>
       <option value="production">Produkcia</option>
-      <option value="management">Manažment</option>
-      <option value="other">Iné</option>
+      <option value="management">Manazment</option>
+      <option value="other">Ine</option>
     </select>
     <select class="sel" id="role" onchange="savePref('savedRole', this.value)">
       <option value="">Rola</option>
       <option value="c-level">C-level</option>
-      <option value="manager">Manažér</option>
+      <option value="manager">Manazer</option>
       <option value="employee">Zamestnanec</option>
     </select>
   </div>
   <div class="vis-row">
-    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Môj nápad</button>
-    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celú firmu</button>
+    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Moj napad</button>
+    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celu firmu</button>
   </div>
-  <div class="mid">
+
+  <div class="tab-row">
+    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">Hlasovy napad</button>
+    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">Textovy napad</button>
+  </div>
+
+  <div id="voice-panel" class="active">
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div></button>
-    <div class="rtime" id="rtime">—</div>
-    <div class="rhint" id="rhint">Klikni pre nahrávanie</div>
+    <div class="rtime" id="rtime">&#8212;</div>
+    <div class="rhint" id="rhint">Klikni pre nahravanie</div>
   </div>
+
+  <div id="text-panel">
+    <textarea class="txt-area" id="txtIdea" placeholder="Napiste svoj napad..."></textarea>
+    <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odoslat textovy napad</button>
+  </div>
+
   <div class="acts" id="acts" style="display:none">
-    <button class="bx"    onclick="discard()">✕</button>
-    <button class="bsend" id="bsend" onclick="sendIdea()">Odoslať nápad</button>
+    <button class="bx" onclick="discard()">&#10005;</button>
+    <button class="bsend" id="bsend" onclick="sendIdea()">Odoslat napad</button>
   </div>
   <div class="bar"><div class="bfill" id="bfill"></div></div>
   <div class="smsg" id="smsg"></div>
-  <div class="adml" onclick="openAdmin()">⚙ Admin konzola</div>
+  <div class="adml" onclick="openAdmin()">Admin konzola</div>
 </div>
 
 <script>
 var API = 'https://ridea.onrender.com';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
+
+function switchTab(tab) {
+  document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
+  document.getElementById('tab-text').classList.toggle('active', tab === 'text');
+  document.getElementById('voice-panel').classList.toggle('active', tab === 'voice');
+  document.getElementById('text-panel').classList.toggle('active', tab === 'text');
+}
 
 function setVisibility(val) {
   currentVisibility = val;
@@ -207,17 +252,17 @@ async function doLogin() {
   var err   = document.getElementById('lerr');
   err.textContent = '';
   try {
-    var r = await fetch(API+'/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password:pass}), credentials:'include'});
+    var r = await fetch(API+'/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email,password:pass}), credentials:'include'});
     if (r.ok) {
       var d = await r.json();
-      user = {name:d.name, role:d.role, email};
+      user = {name:d.name, role:d.role, email:email};
       if (window.electron) {
         await window.electron.setStore('user', user);
         var rem = document.getElementById('lr').checked;
-        await window.electron.setStore('savedCreds', rem ? {email, password:pass} : null);
+        await window.electron.setStore('savedCreds', rem ? {email:email, password:pass} : null);
       }
       showRec();
-    } else { var d = await r.json().catch(()=>({})); err.textContent = d.error||'Nesprávne údaje'; }
+    } else { var d = await r.json().catch(function(){return {};}); err.textContent = d.error||'Nespravne udaje'; }
   } catch(e) { err.textContent = 'Chyba pripojenia'; }
 }
 
@@ -250,11 +295,11 @@ async function startRec() {
       blob = new Blob(chunks, {type:mime});
       stream.getTracks().forEach(function(t){t.stop();});
       document.getElementById('acts').style.display = 'flex';
-      document.getElementById('rhint').textContent = 'Nahrávka pripravená';
+      document.getElementById('rhint').textContent = 'Nahravka pripravena';
     };
     mr.start(1000);
     document.getElementById('rbtn').classList.add('on');
-    document.getElementById('rhint').textContent = 'Nahrávam... klikni pre zastavenie';
+    document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
     secs = 0; document.getElementById('rtime').textContent = '0:00';
     ti = setInterval(function(){
@@ -263,7 +308,7 @@ async function startRec() {
       document.getElementById('rtime').textContent = m+':'+(s<10?'0':'')+s;
     }, 1000);
     clearMsg();
-  } catch(e) { setMsg(e.name==='NotAllowedError'?'Mikrofón odmietnutý':'Chyba: '+e.message,'err'); }
+  } catch(e) { setMsg(e.name==='NotAllowedError'?'Mikrofon odmietnuty':'Chyba: '+e.message,'err'); }
 }
 
 function stopRec() {
@@ -276,16 +321,16 @@ function discard() {
   blob=null; chunks=[];
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
-  document.getElementById('rtime').textContent = '—';
-  document.getElementById('rhint').textContent = 'Klikni pre nahrávanie';
+  document.getElementById('rtime').textContent = '\u2014';
+  document.getElementById('rhint').textContent = 'Klikni pre nahravanie';
   clearMsg();
 }
 
 async function sendIdea() {
   if (!blob) return;
   var btn = document.getElementById('bsend');
-  btn.disabled=true; btn.textContent='Odosiela sa...';
-  setMsg('Prepísujem... 10–30 sekúnd','inf');
+  btn.disabled=true; btn.textContent='Odosielam...';
+  setMsg('Prepisujem... 10-30 sekund','inf');
   var fill = document.getElementById('bfill'), w=0;
   var p = setInterval(function(){ w=Math.min(w+2,85); fill.style.width=w+'%'; if(w>=85) clearInterval(p); }, 600);
   try {
@@ -296,10 +341,37 @@ async function sendIdea() {
     fd.append('visibility', currentVisibility);
     var r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include'});
     clearInterval(p); fill.style.width='100%';
-    if (r.ok) { setMsg('✓ Nápad odoslaný!','ok'); setTimeout(discard, 2500); }
+    if (r.ok) { setMsg('Napad odoslany!','ok'); setTimeout(discard, 2500); }
     else { var d=await r.json().catch(function(){return {};}); setMsg(d.error||'Chyba','err'); }
   } catch(e) { setMsg('Chyba: '+e.message,'err'); }
-  finally { btn.disabled=false; btn.textContent='Odoslať nápad'; setTimeout(function(){fill.style.width='0%';},2000); }
+  finally { btn.disabled=false; btn.textContent='Odoslat napad'; setTimeout(function(){fill.style.width='0%';},2000); }
+}
+
+async function sendTextIdea() {
+  var text = document.getElementById('txtIdea').value.trim();
+  if (!text) { setMsg('Napiste text napadu','err'); return; }
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
+  if (!dept||!role) { setMsg('Vyber oddelenie a rolu','err'); return; }
+  var btn = document.getElementById('txtSend');
+  btn.disabled=true; btn.textContent='Odosielam...';
+  var fill = document.getElementById('bfill'), w=0;
+  var p = setInterval(function(){ w=Math.min(w+2,85); fill.style.width=w+'%'; if(w>=85) clearInterval(p); }, 600);
+  try {
+    var r = await fetch(API+'/api/ideas/text', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:text, department:dept, role:role, visibility:currentVisibility}),
+      credentials:'include'
+    });
+    clearInterval(p); fill.style.width='100%';
+    if (r.ok) {
+      setMsg('Textovy napad odoslany!','ok');
+      document.getElementById('txtIdea').value = '';
+      setTimeout(function(){ fill.style.width='0%'; clearMsg(); }, 2500);
+    } else { var d=await r.json().catch(function(){return {};}); setMsg(d.error||'Chyba','err'); }
+  } catch(e) { setMsg('Chyba: '+e.message,'err'); }
+  finally { btn.disabled=false; btn.textContent='Odoslat textovy napad'; setTimeout(function(){fill.style.width='0%';},2000); }
 }
 
 function setMsg(t,c){ var e=document.getElementById('smsg'); e.textContent=t; e.className='smsg '+c; }

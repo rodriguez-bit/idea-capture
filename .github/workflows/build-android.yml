@@ -1,6 +1,12 @@
 name: Build Android APK
 
 on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/build-android.yml'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -19,6 +25,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(grep 'versionName' android/app/build.gradle | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Generate launcher icons
         run: |
           sudo apt-get install -y python3-pip
@@ -28,17 +40,17 @@ jobs:
           import os
 
           def make_icon(size):
-              img = Image.new('RGBA', (size, size), (15, 23, 42, 255))
+              img = Image.new('RGBA', (size, size), (81, 45, 109, 255))
               draw = ImageDraw.Draw(img)
               pad = int(size * 0.1)
               r = int(size * 0.22)
-              draw.rounded_rectangle([pad, pad, size-pad, size-pad], radius=r, fill=(99, 102, 241, 255))
+              draw.rounded_rectangle([pad, pad, size-pad, size-pad], radius=r, fill=(61, 31, 84, 255))
               fs = int(size * 0.42)
               try:
                   font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", fs)
               except:
                   font = ImageFont.load_default()
-              text = "Ri"
+              text = "RI"
               bbox = draw.textbbox((0,0), text, font=font)
               x = (size - (bbox[2]-bbox[0])) // 2 - bbox[0]
               y = (size - (bbox[3]-bbox[1])) // 2 - bbox[1]
@@ -59,13 +71,17 @@ jobs:
           gradle wrapper --gradle-version=8.4
           ./gradlew assembleRelease
 
-      - name: Upload APK to GitHub Release v1.0.15
+      - name: Upload APK to GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          find android -name "*.apk" | head -5
+          gh release create "v${{ steps.ver.outputs.version }}" \
+            --repo ${{ github.repository }} \
+            --title "Ridea v${{ steps.ver.outputs.version }}" \
+            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn, textove napady, logo RI" \
+            --latest 2>/dev/null || true
           for f in $(find android -name "*.apk"); do
-            cp "$f" "Ridea-1.0.15.apk"
-            gh release upload v1.0.15 "Ridea-1.0.15.apk" \
-              --repo dajanarodriguez/idea-capture --clobber
+            cp "$f" "Ridea-${{ steps.ver.outputs.version }}.apk"
+            gh release upload "v${{ steps.ver.outputs.version }}" "Ridea-${{ steps.ver.outputs.version }}.apk" \
+              --repo ${{ github.repository }} --clobber
           done

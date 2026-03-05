@@ -1,6 +1,12 @@
 name: Build Mac DMG
 
 on:
+  push:
+    paths:
+      - 'electron/**'
+      - '.github/workflows/build-mac.yml'
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -15,27 +21,36 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(node -p "require('./electron/package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Prepare clean source
         run: |
-          mkdir -p src-clean
-          cp electron/main.js src-clean/
-          cp electron/preload.js src-clean/
-          cp electron/recorder.html src-clean/
-          cp -r electron/assets src-clean/ 2>/dev/null || true
-          echo '{"name":"ridea","version":"1.0.15","main":"main.js","dependencies":{}}' > src-clean/package.json
+          mkdir -p build-src
+          cp electron/main.js build-src/
+          cp electron/preload.js build-src/
+          cp electron/recorder.html build-src/
+          cp -r electron/assets build-src/ 2>/dev/null || true
+          cd build-src
+          npm init -y
+          npm install electron@28.3.3 electron-updater@6.8.3
+          echo "Electron installed"
 
       - name: Package app (arm64 + x64)
         run: |
-          npx --yes @electron/packager src-clean Ridea \
+          npx --yes @electron/packager@latest build-src Ridea \
             --platform=darwin \
             --arch=arm64,x64 \
-            --electron-version=28.3.3 \
             --out=mac-out \
             --overwrite \
-            --app-version=1.0.15 \
+            --app-version=${{ steps.ver.outputs.version }} \
+            --no-prune \
             --icon=electron/assets/icon.png
 
-      - name: Create DMG (arm64 — Apple Silicon)
+      - name: Create DMG (arm64 - Apple Silicon)
         run: |
           mkdir dmg_arm64
           cp -r "mac-out/Ridea-darwin-arm64/Ridea.app" dmg_arm64/
@@ -44,9 +59,9 @@ jobs:
             -volname "Ridea" \
             -srcfolder dmg_arm64 \
             -ov -format UDZO \
-            "Ridea-1.0.15-arm64.dmg"
+            "Ridea-${{ steps.ver.outputs.version }}-arm64.dmg"
 
-      - name: Create DMG (x64 — Intel Mac)
+      - name: Create DMG (x64 - Intel Mac)
         run: |
           mkdir dmg_x64
           cp -r "mac-out/Ridea-darwin-x64/Ridea.app" dmg_x64/
@@ -55,14 +70,18 @@ jobs:
             -volname "Ridea" \
             -srcfolder dmg_x64 \
             -ov -format UDZO \
-            "Ridea-1.0.15-x64.dmg"
+            "Ridea-${{ steps.ver.outputs.version }}-x64.dmg"
 
-      - name: Upload DMGs to GitHub Release v1.0.15
+      - name: Upload DMGs to GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls *.dmg 2>/dev/null || true
+          gh release create "v${{ steps.ver.outputs.version }}" \
+            --repo ${{ github.repository }} \
+            --title "Ridea v${{ steps.ver.outputs.version }}" \
+            --notes "Ridea v${{ steps.ver.outputs.version }} - fialovy dizajn, textove napady, logo RI" \
+            --latest 2>/dev/null || true
           for f in *.dmg; do
-            [ -f "$f" ] && gh release upload v1.0.15 "$f" \
-              --repo dajanarodriguez/idea-capture --clobber
+            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+              --repo ${{ github.repository }} --clobber
           done

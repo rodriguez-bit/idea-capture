@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
 
-// Allow cross-origin cookies from file:// → ridea.onrender.com
+// Allow cross-origin cookies from file:// -> ridea.onrender.com
 app.commandLine.appendSwitch('disable-features', 'SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure');
 
 // Simple JSON store (replaces electron-store to avoid ESM issues)
@@ -38,8 +38,8 @@ function _pngChunk(type, data) {
 }
 function makeTrayIcon() {
   const size = 16;
-  // Amber yellow circle on transparent background
-  const R = 255, G = 193, B = 7;
+  // Purple circle on transparent background (#512D6D)
+  const R = 81, G = 45, B = 109;
   const raw = Buffer.alloc(size * (1 + size * 4));
   for (let y = 0; y < size; y++) {
     const base = y * (1 + size * 4);
@@ -69,7 +69,7 @@ function makeTrayIcon() {
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 380,
-    height: 460,
+    height: 580,
     resizable: false,
     title: 'Ridea',
     autoHideMenuBar: true,
@@ -106,17 +106,17 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: '💡 Nahrať nápad',
+      label: 'RI - Nahrat napad',
       click: () => { mainWindow.show(); mainWindow.focus(); }
     },
     { type: 'separator' },
     {
-      label: '🌐 Otvoriť Admin konzolu',
+      label: 'Otvorit Admin konzolu',
       click: () => shell.openExternal(API_BASE)
     },
     { type: 'separator' },
     {
-      label: 'Ukončiť',
+      label: 'Ukoncit',
       click: () => {
         app.isQuitting = true;
         app.quit();
@@ -124,7 +124,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('Ridea — zachytávač nápadov');
+  tray.setToolTip('Ridea - zachytavac napadov');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', () => {
@@ -150,9 +150,9 @@ function checkForUpdates() {
   autoUpdater.on('update-downloaded', (info) => {
     dialog.showMessageBox(mainWindow, {
       type: 'info',
-      title: 'Aktualizácia pripravená',
-      message: `Verzia ${info.version} je stiahnutá. Reštartovať teraz?`,
-      buttons: ['Reštartovať', 'Neskôr'],
+      title: 'Aktualizacia pripravena',
+      message: 'Verzia ' + info.version + ' je stiahnutata. Restartovat teraz?',
+      buttons: ['Restartovat', 'Neskor'],
       defaultId: 0
     }).then(({ response }) => {
       if (response === 0) autoUpdater.quitAndInstall();
