@@ -20,7 +20,7 @@
   {
     "email": "dajana@dajanarodriguez.com",
     "display_name": "Dajana",
-    "password_hash": "scrypt:32768:8:1$nFF6fY6ui2fU19Ah$1fa1d20f7827c8d514bdcd29eab95de934f4e17b6f08414f62018c0954e3e8ed399c4d328dbb373eafe3475fa0c0c172ba4af1cea044e525ba18f6e07af81895",
+    "password_hash": "scrypt:32768:8:1$W4BSgL38lazv8eTj$5e38e5276922c671310aa34527e60b666b8e2a0c7481ba165c368ab685700fb14ace2d3c746091eafe854b740775e449aa182ca518a416a91d942e8b085b7315",
     "role": "reviewer",
     "department": "management",
     "active": 1,
