@@ -490,15 +490,15 @@ LOGIN_HTML = '''<!DOCTYPE html>
 <title>Ridea — Prihlásenie</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .card { background: #1e293b; border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  p { color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
-  label { display: block; font-size: 13px; font-weight: 500; color: #cbd5e1; margin-bottom: 6px; }
-  input { width: 100%; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 15px; outline: none; margin-bottom: 16px; }
-  input:focus { border-color: #6366f1; }
-  button { width: 100%; padding: 13px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-  button:hover { background: #4f46e5; }
+  body { background: #512D6D; color: #f0e6f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(20px); }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  p { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 32px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+  input { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 15px; outline: none; margin-bottom: 16px; }
+  input:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
+  button { width: 100%; padding: 13px; background: #fff; color: #512D6D; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  button:hover { background: #f0e6f6; }
   .error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
   .logo { font-size: 32px; margin-bottom: 16px; }
 </style>
@@ -713,7 +713,8 @@ def _auto_analyze(idea_id):
 
             prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
-{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}Oddelenie: {idea['department']}
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
+Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
 "{idea['transcript']}"
@@ -899,7 +900,8 @@ def api_idea_analyze(idea_id):
 
     prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
-{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}Oddelenie: {idea['department']}
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
+Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
 "{transcript}"
