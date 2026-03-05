@@ -1844,9 +1844,9 @@ def api_campaign_delete(campaign_id):
 
 # ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
+@login_required
 def index():
-    from flask import redirect, url_for
-    return redirect(url_for('recorder_page'))
+    return send_from_directory('static', 'index.html')
 
 
 @app.route('/admin')
