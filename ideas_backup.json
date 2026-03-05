@@ -292,5 +292,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "c-level",
+    "audio_filename": "608eb16d-9e80-46c6-a57c-efcdf24d454f.webm",
+    "duration_seconds": 10,
+    "transcript": "Absolutne ošetřenie.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 13:32:11.078394+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
