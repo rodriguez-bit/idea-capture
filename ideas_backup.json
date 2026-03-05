@@ -208,5 +208,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 6,
+    "author_name": "Veronika Víghová",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 56,
+    "transcript": "Ďalší nápad, ak sme sa bavili v podstate o nových tvároch kabeliek tak možno si robiť aj taký ako keby prieskum medzi našimi zakazničkami. A to spraviť napríklad na Instagrame aby ľudia hlasovali o farbu, tvárká kabelky a detajlí. A tým pádom by sme možno videli, čo ľuďom chýba v našej ponuke alebo aký vkus by sa im páčil. A na základe toho by sme vedeli prispôsobiť možno aj ďalšie nové modely. Čiže ako keby sme mohli ľudí nechať rozhodnúť na dizajne novej kabelky.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 09:28:10.726053+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
