@@ -86,18 +86,18 @@ jobs:
           echo "Packaging done"
 
       - name: Create Inno Setup script
-        shell: bash
+        shell: pwsh
         run: |
-          VERSION="${{ steps.ver.outputs.version }}"
-          cat > installer.iss << ISSEOF
+          $version = "${{ steps.ver.outputs.version }}"
+          $iss = @"
           [Setup]
           AppName=Ridea
-          AppVersion=${VERSION}
+          AppVersion=$version
           AppPublisher=Dajana Rodriguez
           DefaultDirName={autopf}\Ridea
           DefaultGroupName=Ridea
           OutputDir=installer-out
-          OutputBaseFilename=Ridea-Setup-${VERSION}
+          OutputBaseFilename=Ridea-Setup-$version
           SetupIconFile=electron\assets\icon.ico
           Compression=lzma2
           SolidCompression=yes
@@ -106,23 +106,20 @@ jobs:
           UninstallDisplayIcon={app}\Ridea.exe
           WizardStyle=modern
 
-          [Languages]
-          Name: "sk"; MessagesFile: "compiler:Default.isl"
-
-          [Tasks]
-          Name: "desktopicon"; Description: "Vytvorit skratku na ploche"; GroupDescription: "Dalsie moznosti:"; Flags: checked
-
           [Files]
           Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
           [Icons]
           Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"
-          Name: "{group}\Odinštalovať Ridea"; Filename: "{uninstallexe}"
-          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; Tasks: desktopicon
+          Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"
 
           [Run]
-          Filename: "{app}\Ridea.exe"; Description: "Spustit Ridea"; Flags: nowait postinstall skipifsilent
-          ISSEOF
+          Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
+          "@
+          Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
+          Write-Host "Created installer.iss"
+          Get-Content installer.iss
 
       - name: Build installer with Inno Setup
         shell: cmd
@@ -150,12 +147,10 @@ jobs:
             --notes "Ridea v${VERSION} - fialovy dizajn, textove napady, logo RI" \
             --latest 2>/dev/null || echo "Release already exists"
 
-          # Upload installer
           gh release upload "v${VERSION}" \
             "installer-out/Ridea-Setup-${VERSION}.exe" \
             --repo "${REPO}" --clobber || echo "Installer upload failed"
 
-          # Upload ZIP too
           gh release upload "v${VERSION}" \
             "Ridea-${VERSION}-win-x64.zip" \
             --repo "${REPO}" --clobber || echo "ZIP upload failed"
