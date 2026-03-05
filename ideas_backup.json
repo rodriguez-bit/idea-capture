@@ -271,5 +271,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 838,
+    "transcript": "No a vlastne ja teba počulam, lebo 5 dňa ja neviem nič. To je skvelé, tak sa tam už učujeme. Nie, nie, poďme si teraz povedať. Ja včera som natočil také video, ktoré horem že chcem s vás delať. A pohľadal som ešte videa od Dany? Vôbec. Len ona tam musí mať aj nejakú hlavu a pätuť v sociálnej srdeči. A môžeme mať tak akože random zdieľať niečo. Tam je aj nejaký storytelling. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť. Ďakujem za pozornosť.",
+    "status": "new",
+    "ai_score": 2,
+    "ai_analysis": "{\"score\": 2, \"clarity\": 1, \"feasibility\": 3, \"relevance\": 4, \"summary\": \"Nápad sa týka tvorby video obsahu a storytellingu na sociálnych sieťach s potenciálnym zapojením kolegu Dany. Prezentácia je však extrémne nejasná a inkoherentná, čo znemožňuje objektívne vyhodnotenie jeho praktickej hodnoty.\", \"strengths\": [\"Týka sa relevantnej oblasti (video obsah a storytelling na sociálnych sieťach sú dôležitou marketingovou súčasťou)\", \"Prejavuje iniciatívu tvorby nového obsahu a potenciálnu snahu o tímovú spoluprácu\"], \"weaknesses\": [\"Vylúčená zrozumiteľnosť - transkript je prakticky neinterpretovateľný a nekoherentný\", \"Chýbajú konkrétne detaily: aký obsah, pre aké cieľové publikum, aké metriky úspechu\", \"Nýchť detailný plán implementácie alebo časový plán\", \"Nejasný cieľ a očakávaný dopad na tržby alebo povedomie značky\"], \"next_steps\": [\"Požiadať autora nápadu o prepísanú, jasne strukturovanú verziu v písomnej podobe\", \"Usporiadať individuálnu schôdzku s managerom na spresnenie cieľov, cieľového publika a konkrétneho obsahu\", \"Vytvoriť podrobný projekt s konkrétnym plánom, rozpočtom a metrikami úspechu\"], \"category\": \"marketing\", \"tags\": [\"marketing\", \"product\", \"innovation\"]}",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 12:16:32.23104+00",
+    "visibility": "company",
+    "tags": "[\"marketing\", \"product\", \"innovation\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
