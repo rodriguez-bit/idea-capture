@@ -185,7 +185,7 @@
     "password_hash": "scrypt:32768:8:1$i7QY89Tgnz1XNqHP$507dfa66e8e89260448bf50dc480fe903aaacac5a08b7c2401306643e1b205292415b7cc3972fae84ad64217c28154468ebbc6e378113dfad1a3c35733cabca9",
     "role": "submitter",
     "department": "development",
-    "active": 1,
+    "active": 0,
     "created_at": "2026-03-05 10:30:57.333103+00"
   }
 ]
