@@ -1076,6 +1076,61 @@ def api_idea_audio(idea_id):
     return Response(audio_bytes, mimetype=mime, headers={'Content-Disposition': f'inline; filename="{fname}"'})
 
 
+@app.route('/api/ideas/<int:idea_id>/retranscribe', methods=['POST'])
+@login_required
+def api_idea_retranscribe(idea_id):
+    """Re-run Whisper transcription on stored audio_data."""
+    api_key = os.environ.get('OPENAI_API_KEY')
+    if not api_key:
+        return jsonify({'error': 'OPENAI_API_KEY nie je nastavený'}), 500
+    db = get_db()
+    idea = db.execute('SELECT audio_data, audio_filename FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    db.close()
+    if not idea or not idea['audio_data']:
+        return jsonify({'error': 'Audio nie je k dispozícii pre tento nápad'}), 404
+    import base64, openai, tempfile
+    audio_bytes = base64.b64decode(idea['audio_data'])
+    ext = os.path.splitext(idea['audio_filename'])[1] if idea['audio_filename'] else '.webm'
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        tmp.write(audio_bytes)
+        tmp_path = tmp.name
+    try:
+        client = openai.OpenAI(api_key=api_key)
+        chunks = _split_audio_chunks(tmp_path)
+        all_text = []
+        total_duration = 0
+        for i, chunk_path in enumerate(chunks):
+            if os.path.getsize(chunk_path) > 25 * 1024 * 1024:
+                continue
+            with open(chunk_path, 'rb') as f:
+                tr = client.audio.transcriptions.create(
+                    model='whisper-1', file=f, language='sk',
+                    response_format='verbose_json',
+                    prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else (all_text[-1][-200:] if all_text else '')
+                )
+            cleaned = _clean_hallucinations(tr.text or '')
+            total_duration += int(getattr(tr, 'duration', 0) or 0)
+            if cleaned:
+                all_text.append(cleaned)
+            for cp in chunks:
+                if cp != tmp_path and os.path.exists(cp):
+                    try: os.unlink(cp)
+                    except Exception: pass
+        transcript_text = ' '.join(all_text).strip() or '[Transkript nedostupný]'
+        db2 = get_db()
+        db2.execute('UPDATE ideas SET transcript = ?, duration_seconds = ? WHERE id = ?',
+                    (transcript_text, total_duration or idea['duration_seconds'] if 'duration_seconds' in idea.keys() else 0, idea_id))
+        db2.commit()
+        db2.close()
+        save_ideas_backup()
+        return jsonify({'ok': True, 'transcript': transcript_text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        try: os.unlink(tmp_path)
+        except Exception: pass
+
+
 @app.route('/api/ideas/<int:idea_id>/analyze', methods=['POST'])
 @login_required
 def api_idea_analyze(idea_id):

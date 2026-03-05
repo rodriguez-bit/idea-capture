@@ -376,7 +376,10 @@ table input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--pr
     </div>
 
     <div class="detail-section">
-      <label>Transkript</label>
+      <label style="display:flex;align-items:center;justify-content:space-between">
+        <span>Transkript</span>
+        <button id="btn-retranscribe" onclick="retranscribeIdea()" style="display:none;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12px">🔄 Prepísať znova</button>
+      </label>
       <p id="modal-transcript"></p>
     </div>
 
@@ -803,8 +806,10 @@ async function openIdea(id) {
   if (i.audio_data) {
     audioSection.style.display = '';
     document.getElementById('modal-audio-player').src = `/api/ideas/${i.id}/audio`;
+    document.getElementById('btn-retranscribe').style.display = '';
   } else {
     audioSection.style.display = 'none';
+    document.getElementById('btn-retranscribe').style.display = 'none';
   }
 
   const aiSection = document.getElementById('modal-ai-section');
@@ -922,6 +927,26 @@ async function saveIdea() {
     loadIdeas();
   } else {
     showToast('Chyba pri ukladaní', 'error');
+  }
+}
+
+async function retranscribeIdea() {
+  if (!currentIdea) return;
+  const btn = document.getElementById('btn-retranscribe');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Prepisu..';
+  btn.disabled = true;
+  showToast('Spúšťam prepis...', '');
+  const r = await fetch(`/api/ideas/${currentIdea.id}/retranscribe`, {method: 'POST'});
+  const d = await r.json();
+  btn.textContent = orig;
+  btn.disabled = false;
+  if (r.ok) {
+    document.getElementById('modal-transcript').textContent = d.transcript;
+    showToast('Prepis dokončený', 'success');
+    loadIdeas();
+  } else {
+    showToast(d.error || 'Prepis zlyhal', 'error');
   }
 }
 
