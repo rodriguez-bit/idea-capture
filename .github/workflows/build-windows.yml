@@ -28,20 +28,34 @@ jobs:
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Install dependencies and build
-        shell: bash
-        working-directory: electron
-        run: |
-          npm ci
-          npx electron-builder --win portable --config.extraMetadata.version=${{ steps.ver.outputs.version }}
-
-      - name: List output
+      - name: Prepare source
         shell: bash
         run: |
-          find electron/dist -type f -name "*.exe" -o -name "*.zip" 2>/dev/null || true
-          ls -la electron/dist/ 2>/dev/null || true
+          mkdir -p build-src
+          cp electron/main.js build-src/
+          cp electron/preload.js build-src/
+          cp electron/recorder.html build-src/
+          cp -r electron/assets build-src/ 2>/dev/null || true
+          echo '{"name":"ridea","version":"${{ steps.ver.outputs.version }}","main":"main.js","dependencies":{}}' > build-src/package.json
 
-      - name: Create GitHub Release
+      - name: Package with electron-packager
+        shell: bash
+        run: |
+          npx --yes @electron/packager@latest build-src Ridea \
+            --platform=win32 \
+            --arch=x64 \
+            --electron-version=28.3.3 \
+            --out=win-out \
+            --overwrite \
+            --app-version=${{ steps.ver.outputs.version }} \
+            --no-prune
+
+      - name: Create ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+
+      - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
@@ -50,15 +64,13 @@ jobs:
             --repo ${{ github.repository }} \
             --title "Ridea v${{ steps.ver.outputs.version }}" \
             --notes "Ridea v${{ steps.ver.outputs.version }} — fialovy dizajn #512D6D" \
-            --latest \
-            2>/dev/null || true
+            --latest 2>/dev/null || true
 
       - name: Upload to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          for f in electron/dist/*.exe; do
-            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
-              --repo ${{ github.repository }} --clobber
-          done
+          gh release upload "v${{ steps.ver.outputs.version }}" \
+            "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip" \
+            --repo ${{ github.repository }} --clobber
