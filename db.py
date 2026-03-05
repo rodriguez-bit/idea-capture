@@ -51,8 +51,6 @@ def _translate_query(sql):
         return sql
 
     # ? -> %s (parameter placeholders)
-    # Careful: only replace ? that are not inside string literals
-    # Since our codebase has no ? in string literals, simple replace is safe
     sql = sql.replace('?', '%s')
 
     # datetime('now') -> CURRENT_TIMESTAMP, date('now') -> CURRENT_DATE
@@ -62,8 +60,7 @@ def _translate_query(sql):
     # date(column) -> column::date (SQLite date() cast -> PG cast)
     sql = re.sub(r'\bdate\((\w+)\)', r'\1::date', sql)
 
-    # TEXT >= CURRENT_DATE comparisons: cast callback_datum and similar text date fields
-    # In SQLite text comparison works, but PG needs explicit cast
+    # TEXT >= CURRENT_DATE comparisons
     sql = re.sub(r'(\w+_datum)\s*>=\s*CURRENT_DATE', r"NULLIF(\1, '')::date >= CURRENT_DATE", sql)
     sql = re.sub(r'(\w+_datum)\s*<=\s*CURRENT_DATE', r"NULLIF(\1, '')::date <= CURRENT_DATE", sql)
 
@@ -78,6 +75,11 @@ def _translate_query(sql):
         if 'ON CONFLICT' not in sql:
             sql = sql.rstrip().rstrip(';')
             sql += ' ON CONFLICT (email) DO UPDATE SET display_name=EXCLUDED.display_name, password_hash=EXCLUDED.password_hash, role=EXCLUDED.role, department=EXCLUDED.department'
+    elif 'INSERT OR REPLACE INTO company_context' in sql:
+        sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
+        if 'ON CONFLICT' not in sql:
+            sql = sql.rstrip().rstrip(';')
+            sql += ' ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value'
     elif 'INSERT OR REPLACE INTO' in sql:
         sql = sql.replace('INSERT OR REPLACE INTO', 'INSERT INTO')
         if 'ON CONFLICT' not in sql:

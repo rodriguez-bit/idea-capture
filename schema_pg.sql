@@ -29,9 +29,68 @@ CREATE TABLE IF NOT EXISTS ideas (
     reviewed_at TEXT DEFAULT '',
     created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text),
     visibility TEXT NOT NULL DEFAULT 'personal',
-    tags TEXT DEFAULT '[]'
+    tags TEXT DEFAULT '[]',
+    assigned_to TEXT DEFAULT '',
+    deadline TEXT DEFAULT '',
+    campaign_id INTEGER DEFAULT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
 CREATE INDEX IF NOT EXISTS idx_ideas_created ON ideas (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
+
+CREATE TABLE IF NOT EXISTS company_context (
+    key TEXT PRIMARY KEY,
+    value TEXT DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    idea_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    user_name TEXT DEFAULT '',
+    text TEXT NOT NULL,
+    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text)
+);
+
+CREATE INDEX IF NOT EXISTS idx_comments_idea ON comments (idea_id);
+
+CREATE TABLE IF NOT EXISTS votes (
+    id SERIAL PRIMARY KEY,
+    idea_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text),
+    UNIQUE (idea_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_votes_idea ON votes (idea_id);
+
+CREATE TABLE IF NOT EXISTS meetings (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    meeting_date TEXT DEFAULT '',
+    created_by INTEGER NOT NULL,
+    created_by_name TEXT DEFAULT '',
+    status TEXT DEFAULT 'planned',
+    notes TEXT DEFAULT '',
+    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text)
+);
+
+CREATE TABLE IF NOT EXISTS meeting_ideas (
+    id SERIAL PRIMARY KEY,
+    meeting_id INTEGER NOT NULL,
+    idea_id INTEGER NOT NULL,
+    UNIQUE (meeting_id, idea_id)
+);
+
+CREATE TABLE IF NOT EXISTS campaigns (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    start_date TEXT DEFAULT '',
+    end_date TEXT DEFAULT '',
+    status TEXT DEFAULT 'active',
+    created_by INTEGER NOT NULL,
+    created_at TEXT DEFAULT (CURRENT_TIMESTAMP::text)
+);

@@ -1,0 +1,221 @@
+name: Build Windows EXE
+
+on:
+  push:
+    paths:
+      - 'electron/**'
+      - '.github/workflows/build-windows.yml'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Read version
+        id: ver
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./electron/package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install Pillow
+        run: pip install Pillow
+
+      - name: Generate RI icon
+        shell: python
+        run: |
+          import os
+          os.makedirs('electron/assets', exist_ok=True)
+
+          from PIL import Image, ImageDraw, ImageFont
+
+          def make_icon_image(size):
+              img = Image.new('RGBA', (size, size), (81, 45, 109, 255))
+              draw = ImageDraw.Draw(img)
+              pad = int(size * 0.12)
+              r = int(size * 0.2)
+              draw.rounded_rectangle([pad, pad, size-pad, size-pad], radius=r, fill=(61, 31, 84, 255))
+              fs = int(size * 0.45)
+              try:
+                  font = ImageFont.truetype("C:/Windows/Fonts/arialbd.ttf", fs)
+              except:
+                  try:
+                      font = ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", fs)
+                  except:
+                      font = ImageFont.load_default()
+              text = "RI"
+              bbox = draw.textbbox((0,0), text, font=font)
+              x = (size - (bbox[2]-bbox[0])) // 2 - bbox[0]
+              y = (size - (bbox[3]-bbox[1])) // 2 - bbox[1]
+              draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+              return img
+
+          sizes = [256, 128, 64, 48, 32, 16]
+          images = [make_icon_image(s) for s in sizes]
+          images[0].save('electron/assets/icon.ico', format='ICO', sizes=[(s, s) for s in sizes])
+          images[0].save('electron/assets/icon.png', format='PNG')
+          print(f"Created ICO with sizes: {sizes}")
+          print(f"ICO size: {os.path.getsize('electron/assets/icon.ico')} bytes")
+
+      - name: Prepare and package
+        shell: bash
+        run: |
+          mkdir build-src
+          cp electron/main.js build-src/
+          cp electron/preload.js build-src/
+          cp electron/recorder.html build-src/
+          mkdir -p build-src/assets
+          cp electron/assets/icon.ico build-src/assets/
+          cp electron/assets/icon.png build-src/assets/
+          cd build-src
+          npm init -y
+          npm install electron@28.3.3 electron-updater@6.8.3
+          cd ..
+
+          echo "=== Verify icon ==="
+          ls -la build-src/assets/icon.ico
+          ls -la build-src/assets/icon.png
+
+          npx --yes @electron/packager@latest build-src Ridea \
+            --platform=win32 \
+            --arch=x64 \
+            --out=win-out \
+            --overwrite \
+            --app-version=${{ steps.ver.outputs.version }} \
+            --icon=build-src/assets/icon.ico \
+            --no-prune \
+            --no-asar 2>&1
+          echo "Packaging done"
+
+          # Copy icon files next to Ridea.exe as well (extra fallback)
+          cp electron/assets/icon.ico win-out/Ridea-win32-x64/icon.ico
+          mkdir -p win-out/Ridea-win32-x64/resources/app/assets
+          cp electron/assets/icon.ico win-out/Ridea-win32-x64/resources/app/assets/icon.ico
+          cp electron/assets/icon.png win-out/Ridea-win32-x64/resources/app/assets/icon.png
+
+          echo "=== Verify icons in output ==="
+          ls -la win-out/Ridea-win32-x64/icon.ico
+          ls -la win-out/Ridea-win32-x64/resources/app/assets/icon.ico
+          ls -la win-out/Ridea-win32-x64/Ridea.exe
+          echo "=== List app dir ==="
+          ls -la win-out/Ridea-win32-x64/resources/app/
+
+      - name: Create Inno Setup script
+        shell: pwsh
+        run: |
+          $version = "${{ steps.ver.outputs.version }}"
+          $iss = @"
+          [Setup]
+          AppName=Ridea
+          AppVersion=$version
+          AppPublisher=Dajana Rodriguez
+          DefaultDirName={autopf}\Ridea
+          DefaultGroupName=Ridea
+          OutputDir=installer-out
+          OutputBaseFilename=Ridea-Setup-$version
+          SetupIconFile=electron\assets\icon.ico
+          Compression=lzma2
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          UninstallDisplayIcon={app}\icon.ico
+          WizardStyle=modern
+
+          [Files]
+          Source: "win-out\Ridea-win32-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+          [Icons]
+          Name: "{group}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\icon.ico"
+          Name: "{group}\Uninstall Ridea"; Filename: "{uninstallexe}"
+          Name: "{autodesktop}\Ridea"; Filename: "{app}\Ridea.exe"; IconFilename: "{app}\icon.ico"
+
+          [Run]
+          Filename: "{app}\Ridea.exe"; Description: "Launch Ridea"; Flags: nowait postinstall skipifsilent
+          Filename: "{sys}\ie4uinit.exe"; Parameters: "-show"; Flags: runhidden nowait
+          "@
+          Set-Content -Path "installer.iss" -Value $iss -Encoding ASCII
+          Write-Host "Created installer.iss"
+
+      - name: Build installer with Inno Setup
+        shell: cmd
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Create ZIP too
+        if: success()
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+
+      - name: Generate latest.yml for auto-updater
+        if: success()
+        shell: python
+        run: |
+          import hashlib, base64, os, datetime
+
+          version = "${{ steps.ver.outputs.version }}"
+          exe_path = f"installer-out/Ridea-Setup-{version}.exe"
+          file_size = os.path.getsize(exe_path)
+
+          with open(exe_path, "rb") as f:
+              sha512 = hashlib.sha512(f.read()).digest()
+          sha512_b64 = base64.b64encode(sha512).decode()
+
+          now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+          import textwrap
+          yml = textwrap.dedent(f"""\
+          version: {version}
+          files:
+            - url: Ridea-Setup-{version}.exe
+              sha512: {sha512_b64}
+              size: {file_size}
+          path: Ridea-Setup-{version}.exe
+          sha512: {sha512_b64}
+          releaseDate: '{now}'
+          """)
+
+          with open("latest.yml", "w") as f:
+              f.write(yml)
+
+          print("Generated latest.yml:")
+          print(yml)
+
+      - name: Create Release and Upload
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          REPO="${{ github.repository }}"
+
+          gh release create "v${VERSION}" \
+            --repo "${REPO}" \
+            --title "Ridea v${VERSION}" \
+            --notes "Ridea v${VERSION} - fix: ikona sa zobrazuje v taskbare aj v tray, mic+system nahravanie spolu" \
+            --latest 2>/dev/null || echo "Release already exists"
+
+          gh release upload "v${VERSION}" \
+            "installer-out/Ridea-Setup-${VERSION}.exe" \
+            --repo "${REPO}" --clobber || echo "Installer upload failed"
+
+          gh release upload "v${VERSION}" \
+            "Ridea-${VERSION}-win-x64.zip" \
+            --repo "${REPO}" --clobber || echo "ZIP upload failed"
+
+          gh release upload "v${VERSION}" \
+            "latest.yml" \
+            --repo "${REPO}" --clobber || echo "latest.yml upload failed"
+
+          echo "Upload complete"

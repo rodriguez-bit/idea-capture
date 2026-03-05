@@ -1,36 +1,5 @@
-// Ridea Service Worker — versioned cache, network-first API, SW_UPDATED notify
-const CACHE = 'ridea-v1.0.14';
-const SHELL = ['/recorder', '/static/manifest.json'];
-
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => {
-      // Notify all open clients that SW was updated
-      return self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
-        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }));
-      });
-    })
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', e => {
-  // Network first for API calls
-  if (e.request.url.includes('/api/')) {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
-    return;
-  }
-  // Cache first for static shell
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
-});
+const CACHE_NAME = 'ridea-v2.4.0';
+const urlsToCache = ['/recorder', '/static/recorder.html', '/static/icon-192.png'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(urlsToCache)).then(() => self.skipWaiting())); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => { self.clients.matchAll().then(cls => cls.forEach(c => c.postMessage({type:'SW_UPDATED'}))); return self.clients.claim(); })); });
+self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).then(r => { if (r.ok && e.request.method === 'GET') { const rc = r.clone(); caches.open(CACHE_NAME).then(c => c.put(e.request, rc)); } return r; }).catch(() => caches.match(e.request))); });

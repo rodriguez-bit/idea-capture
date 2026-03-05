@@ -1,13 +1,17 @@
 import os
+import io
+import csv
 import json
 import base64
+import re as re_module
+import subprocess
 import tempfile
 import threading
 import time
 import functools
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, session, send_from_directory, redirect, url_for
+from flask import Flask, request, jsonify, session, send_from_directory, redirect, url_for, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import requests
@@ -35,9 +39,10 @@ _branch_ready = False
 _backup_lock = threading.Lock()
 
 ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a', '.mp4', '.flac', '.webm', '.mpeg', '.opus'}
+ALLOWED_DOCUMENT_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt', '.md', '.rtf', '.png', '.jpg', '.jpeg', '.gif', '.webp'}
 
 DEPARTMENTS = ['development', 'marketing', 'production', 'management', 'other']
-ROLES = ['c-level', 'manager', 'employee', 'majo-markech']
+ROLES = ['c-level', 'manager', 'employee']
 
 # ─── Failed login tracking ───────────────────────────────────────────────────
 _failed_logins = {}
@@ -251,12 +256,71 @@ def init_db():
                 reviewed_at TEXT DEFAULT '',
                 created_at TEXT DEFAULT (datetime('now')),
                 visibility TEXT NOT NULL DEFAULT 'personal',
-                tags TEXT DEFAULT '[]'
+                tags TEXT DEFAULT '[]',
+                assigned_to TEXT DEFAULT '',
+                deadline TEXT DEFAULT '',
+                campaign_id INTEGER DEFAULT NULL
             );
 
             CREATE INDEX IF NOT EXISTS idx_ideas_status ON ideas (status);
             CREATE INDEX IF NOT EXISTS idx_ideas_created ON ideas (created_at DESC);
             CREATE INDEX IF NOT EXISTS idx_ideas_dept ON ideas (department);
+
+            CREATE TABLE IF NOT EXISTS company_context (
+                key TEXT PRIMARY KEY,
+                value TEXT DEFAULT ''
+            );
+
+            CREATE TABLE IF NOT EXISTS comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                idea_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                user_name TEXT DEFAULT '',
+                text TEXT NOT NULL,
+                created_at TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_comments_idea ON comments (idea_id);
+
+            CREATE TABLE IF NOT EXISTS votes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                idea_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                created_at TEXT DEFAULT (datetime('now')),
+                UNIQUE (idea_id, user_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_votes_idea ON votes (idea_id);
+
+            CREATE TABLE IF NOT EXISTS meetings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                meeting_date TEXT DEFAULT '',
+                created_by INTEGER NOT NULL,
+                created_by_name TEXT DEFAULT '',
+                status TEXT DEFAULT 'planned',
+                notes TEXT DEFAULT '',
+                created_at TEXT DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE IF NOT EXISTS meeting_ideas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                meeting_id INTEGER NOT NULL,
+                idea_id INTEGER NOT NULL,
+                UNIQUE (meeting_id, idea_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS campaigns (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                start_date TEXT DEFAULT '',
+                end_date TEXT DEFAULT '',
+                status TEXT DEFAULT 'active',
+                created_by INTEGER NOT NULL,
+                created_at TEXT DEFAULT (datetime('now'))
+            );
         ''')
         db.commit()
 
@@ -295,6 +359,35 @@ def init_db():
                     WHERE table_name='ideas' AND column_name='tags'
                   ) THEN
                     ALTER TABLE ideas ADD COLUMN tags TEXT DEFAULT '[]';
+                  END IF;
+                END $$;
+            """)
+            db.commit()
+        except Exception:
+            pass
+
+    # Idempotent migration: add assigned_to, deadline, campaign_id columns
+    existing_cols3 = [row[1] for row in db.execute('PRAGMA table_info(ideas)').fetchall()] if not DATABASE_URL else []
+    if not DATABASE_URL:
+        if 'assigned_to' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN assigned_to TEXT DEFAULT ''")
+        if 'deadline' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN deadline TEXT DEFAULT ''")
+        if 'campaign_id' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN campaign_id INTEGER DEFAULT NULL")
+        db.commit()
+    elif DATABASE_URL:
+        try:
+            db.execute("""
+                DO $$ BEGIN
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='assigned_to') THEN
+                    ALTER TABLE ideas ADD COLUMN assigned_to TEXT DEFAULT '';
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='deadline') THEN
+                    ALTER TABLE ideas ADD COLUMN deadline TEXT DEFAULT '';
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='campaign_id') THEN
+                    ALTER TABLE ideas ADD COLUMN campaign_id INTEGER DEFAULT NULL;
                   END IF;
                 END $$;
             """)
@@ -399,22 +492,22 @@ LOGIN_HTML = '''<!DOCTYPE html>
 <title>Ridea — Prihlásenie</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0f172a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .card { background: #1e293b; border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  p { color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
-  label { display: block; font-size: 13px; font-weight: 500; color: #cbd5e1; margin-bottom: 6px; }
-  input { width: 100%; padding: 12px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 15px; outline: none; margin-bottom: 16px; }
-  input:focus { border-color: #6366f1; }
-  button { width: 100%; padding: 13px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-  button:hover { background: #4f46e5; }
+  body { background: #512D6D; color: #f0e6f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: rgba(255,255,255,0.08); border-radius: 16px; padding: 48px 40px; width: 100%; max-width: 400px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(20px); }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  p { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 32px; }
+  label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+  input { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 15px; outline: none; margin-bottom: 16px; }
+  input:focus { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
+  button { width: 100%; padding: 13px; background: #fff; color: #512D6D; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  button:hover { background: #f0e6f6; }
   .error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
   .logo { font-size: 32px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="logo">💡</div>
+  <div class="logo">&#128161;</div>
   <h1>Ridea</h1>
   <p>Interný nástroj pre zachytávanie nápadov</p>
   <label>E-mail</label>
@@ -568,10 +661,12 @@ def api_idea_detail(idea_id):
 @reviewer_required
 def api_idea_update(idea_id):
     data = request.get_json() or {}
-    allowed = {'status', 'reviewer_note', 'visibility', 'tags'}
+    allowed = {'status', 'reviewer_note', 'visibility', 'tags', 'assigned_to', 'deadline'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if 'visibility' in updates and updates['visibility'] not in ('personal', 'company'):
         return jsonify({'error': 'Neplatná hodnota viditeľnosti'}), 400
+    if 'status' in updates and updates['status'] not in ('new', 'in_review', 'accepted', 'rejected', 'v_realizacii'):
+        return jsonify({'error': 'Neplatný status'}), 400
     if 'tags' in updates:
         try:
             parsed = json.loads(updates['tags']) if isinstance(updates['tags'], str) else updates['tags']
@@ -600,59 +695,274 @@ def api_idea_update(idea_id):
     return jsonify({'ok': True})
 
 
-AUDIO_UPLOADS_DIR = 'audio_uploads'
-
-
-def _save_audio_backup(tmp_path, ext, user_id):
-    """Save audio file permanently before transcription."""
+def _auto_analyze(idea_id):
+    """Auto-trigger Claude analysis after transcription."""
     try:
-        os.makedirs(AUDIO_UPLOADS_DIR, exist_ok=True)
-        filename = f'{user_id}_{int(time.time())}{ext}'
-        dest = os.path.join(AUDIO_UPLOADS_DIR, filename)
+        import anthropic as anthropic_sdk
+        api_key = os.environ.get('ANTHROPIC_API_KEY')
+        if not api_key:
+            print(f'Auto-analyze: no ANTHROPIC_API_KEY')
+            return
+
+        with app.app_context():
+            db = get_db()
+            idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+            if not idea or not idea['transcript']:
+                db.close()
+                return
+
+            company_context = _get_company_context_for_prompt()
+
+            prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
+
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
+Oddelenie: {idea['department']}
+Rola: {idea['role']}
+Transkript nápadu:
+"{idea['transcript']}"
+
+Vráť JSON s týmto formátom (iba JSON, bez markdown):
+{{
+  "score": <1-10>,
+  "clarity": <1-10>,
+  "feasibility": <1-10>,
+  "relevance": <1-10>,
+  "summary": "<2-3 vety zhrnutie nápadu>",
+  "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
+  "weaknesses": ["<slabá stránka 1>"],
+  "next_steps": ["<konkrétny krok 1>", "<konkrétny krok 2>"],
+  "category": "<one of: process_improvement|cost_reduction|revenue|product|other>",
+  "tags": ["<tag1>", "<tag2>"]
+}}
+
+Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+relevance je hodnotenie relevancie nápadu pre firmu (ak je k dispozícii kontext firmy, zohľadni ciele, priority a hodnoty firmy).
+Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
+
+            client = anthropic_sdk.Anthropic(api_key=api_key)
+            message = client.messages.create(
+                model='claude-haiku-4-5-20251001',
+                max_tokens=1000,
+                messages=[{'role': 'user', 'content': prompt}]
+            )
+            raw = message.content[0].text.strip()
+            if raw.startswith('```'):
+                raw = raw.split('```')[1]
+                if raw.startswith('json'):
+                    raw = raw[4:]
+            analysis = json.loads(raw)
+            score = int(analysis.get('score', 0))
+            tags = json.dumps(analysis.get('tags', []), ensure_ascii=False)
+
+            db.execute('UPDATE ideas SET ai_score = ?, ai_analysis = ?, tags = ? WHERE id = ?',
+                       (score, json.dumps(analysis, ensure_ascii=False), tags, idea_id))
+            db.commit()
+            db.close()
+            save_ideas_backup()
+            print(f'Auto-analyze: idea {idea_id} scored {score}/10')
+    except Exception as e:
+        print(f'Auto-analyze error for idea {idea_id}: {e}')
+
+
+def _split_audio_chunks(file_path, max_size_mb=20):
+    """Split audio file into chunks under max_size_mb for Whisper API (25MB limit)."""
+    file_size = os.path.getsize(file_path)
+    if file_size <= max_size_mb * 1024 * 1024:
+        return [file_path]
+
+    # Get duration using ffprobe
+    try:
+        result = subprocess.run(
+            ['ffprobe', '-v', 'quiet', '-show_entries', 'format=duration',
+             '-of', 'default=noprint_wrappers=1:nokey=1', file_path],
+            capture_output=True, text=True, timeout=30
+        )
+        total_duration = float(result.stdout.strip())
+    except Exception:
+        return [file_path]  # Fallback: send as-is
+
+    # Calculate chunk duration based on file size ratio
+    num_chunks = max(2, int(file_size / (max_size_mb * 1024 * 1024)) + 1)
+    chunk_duration = total_duration / num_chunks
+
+    chunks = []
+    for i in range(num_chunks):
+        start = i * chunk_duration
+        chunk_path = file_path + f'.chunk{i}.mp3'
+        try:
+            subprocess.run(
+                ['ffmpeg', '-y', '-i', file_path, '-ss', str(start),
+                 '-t', str(chunk_duration), '-ar', '16000', '-ac', '1',
+                 '-b:a', '64k', chunk_path],
+                capture_output=True, timeout=120
+            )
+            if os.path.exists(chunk_path) and os.path.getsize(chunk_path) > 1000:
+                chunks.append(chunk_path)
+        except Exception:
+            continue
+
+    return chunks if chunks else [file_path]
+
+
+def _clean_hallucinations(text):
+    """Remove repeated phrases that indicate Whisper hallucination."""
+    if not text or len(text) < 50:
+        return text
+
+    # Split into sentences
+    sentences = re_module.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    if len(sentences) < 3:
+        return text
+
+    # Count phrase frequency
+    phrase_count = {}
+    for s in sentences:
+        normalized = s.lower().strip()
+        if len(normalized) < 5:
+            continue
+        phrase_count[normalized] = phrase_count.get(normalized, 0) + 1
+
+    # Find hallucinated phrases (repeated 3+ times)
+    hallucinated = set()
+    for phrase, count in phrase_count.items():
+        if count >= 3 and count > len(sentences) * 0.2:
+            hallucinated.add(phrase)
+
+    if not hallucinated:
+        return text
+
+    # Remove hallucinated sentences, keep first occurrence
+    seen_hallucinated = set()
+    clean_sentences = []
+    for s in sentences:
+        normalized = s.lower().strip()
+        if normalized in hallucinated:
+            if normalized not in seen_hallucinated:
+                clean_sentences.append(s)
+                seen_hallucinated.add(normalized)
+        else:
+            clean_sentences.append(s)
+
+    cleaned = '. '.join(clean_sentences)
+    if cleaned and not cleaned.endswith('.'):
+        cleaned += '.'
+
+    # If we removed >80% of content, it was mostly hallucination
+    if len(cleaned) < len(text) * 0.2:
+        return ''
+
+    return cleaned
+
+
+def _save_audio_backup(tmp_path, ext, job_id):
+    """Save raw audio file to persistent backup directory. Returns saved filename or None."""
+    try:
+        backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
+        os.makedirs(backup_dir, exist_ok=True)
+        filename = f'{job_id}{ext}'
+        dest = os.path.join(backup_dir, filename)
         import shutil
         shutil.copy2(tmp_path, dest)
+        print(f'Audio backup saved: {filename} ({os.path.getsize(dest) / 1024:.0f}KB)')
         return filename
     except Exception as e:
         print(f'Audio backup error: {e}')
-        return ''
+        return None
 
 
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
-    audio_filename = ''
+
+    # FIRST: Save raw audio backup so recording is never lost
+    audio_filename = _save_audio_backup(tmp_path, ext, job_id)
+
     try:
         # Save audio backup BEFORE transcription
         audio_filename = _save_audio_backup(tmp_path, ext, user_id)
 
         client = openai.OpenAI(api_key=api_key)
-        with open(tmp_path, 'rb') as f:
-            transcription = client.audio.transcriptions.create(
-                model='whisper-1',
-                file=f,
-                language='sk',
-                response_format='verbose_json'
-            )
-        transcript_text = transcription.text or ''
-        duration = int(getattr(transcription, 'duration', 0) or 0)
+
+        file_size = os.path.getsize(tmp_path)
+        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB')
+
+        # Split large files into chunks for Whisper 25MB limit
+        chunks = _split_audio_chunks(tmp_path)
+        print(f'Upload job {job_id}: {len(chunks)} chunk(s)')
+
+        all_text = []
+        total_duration = 0
+
+        for i, chunk_path in enumerate(chunks):
+            chunk_size = os.path.getsize(chunk_path)
+            if chunk_size > 25 * 1024 * 1024:
+                print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
+                continue
+
+            try:
+                with open(chunk_path, 'rb') as f:
+                    transcription = client.audio.transcriptions.create(
+                        model='whisper-1',
+                        file=f,
+                        language='sk',
+                        response_format='verbose_json',
+                        prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
+                    )
+
+                chunk_text = transcription.text or ''
+                chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
+                total_duration += chunk_dur
+
+                # Clean hallucinations from each chunk
+                cleaned = _clean_hallucinations(chunk_text)
+                if cleaned:
+                    all_text.append(cleaned)
+
+                print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
+            except Exception as whisper_err:
+                print(f'Upload job {job_id}: Whisper error on chunk {i}: {whisper_err}')
+                continue
+
+        # Clean up chunk files
+        for chunk_path in chunks:
+            if chunk_path != tmp_path and os.path.exists(chunk_path):
+                try:
+                    os.unlink(chunk_path)
+                except Exception:
+                    pass
+
+        transcript_text = ' '.join(all_text).strip()
+
+        # Final hallucination check on combined text
+        if transcript_text:
+            transcript_text = _clean_hallucinations(transcript_text)
+
+        # Even if transcript is empty, SAVE the idea with audio backup reference
+        if not transcript_text:
+            transcript_text = '[Nahravka ulozena - transkript nedostupny. Audio: ' + (audio_filename or 'N/A') + ']'
 
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
                 INSERT INTO ideas (author_id, author_name, department, role, audio_filename, duration_seconds, transcript, status, visibility)
                 VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, audio_filename, duration, transcript_text, visibility))
+            ''', (user_id, user_name, department, role, audio_filename or '', total_duration, transcript_text, visibility))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
             save_ideas_backup()
+
+        # Auto-analyze with Claude
+        _auto_analyze(idea_id)
 
         _upload_jobs[job_id] = {
             'status': 'done',
             'result': {
                 'id': idea_id,
                 'transcript': transcript_text,
-                'duration_seconds': duration,
-                'message': 'Nápad úspešne zaznamenaný'
+                'duration_seconds': total_duration,
+                'message': 'Napad uspesne zaznamenany'
             }
         }
     except Exception as e:
@@ -767,8 +1077,11 @@ def api_idea_analyze(idea_id):
         db.close()
         return jsonify({'error': 'Chýba transkript'}), 400
 
+    company_context = _get_company_context_for_prompt()
+
     prompt = f"""Analyzuj nasledujúci interný nápad od zamestnanca a ohodnoť ho.
 
+{('--- KONTEXT FIRMY ---' + chr(10) + company_context + chr(10) + '--- KONIEC KONTEXTU ---' + chr(10)) if company_context else ''}
 Oddelenie: {idea['department']}
 Rola: {idea['role']}
 Transkript nápadu:
@@ -779,6 +1092,7 @@ Vráť JSON s týmto formátom (iba JSON, bez markdown):
   "score": <1-10>,
   "clarity": <1-10>,
   "feasibility": <1-10>,
+  "relevance": <1-10>,
   "summary": "<2-3 vety zhrnutie nápadu>",
   "strengths": ["<silná stránka 1>", "<silná stránka 2>"],
   "weaknesses": ["<slabá stránka 1>"],
@@ -788,6 +1102,7 @@ Vráť JSON s týmto formátom (iba JSON, bez markdown):
 }}
 
 Hodnoť objektívne. score je celkové hodnotenie potenciálu nápadu.
+relevance je hodnotenie relevancie nápadu pre firmu (ak je k dispozícii kontext firmy, zohľadni ciele, priority a hodnoty firmy).
 Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické slovo): quick_win, cost_reduction, product, process, customer, technical, innovation, urgent, automation, hr, marketing, quality."""
 
     try:
@@ -828,6 +1143,147 @@ def api_idea_delete(idea_id):
     db.close()
     save_ideas_backup()
     return jsonify({'ok': True})
+
+
+@app.route('/api/ideas/text', methods=['POST'])
+@login_required
+def api_ideas_text():
+    """Create an idea from text input."""
+    data = request.get_json() or {}
+    text = (data.get('text') or '').strip()
+    department = (data.get('department') or '').strip()
+    role = (data.get('role') or '').strip()
+    visibility = (data.get('visibility') or 'personal').strip()
+    if visibility not in ('personal', 'company'):
+        visibility = 'personal'
+    if not text:
+        return jsonify({'error': 'Text napadu je povinny'}), 400
+    if not department or not role:
+        return jsonify({'error': 'Oddelenie a rola su povinne'}), 400
+
+    db = get_db()
+    cursor = db.execute('''
+        INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+        VALUES (?, ?, ?, ?, 0, ?, 'new', ?)
+    ''', (session['user_id'], session['user_name'], department, role, text, visibility))
+    idea_id = cursor.lastrowid
+    db.commit()
+    db.close()
+    save_ideas_backup()
+
+    # Auto-analyze in background
+    threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
+
+    return jsonify({'ok': True, 'id': idea_id, 'message': 'Napad uspesne vytvoreny'}), 201
+
+
+@app.route('/api/ideas/upload-document', methods=['POST'])
+@login_required
+def api_ideas_upload_document():
+    """Create an idea from an uploaded document (PDF, DOCX, TXT, image)."""
+    if 'document' not in request.files:
+        return jsonify({'error': 'Chyba subor'}), 400
+
+    file = request.files['document']
+    if not file.filename:
+        return jsonify({'error': 'Prazdny subor'}), 400
+
+    ext = os.path.splitext(secure_filename(file.filename))[1].lower()
+    if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
+        return jsonify({'error': f'Nepodporovany format: {ext}. Podporovane: PDF, DOCX, TXT, MD, obrazky'}), 400
+
+    department = (request.form.get('department') or '').strip()
+    role = (request.form.get('role') or '').strip()
+    visibility = (request.form.get('visibility') or 'personal').strip()
+    if visibility not in ('personal', 'company'):
+        visibility = 'personal'
+    if not department or not role:
+        return jsonify({'error': 'Oddelenie a rola su povinne'}), 400
+
+    try:
+        content = file.read()
+        text = ''
+
+        if ext in ('.txt', '.md', '.rtf'):
+            text = content.decode('utf-8', errors='replace')
+        elif ext == '.pdf':
+            try:
+                import PyPDF2
+                reader = PyPDF2.PdfReader(io.BytesIO(content))
+                pages = []
+                for page in reader.pages:
+                    pages.append(page.extract_text() or '')
+                text = '\n'.join(pages)
+            except ImportError:
+                # Fallback: try pdfminer
+                try:
+                    from pdfminer.high_level import extract_text as pdf_extract
+                    text = pdf_extract(io.BytesIO(content))
+                except ImportError:
+                    text = f'[PDF subor: {file.filename} - kniznica na citanie PDF nie je nainstalovana]'
+        elif ext in ('.docx', '.doc'):
+            try:
+                import docx
+                doc = docx.Document(io.BytesIO(content))
+                text = '\n'.join([p.text for p in doc.paragraphs])
+            except ImportError:
+                text = f'[DOCX subor: {file.filename} - kniznica na citanie DOCX nie je nainstalovana]'
+        elif ext in ('.png', '.jpg', '.jpeg', '.gif', '.webp'):
+            # For images, store a placeholder and try OCR if available
+            text = f'[Obrazok: {file.filename}]'
+            try:
+                import pytesseract
+                from PIL import Image
+                img = Image.open(io.BytesIO(content))
+                ocr_text = pytesseract.image_to_string(img, lang='slk+eng')
+                if ocr_text.strip():
+                    text = f'[Obrazok: {file.filename}]\n\n{ocr_text.strip()}'
+            except ImportError:
+                pass
+            except Exception as ocr_err:
+                print(f'OCR error: {ocr_err}')
+
+        if not text.strip():
+            text = f'[Importovany subor: {file.filename}]'
+
+        # Limit text length
+        if len(text) > 50000:
+            text = text[:50000] + '\n\n[... text skrateny, povodny subor mal viac ako 50000 znakov]'
+
+        db = get_db()
+        cursor = db.execute('''
+            INSERT INTO ideas (author_id, author_name, department, role, duration_seconds, transcript, status, visibility)
+            VALUES (?, ?, ?, ?, 0, ?, 'new', ?)
+        ''', (session['user_id'], session['user_name'], department, role, text, visibility))
+        idea_id = cursor.lastrowid
+        db.commit()
+        db.close()
+        save_ideas_backup()
+
+        # Auto-analyze in background
+        threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
+
+        return jsonify({'ok': True, 'id': idea_id, 'message': 'Dokument uspesne importovany ako napad', 'transcript': text[:200]}), 201
+
+    except Exception as e:
+        print(f'Document upload error: {e}')
+        return jsonify({'error': f'Chyba pri spracovani suboru: {str(e)}'}), 500
+
+
+@app.route('/api/ideas/bulk-delete', methods=['POST'])
+@admin_required
+def api_ideas_bulk_delete():
+    data = request.get_json() or {}
+    ids = data.get('ids', [])
+    if not ids or not isinstance(ids, list):
+        return jsonify({'error': 'Žiadne nápady na vymazanie'}), 400
+    db = get_db()
+    placeholders = ','.join(['?'] * len(ids))
+    db.execute(f'DELETE FROM ideas WHERE id IN ({placeholders})', ids)
+    db.commit()
+    db.close()
+    save_ideas_backup()
+    return jsonify({'ok': True, 'deleted': len(ids)})
 
 
 # ─── Routes: Users (admin) ────────────────────────────────────────────────────
@@ -889,6 +1345,96 @@ def api_users_update(user_id):
     return jsonify({'ok': True})
 
 
+# ─── Routes: Password change (self-service) ─────────────────────────────────
+@app.route('/api/change-password', methods=['POST'])
+@login_required
+def api_change_password():
+    data = request.get_json() or {}
+    current_password = data.get('current_password', '')
+    new_password = data.get('new_password', '')
+
+    if not current_password or not new_password:
+        return jsonify({'error': 'Aktuálne heslo a nové heslo sú povinné'}), 400
+    if len(new_password) < 6:
+        return jsonify({'error': 'Nové heslo musí mať aspoň 6 znakov'}), 400
+
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    if not user or not check_password_hash(user['password_hash'], current_password):
+        db.close()
+        return jsonify({'error': 'Nesprávne aktuálne heslo'}), 401
+
+    db.execute('UPDATE users SET password_hash = ? WHERE id = ?',
+               (generate_password_hash(new_password), session['user_id']))
+    db.commit()
+    db.close()
+    save_users_backup()
+    return jsonify({'ok': True})
+
+
+# ─── Routes: CSV Export ───────────────────────────────────────────────────────
+@app.route('/api/ideas/export-csv')
+@login_required
+def api_ideas_export_csv():
+    db = get_db()
+    filters = []
+    params = []
+
+    dept = request.args.get('department')
+    role = request.args.get('role')
+    status = request.args.get('status')
+    search = request.args.get('search')
+
+    user_role = session.get('user_role')
+    if user_role == 'submitter':
+        filters.append("(author_id = ? OR visibility = 'company')")
+        params.append(session['user_id'])
+
+    if dept:
+        filters.append('department = ?')
+        params.append(dept)
+    if role:
+        filters.append('role = ?')
+        params.append(role)
+    if status:
+        filters.append('status = ?')
+        params.append(status)
+    if search:
+        filters.append('(transcript LIKE ? OR author_name LIKE ?)')
+        params.extend([f'%{search}%', f'%{search}%'])
+
+    where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
+    rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC', params).fetchall()
+    db.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['ID', 'Autor', 'Oddelenie', 'Rola', 'Transkript', 'AI Skóre', 'Status', 'Viditeľnosť', 'Priradené', 'Deadline', 'Tagy', 'Vytvorené'])
+    for r in rows:
+        d = dict(r)
+        writer.writerow([
+            d.get('id', ''),
+            d.get('author_name', ''),
+            d.get('department', ''),
+            d.get('role', ''),
+            d.get('transcript', ''),
+            d.get('ai_score', ''),
+            d.get('status', ''),
+            d.get('visibility', ''),
+            d.get('assigned_to', ''),
+            d.get('deadline', ''),
+            d.get('tags', ''),
+            d.get('created_at', '')
+        ])
+
+    csv_data = output.getvalue()
+    return Response(
+        csv_data,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=ridea-napady-{datetime.now().strftime("%Y%m%d")}.csv'}
+    )
+
+
 # ─── Routes: Stats ────────────────────────────────────────────────────────────
 @app.route('/api/stats')
 @login_required
@@ -905,21 +1451,422 @@ def api_stats():
     for row in db.execute('SELECT visibility, COUNT(*) as cnt FROM ideas GROUP BY visibility').fetchall():
         by_visibility[row['visibility']] = row['cnt']
     recent = db.execute('SELECT * FROM ideas ORDER BY created_at DESC LIMIT 5').fetchall()
+
+    # Score distribution for chart
+    score_dist = {}
+    for row in db.execute('SELECT ai_score, COUNT(*) as cnt FROM ideas WHERE ai_score > 0 GROUP BY ai_score ORDER BY ai_score').fetchall():
+        score_dist[str(row['ai_score'])] = row['cnt']
+
+    # Average score by department
+    avg_by_dept = {}
+    for row in db.execute('SELECT department, AVG(ai_score) as avg_score FROM ideas WHERE ai_score > 0 GROUP BY department').fetchall():
+        avg_by_dept[row['department']] = round(float(row['avg_score']), 1)
+
+    # Ideas over time (last 30 days, grouped by date)
+    trend = []
+    for row in db.execute("""
+        SELECT substr(created_at, 1, 10) as day, COUNT(*) as cnt
+        FROM ideas
+        GROUP BY substr(created_at, 1, 10)
+        ORDER BY day DESC
+        LIMIT 30
+    """).fetchall():
+        trend.append({'day': row['day'], 'count': row['cnt']})
+
     db.close()
     return jsonify({
         'total': total,
         'by_status': by_status,
         'by_department': by_dept,
         'by_visibility': by_visibility,
-        'recent': [dict(r) for r in recent]
+        'recent': [dict(r) for r in recent],
+        'score_distribution': score_dist,
+        'avg_score_by_dept': avg_by_dept,
+        'trend': trend
     })
+
+
+# ─── Routes: Company Context ──────────────────────────────────────────────────
+COMPANY_CONTEXT_KEYS = [
+    'company_description',   # O firme
+    'goals_priorities',      # Ciele a priority
+    'brand_values',          # Brand hodnoty
+    'idea_criteria',         # Čo hľadáme v nápadoch
+]
+
+
+@app.route('/api/company-context', methods=['GET'])
+@login_required
+def api_company_context_get():
+    db = get_db()
+    rows = db.execute('SELECT key, value FROM company_context').fetchall()
+    db.close()
+    result = {k: '' for k in COMPANY_CONTEXT_KEYS}
+    for row in rows:
+        result[row['key']] = row['value']
+    return jsonify(result)
+
+
+@app.route('/api/company-context', methods=['POST'])
+@admin_required
+def api_company_context_save():
+    data = request.get_json() or {}
+    db = get_db()
+    for key in COMPANY_CONTEXT_KEYS:
+        if key in data:
+            value = str(data[key])[:5000]  # max 5000 chars per field
+            db.execute(
+                'INSERT OR REPLACE INTO company_context (key, value) VALUES (?, ?)',
+                (key, value)
+            )
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+def _get_company_context_for_prompt():
+    """Build company context string for AI analysis prompt."""
+    db = get_db()
+    rows = db.execute('SELECT key, value FROM company_context').fetchall()
+    db.close()
+    context_parts = []
+    labels = {
+        'company_description': 'O firme',
+        'goals_priorities': 'Ciele a priority firmy',
+        'brand_values': 'Hodnoty značky',
+        'idea_criteria': 'Čo hľadáme v nápadoch',
+    }
+    for row in rows:
+        if row['value'] and row['value'].strip():
+            label = labels.get(row['key'], row['key'])
+            context_parts.append(f"{label}: {row['value'].strip()}")
+    return '\n'.join(context_parts)
+
+
+# ─── Routes: Kanban ─────────────────────────────────────────────────────────────
+@app.route('/api/kanban')
+@login_required
+def api_kanban():
+    db = get_db()
+    statuses = ['new', 'in_review', 'accepted', 'v_realizacii', 'rejected']
+    result = {}
+    for s in statuses:
+        rows = db.execute(
+            'SELECT id, author_name, transcript, ai_score, assigned_to, deadline, tags FROM ideas WHERE status = ? ORDER BY created_at DESC LIMIT 50',
+            (s,)
+        ).fetchall()
+        result[s] = [dict(r) for r in rows]
+    db.close()
+    return jsonify(result)
+
+
+# ─── Routes: Comments ───────────────────────────────────────────────────────────
+@app.route('/api/ideas/<int:idea_id>/comments', methods=['GET'])
+@login_required
+def api_comments_list(idea_id):
+    db = get_db()
+    rows = db.execute(
+        'SELECT * FROM comments WHERE idea_id = ? ORDER BY created_at ASC', (idea_id,)
+    ).fetchall()
+    db.close()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route('/api/ideas/<int:idea_id>/comments', methods=['POST'])
+@login_required
+def api_comments_create(idea_id):
+    data = request.get_json() or {}
+    text = (data.get('text') or '').strip()
+    if not text:
+        return jsonify({'error': 'Text komentára je povinný'}), 400
+    if len(text) > 2000:
+        return jsonify({'error': 'Komentár je príliš dlhý (max 2000 znakov)'}), 400
+
+    db = get_db()
+    idea = db.execute('SELECT id FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    if not idea:
+        db.close()
+        return jsonify({'error': 'Nápad nenájdený'}), 404
+
+    db.execute(
+        'INSERT INTO comments (idea_id, user_id, user_name, text) VALUES (?, ?, ?, ?)',
+        (idea_id, session['user_id'], session['user_name'], text)
+    )
+    db.commit()
+    db.close()
+    return jsonify({'ok': True}), 201
+
+
+@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
+@login_required
+def api_comments_delete(comment_id):
+    db = get_db()
+    comment = db.execute('SELECT * FROM comments WHERE id = ?', (comment_id,)).fetchone()
+    if not comment:
+        db.close()
+        return jsonify({'error': 'Komentár nenájdený'}), 404
+    # Only author or admin can delete
+    if comment['user_id'] != session['user_id'] and session.get('user_role') != 'admin':
+        db.close()
+        return jsonify({'error': 'Nemáte oprávnenie'}), 403
+    db.execute('DELETE FROM comments WHERE id = ?', (comment_id,))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+# ─── Routes: Votes ─────────────────────────────────────────────────────────────
+@app.route('/api/ideas/<int:idea_id>/votes', methods=['GET'])
+@login_required
+def api_votes_get(idea_id):
+    db = get_db()
+    count = db.execute('SELECT COUNT(*) FROM votes WHERE idea_id = ?', (idea_id,)).fetchone()[0]
+    user_voted = db.execute(
+        'SELECT COUNT(*) FROM votes WHERE idea_id = ? AND user_id = ?',
+        (idea_id, session['user_id'])
+    ).fetchone()[0] > 0
+    db.close()
+    return jsonify({'count': count, 'user_voted': user_voted})
+
+
+@app.route('/api/ideas/<int:idea_id>/votes', methods=['POST'])
+@login_required
+def api_votes_toggle(idea_id):
+    db = get_db()
+    existing = db.execute(
+        'SELECT id FROM votes WHERE idea_id = ? AND user_id = ?',
+        (idea_id, session['user_id'])
+    ).fetchone()
+    if existing:
+        db.execute('DELETE FROM votes WHERE idea_id = ? AND user_id = ?',
+                   (idea_id, session['user_id']))
+    else:
+        db.execute('INSERT INTO votes (idea_id, user_id) VALUES (?, ?)',
+                   (idea_id, session['user_id']))
+    db.commit()
+    count = db.execute('SELECT COUNT(*) FROM votes WHERE idea_id = ?', (idea_id,)).fetchone()[0]
+    user_voted = not bool(existing)
+    db.close()
+    return jsonify({'count': count, 'user_voted': user_voted})
+
+
+# ─── Routes: Meetings (porady) ────────────────────────────────────────────────
+@app.route('/api/meetings', methods=['GET'])
+@login_required
+def api_meetings_list():
+    db = get_db()
+    rows = db.execute('SELECT * FROM meetings ORDER BY meeting_date DESC').fetchall()
+    result = []
+    for m in rows:
+        d = dict(m)
+        # Get linked ideas count
+        cnt = db.execute('SELECT COUNT(*) FROM meeting_ideas WHERE meeting_id = ?', (m['id'],)).fetchone()[0]
+        d['ideas_count'] = cnt
+        result.append(d)
+    db.close()
+    return jsonify(result)
+
+
+@app.route('/api/meetings', methods=['POST'])
+@reviewer_required
+def api_meetings_create():
+    data = request.get_json() or {}
+    title = (data.get('title') or '').strip()
+    if not title:
+        return jsonify({'error': 'Názov porady je povinný'}), 400
+
+    db = get_db()
+    cursor = db.execute(
+        'INSERT INTO meetings (title, description, meeting_date, created_by, created_by_name) VALUES (?, ?, ?, ?, ?)',
+        (title, data.get('description', ''), data.get('meeting_date', ''),
+         session['user_id'], session['user_name'])
+    )
+    meeting_id = cursor.lastrowid
+    db.commit()
+    db.close()
+    return jsonify({'ok': True, 'id': meeting_id}), 201
+
+
+@app.route('/api/meetings/<int:meeting_id>', methods=['GET'])
+@login_required
+def api_meeting_detail(meeting_id):
+    db = get_db()
+    m = db.execute('SELECT * FROM meetings WHERE id = ?', (meeting_id,)).fetchone()
+    if not m:
+        db.close()
+        return jsonify({'error': 'Porada nenájdená'}), 404
+    d = dict(m)
+    # Get linked ideas
+    idea_rows = db.execute('''
+        SELECT i.* FROM ideas i
+        JOIN meeting_ideas mi ON mi.idea_id = i.id
+        WHERE mi.meeting_id = ?
+        ORDER BY i.created_at DESC
+    ''', (meeting_id,)).fetchall()
+    d['ideas'] = [dict(r) for r in idea_rows]
+    db.close()
+    return jsonify(d)
+
+
+@app.route('/api/meetings/<int:meeting_id>', methods=['PATCH'])
+@reviewer_required
+def api_meeting_update(meeting_id):
+    data = request.get_json() or {}
+    allowed = {'title', 'description', 'meeting_date', 'status', 'notes'}
+    updates = {k: v for k, v in data.items() if k in allowed}
+    if not updates:
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
+    db = get_db()
+    set_clause = ', '.join(f'{k} = ?' for k in updates)
+    db.execute(f'UPDATE meetings SET {set_clause} WHERE id = ?', list(updates.values()) + [meeting_id])
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/meetings/<int:meeting_id>/ideas', methods=['POST'])
+@reviewer_required
+def api_meeting_add_idea(meeting_id):
+    data = request.get_json() or {}
+    idea_id = data.get('idea_id')
+    if not idea_id:
+        return jsonify({'error': 'idea_id je povinné'}), 400
+    db = get_db()
+    try:
+        db.execute('INSERT INTO meeting_ideas (meeting_id, idea_id) VALUES (?, ?)', (meeting_id, idea_id))
+        db.commit()
+    except Exception:
+        pass  # Already linked
+    db.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/meetings/<int:meeting_id>/ideas/<int:idea_id>', methods=['DELETE'])
+@reviewer_required
+def api_meeting_remove_idea(meeting_id, idea_id):
+    db = get_db()
+    db.execute('DELETE FROM meeting_ideas WHERE meeting_id = ? AND idea_id = ?', (meeting_id, idea_id))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/meetings/<int:meeting_id>', methods=['DELETE'])
+@admin_required
+def api_meeting_delete(meeting_id):
+    db = get_db()
+    db.execute('DELETE FROM meeting_ideas WHERE meeting_id = ?', (meeting_id,))
+    db.execute('DELETE FROM meetings WHERE id = ?', (meeting_id,))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+# ─── Routes: Campaigns ────────────────────────────────────────────────────────
+@app.route('/api/campaigns', methods=['GET'])
+@login_required
+def api_campaigns_list():
+    db = get_db()
+    rows = db.execute('SELECT * FROM campaigns ORDER BY created_at DESC').fetchall()
+    result = []
+    for c in rows:
+        d = dict(c)
+        cnt = db.execute('SELECT COUNT(*) FROM ideas WHERE campaign_id = ?', (c['id'],)).fetchone()[0]
+        d['ideas_count'] = cnt
+        result.append(d)
+    db.close()
+    return jsonify(result)
+
+
+@app.route('/api/campaigns', methods=['POST'])
+@reviewer_required
+def api_campaigns_create():
+    data = request.get_json() or {}
+    title = (data.get('title') or '').strip()
+    if not title:
+        return jsonify({'error': 'Názov kampane je povinný'}), 400
+
+    db = get_db()
+    cursor = db.execute(
+        'INSERT INTO campaigns (title, description, start_date, end_date, created_by) VALUES (?, ?, ?, ?, ?)',
+        (title, data.get('description', ''), data.get('start_date', ''),
+         data.get('end_date', ''), session['user_id'])
+    )
+    campaign_id = cursor.lastrowid
+    db.commit()
+    db.close()
+    return jsonify({'ok': True, 'id': campaign_id}), 201
+
+
+@app.route('/api/campaigns/<int:campaign_id>', methods=['GET'])
+@login_required
+def api_campaign_detail(campaign_id):
+    db = get_db()
+    c = db.execute('SELECT * FROM campaigns WHERE id = ?', (campaign_id,)).fetchone()
+    if not c:
+        db.close()
+        return jsonify({'error': 'Kampaň nenájdená'}), 404
+    d = dict(c)
+    ideas = db.execute('SELECT * FROM ideas WHERE campaign_id = ? ORDER BY created_at DESC',
+                       (campaign_id,)).fetchall()
+    d['ideas'] = [dict(r) for r in ideas]
+    db.close()
+    return jsonify(d)
+
+
+@app.route('/api/campaigns/<int:campaign_id>', methods=['PATCH'])
+@reviewer_required
+def api_campaign_update(campaign_id):
+    data = request.get_json() or {}
+    allowed = {'title', 'description', 'start_date', 'end_date', 'status'}
+    updates = {k: v for k, v in data.items() if k in allowed}
+    if not updates:
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
+    db = get_db()
+    set_clause = ', '.join(f'{k} = ?' for k in updates)
+    db.execute(f'UPDATE campaigns SET {set_clause} WHERE id = ?', list(updates.values()) + [campaign_id])
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/campaigns/<int:campaign_id>', methods=['DELETE'])
+@admin_required
+def api_campaign_delete(campaign_id):
+    db = get_db()
+    # Unlink ideas from campaign
+    db.execute('UPDATE ideas SET campaign_id = NULL WHERE campaign_id = ?', (campaign_id,))
+    db.execute('DELETE FROM campaigns WHERE id = ?', (campaign_id,))
+    db.commit()
+    db.close()
+    return jsonify({'ok': True})
+
+
+# ─── Routes: Audio files ──────────────────────────────────────────────────────
+@app.route('/api/ideas/<int:idea_id>/audio')
+@login_required
+def api_idea_audio(idea_id):
+    """Download raw audio backup for an idea."""
+    db = get_db()
+    idea = db.execute('SELECT * FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    db.close()
+    if not idea:
+        return jsonify({'error': 'Napad nenajdeny'}), 404
+    audio_file = idea.get('audio_filename', '') if isinstance(idea, dict) else (idea['audio_filename'] if 'audio_filename' in idea.keys() else '')
+    if not audio_file:
+        return jsonify({'error': 'Audio subor nie je k dispozicii'}), 404
+    backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
+    filepath = os.path.join(backup_dir, audio_file)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'Audio subor nebol najdeny na disku'}), 404
+    return send_from_directory(backup_dir, audio_file, as_attachment=True)
 
 
 # ─── Routes: Pages ────────────────────────────────────────────────────────────
 @app.route('/')
 @login_required
 def index():
-    return redirect(url_for('recorder_page'))
+    return send_from_directory('static', 'index.html')
 
 
 @app.route('/admin')
