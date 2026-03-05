@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS ideas (
     department TEXT DEFAULT '',
     role TEXT DEFAULT '',
     audio_filename TEXT DEFAULT '',
+    audio_data TEXT DEFAULT '',
     duration_seconds INTEGER DEFAULT 0,
     transcript TEXT DEFAULT '',
     status TEXT DEFAULT 'new',

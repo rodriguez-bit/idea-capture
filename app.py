@@ -246,6 +246,7 @@ def init_db():
                 department TEXT DEFAULT '',
                 role TEXT DEFAULT '',
                 audio_filename TEXT DEFAULT '',
+                audio_data TEXT DEFAULT '',
                 duration_seconds INTEGER DEFAULT 0,
                 transcript TEXT DEFAULT '',
                 status TEXT DEFAULT 'new',
@@ -375,6 +376,8 @@ def init_db():
             db.execute("ALTER TABLE ideas ADD COLUMN deadline TEXT DEFAULT ''")
         if 'campaign_id' not in existing_cols3:
             db.execute("ALTER TABLE ideas ADD COLUMN campaign_id INTEGER DEFAULT NULL")
+        if 'audio_data' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN audio_data TEXT DEFAULT ''")
         db.commit()
     elif DATABASE_URL:
         try:
@@ -388,6 +391,9 @@ def init_db():
                   END IF;
                   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='campaign_id') THEN
                     ALTER TABLE ideas ADD COLUMN campaign_id INTEGER DEFAULT NULL;
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='audio_data') THEN
+                    ALTER TABLE ideas ADD COLUMN audio_data TEXT DEFAULT '';
                   END IF;
                 END $$;
             """)
@@ -857,30 +863,32 @@ def _clean_hallucinations(text):
 
 
 def _save_audio_backup(tmp_path, ext, job_id):
-    """Save raw audio file to persistent backup directory. Returns saved filename or None."""
+    """Save raw audio file to backup directory and return (filename, base64_data)."""
     try:
         backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
         os.makedirs(backup_dir, exist_ok=True)
         filename = f'{job_id}{ext}'
         dest = os.path.join(backup_dir, filename)
-        import shutil
+        import shutil, base64
         shutil.copy2(tmp_path, dest)
+        with open(dest, 'rb') as f:
+            audio_b64 = base64.b64encode(f.read()).decode('ascii')
         print(f'Audio backup saved: {filename} ({os.path.getsize(dest) / 1024:.0f}KB)')
-        return filename
+        return filename, audio_b64
     except Exception as e:
         print(f'Audio backup error: {e}')
-        return None
+        return None, None
 
 
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
 
     # FIRST: Save raw audio backup so recording is never lost
-    audio_filename = _save_audio_backup(tmp_path, ext, job_id)
+    audio_filename, audio_data = _save_audio_backup(tmp_path, ext, job_id)
 
     try:
         # Save audio backup BEFORE transcription
-        audio_filename = _save_audio_backup(tmp_path, ext, user_id)
+        audio_filename, audio_data = _save_audio_backup(tmp_path, ext, user_id)
 
         client = openai.OpenAI(api_key=api_key)
 
@@ -945,9 +953,9 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
-                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, duration_seconds, transcript, status, visibility)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, audio_filename or '', total_duration, transcript_text, visibility))
+                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, audio_data, duration_seconds, transcript, status, visibility)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?)
+            ''', (user_id, user_name, department, role, audio_filename or '', audio_data or '', total_duration, transcript_text, visibility))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
@@ -1046,16 +1054,26 @@ def api_ideas_job(job_id):
 @login_required
 def api_idea_audio(idea_id):
     db = get_db()
-    idea = db.execute('SELECT audio_filename FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    idea = db.execute('SELECT audio_filename, audio_data FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     db.close()
     if not idea or not idea['audio_filename']:
         return jsonify({'error': 'Audio nenájdené'}), 404
+    # Try file on disk first
     audio_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'audio_uploads')
     audio_path = os.path.join(audio_dir, idea['audio_filename'])
-    if not os.path.exists(audio_path):
+    if os.path.exists(audio_path):
+        from flask import send_file
+        return send_file(audio_path, as_attachment=False)
+    # Fallback: serve from DB (base64)
+    audio_b64 = idea['audio_data'] if idea['audio_data'] else ''
+    if not audio_b64:
         return jsonify({'error': 'Súbor neexistuje'}), 404
-    from flask import send_file
-    return send_file(audio_path, as_attachment=False)
+    import base64
+    from flask import Response
+    audio_bytes = base64.b64decode(audio_b64)
+    fname = idea['audio_filename']
+    mime = 'audio/webm' if fname.endswith('.webm') else 'audio/mpeg' if fname.endswith('.mp3') else 'audio/ogg' if fname.endswith('.ogg') else 'audio/wav'
+    return Response(audio_bytes, mimetype=mime, headers={'Content-Disposition': f'inline; filename="{fname}"'})
 
 
 @app.route('/api/ideas/<int:idea_id>/analyze', methods=['POST'])
