@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
@@ -21,25 +21,29 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Wine for cross-compilation
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wine64 wine32 2>/dev/null || sudo apt-get install -y -qq wine64
+
       - name: Read version
         id: ver
-        shell: bash
         run: |
           VERSION=$(node -p "require('./electron/package.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Prepare source
-        shell: bash
         run: |
           mkdir -p build-src
           cp electron/main.js build-src/
           cp electron/preload.js build-src/
           cp electron/recorder.html build-src/
           cp -r electron/assets build-src/ 2>/dev/null || true
-          echo '{"name":"ridea","version":"${{ steps.ver.outputs.version }}","main":"main.js","dependencies":{}}' > build-src/package.json
+          echo '{"name":"ridea","version":"'"${{ steps.ver.outputs.version }}"'","main":"main.js","dependencies":{}}' > build-src/package.json
+          cat build-src/package.json
 
-      - name: Package with electron-packager
-        shell: bash
+      - name: Package for Windows
         run: |
           npx --yes @electron/packager@latest build-src Ridea \
             --platform=win32 \
@@ -47,18 +51,18 @@ jobs:
             --electron-version=28.3.3 \
             --out=win-out \
             --overwrite \
-            --app-version=${{ steps.ver.outputs.version }} \
-            --no-prune
+            --app-version=${{ steps.ver.outputs.version }} 2>&1
 
       - name: Create ZIP
-        shell: pwsh
         run: |
-          Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
+          cd win-out/Ridea-win32-x64
+          zip -r ../../Ridea-${{ steps.ver.outputs.version }}-win-x64.zip .
+          cd ../..
+          ls -la *.zip
 
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
         run: |
           gh release create "v${{ steps.ver.outputs.version }}" \
             --repo ${{ github.repository }} \
@@ -69,7 +73,6 @@ jobs:
       - name: Upload to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash
         run: |
           gh release upload "v${{ steps.ver.outputs.version }}" \
             "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip" \
