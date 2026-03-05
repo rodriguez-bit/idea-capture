@@ -7,10 +7,10 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0f172a; --surface: #1e293b; --surface2: #263348;
-  --border: #334155; --text: #e2e8f0; --muted: #94a3b8;
-  --primary: #6366f1; --primary-hover: #4f46e5;
-  --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6;
+  --bg: #512D6D; --surface: #3d1f54; --surface2: #462560;
+  --border: rgba(255,255,255,0.12); --text: #f0e6f6; --muted: rgba(255,255,255,0.5);
+  --primary: #d4a6f5; --primary-hover: #c084fc;
+  --green: #4ade80; --yellow: #facc15; --red: #f87171; --blue: #93c5fd;
 }
 body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
 
@@ -71,7 +71,7 @@ tr:hover td { background: var(--surface2); cursor: pointer; }
 .badge-rejected { background: rgba(239,68,68,0.15); color: #f87171; }
 .badge-v_realizacii { background: rgba(168,85,247,0.15); color: #c084fc; }
 .badge-dept { background: var(--surface2); color: var(--muted); }
-.badge-score { background: rgba(99,102,241,0.15); color: #818cf8; }
+.badge-score { background: rgba(212,166,245,0.15); color: #d4a6f5; }
 .badge-tag { background: rgba(168,85,247,0.15); color: #c084fc; font-size: 11px; }
 .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .tag-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25); border-radius: 20px; font-size: 12px; color: #c084fc; cursor: pointer; transition: all 0.15s; }
@@ -975,15 +975,15 @@ async function loadStats() {
       datasets: [{
         label: 'Priemerné skóre',
         data: deptScores,
-        backgroundColor: 'rgba(99,102,241,0.6)',
-        borderColor: '#6366f1',
+        backgroundColor: 'rgba(212,166,245,0.6)',
+        borderColor: '#d4a6f5',
         borderWidth: 1,
         borderRadius: 6
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true, max: 10, grid: { color: '#1e293b' } }, x: { grid: { display: false } } },
+      scales: { y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.08)' } }, x: { grid: { display: false } } },
       plugins: { legend: { display: false } }
     }
   });
@@ -1004,17 +1004,17 @@ async function loadStats() {
       datasets: [{
         label: 'Nápady',
         data: trendCounts,
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99,102,241,0.1)',
+        borderColor: '#d4a6f5',
+        backgroundColor: 'rgba(212,166,245,0.1)',
         fill: true,
         tension: 0.3,
         pointRadius: 3,
-        pointBackgroundColor: '#6366f1'
+        pointBackgroundColor: '#d4a6f5'
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#1e293b' } }, x: { grid: { display: false } } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.08)' } }, x: { grid: { display: false } } },
       plugins: { legend: { display: false } }
     }
   });
@@ -1321,7 +1321,7 @@ async function loadVotes(ideaId) {
     const r = await fetch(`/api/ideas/${ideaId}/votes`);
     const data = await r.json();
     document.getElementById('modal-vote-btn').textContent = data.user_voted ? '👍 Odhlasovať' : '👍 Hlasovať';
-    document.getElementById('modal-vote-btn').style.background = data.user_voted ? 'rgba(99,102,241,0.2)' : '';
+    document.getElementById('modal-vote-btn').style.background = data.user_voted ? 'rgba(212,166,245,0.2)' : '';
     document.getElementById('modal-vote-count').textContent = `${data.count} hlas${data.count === 1 ? '' : 'ov'}`;
   } catch {}
 }
