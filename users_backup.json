@@ -83,7 +83,7 @@
   {
     "email": "olha kolodiazhna <kolodiazhna@dajanarodriguez.com>",
     "display_name": "Olha Patrová",
-    "password_hash": "scrypt:32768:8:1$6cjYHOTPI9uZ8au9$50cab21a0abd0fa91ed724ed320591ffae9e526b8cc9f1e4aa5e80334362c8ac824e0b52582e0031d208e41416b62332242b2d88be741ec115c9ba4ed731e487",
+    "password_hash": "scrypt:32768:8:1$iMaii5m5AtRp6QYl$07b2648e2effc64cd4fe71203b8fc86820e2ea59cfd426dd41cc0655cab6c4e4c0b153cb04373b01e7b376ae4bbb65329f6ee2a5cf51dd89a18b9665f82e6e3d",
     "role": "submitter",
     "department": "marketing",
     "active": 1,
