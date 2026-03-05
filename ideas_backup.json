@@ -117,10 +117,10 @@
     "ai_analysis": "{\"score\": 6, \"clarity\": 4, \"feasibility\": 6, \"relevance\": 7, \"summary\": \"Nápad na zavedenie systému na správu výroby v sekcii kože s integráciou CSV súborov, DFX súborov nožov a trackingom produktov podľa plánu. Systém by mal spájať údaje o produktoch, dostupných nožoch, dátumoch plánovaného a skutočného sekania s možnosťou validácie správnosti.\", \"strengths\": [\"Adresuje reálny problém v operačnom procese - systematizáciu výroby s viacerými metrikanami\", \"Jasne identifikuje potrebu mapovať produkty na špecifické nástroje (nože) a DFX súbory\", \"Zahŕňa tracking celého cyklu od plánu až po dokončenie s kontrolou kvality\", \"Potenciál na zlepšenie efektívnosti a zníženie chýb\"], \"weaknesses\": [\"Vysvetlenie je nejasné a nestrukturované - chýba jasná špecifikácia požiadaviek\", \"Manager si nie je istý finálnou logikou - deklaruje 'zatiaľ ešte neviem, ako to spravíme'\", \"Nespecifikované budú technické detaily implementácie a integrácie s existujúcimi systémami\", \"Chýba analýza nákladov, časového rámca a dopadov na ostatné procesy\"], \"next_steps\": [\"Vypracovať detailnú špecifikáciu požiadaviek s jasnou štruktúrou a procesným tokom\", \"Vytvorí mapping tabuľku: produkty ↔ nože ↔ DFX súbory s príkladmi z reálnych dát\", \"Konzultovať s IT tímom a operačným tímom o technickej realizovateľnosti a integrácii\", \"Návrh prototypu alebo proof-of-concept na menšej vzorke pred plnou implementáciou\"], \"category\": \"process_improvement\", \"tags\": [\"automation\", \"process\", \"quality\", \"technical\"]}",
     "reviewer_note": "",
     "reviewed_by": "Raul Rodriguez",
-    "reviewed_at": "2026-03-05T01:20:34.957004",
+    "reviewed_at": "2026-03-05T01:49:40.066764",
     "created_at": "2026-03-05 00:44:33.19456+00",
     "visibility": "company",
-    "tags": "[\"automation\", \"process\", \"quality\", \"technical\"]",
+    "tags": "[]",
     "assigned_to": "Raul Rodriguez",
     "deadline": "2026-03-05",
     "campaign_id": null
