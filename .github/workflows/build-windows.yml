@@ -14,6 +14,8 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,27 +33,20 @@ jobs:
       - name: Install dependencies
         shell: bash
         working-directory: electron
-        run: |
-          npm install --no-audit --no-fund 2>&1
-          echo "--- node_modules contents ---"
-          ls node_modules/ | head -20
-          echo "--- electron binary ---"
-          npx electron --version 2>&1 || echo 'electron binary check done'
+        run: npm install --no-audit --no-fund
 
-      - name: Build Windows portable
+      - name: Build Windows
         shell: bash
         working-directory: electron
         run: |
-          DEBUG=electron-builder npx electron-builder --win portable -c.extraMetadata.version=${{ steps.ver.outputs.version }} 2>&1
+          npx electron-builder --win --publish never --config.publish.provider=generic --config.publish.url=https://example.com 2>&1
 
-      - name: List dist output
+      - name: List output
+        if: always()
         shell: bash
-        run: |
-          ls -laR electron/dist/ 2>/dev/null || echo 'No dist directory'
+        run: find electron/dist -type f 2>/dev/null || echo 'No dist'
 
       - name: Create Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           gh release create "v${{ steps.ver.outputs.version }}" \
@@ -61,11 +56,10 @@ jobs:
             --latest 2>/dev/null || true
 
       - name: Upload to Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          for f in electron/dist/*.exe; do
-            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
+          shopt -s nullglob
+          for f in electron/dist/*.exe electron/dist/*.zip; do
+            gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
               --repo ${{ github.repository }} --clobber
           done
