@@ -63,27 +63,6 @@
     "campaign_id": null
   },
   {
-    "author_id": 1,
-    "author_name": "Admin",
-    "department": "marketing",
-    "role": "employee",
-    "audio_filename": "",
-    "duration_seconds": 30,
-    "transcript": "Takže mám nápad k poukazom, že keď budeme dávať poukazy, tak musíme vymyslieť, ako toto odkomunikovať, ale vždycky, každý týždeň napríklad, by bolo, že jeden človek, ktorý kúpi niečo s poukazom, by mal objednávku zadarmo. To je na podporu využitelnosti poukazov. Ďakujem za pozornosť.",
-    "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-04 14:06:49.785388+00",
-    "visibility": "personal",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 32,
     "author_name": "Jakub Martiska",
     "department": "marketing",
