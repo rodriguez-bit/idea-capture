@@ -231,27 +231,6 @@
     "campaign_id": null
   },
   {
-    "author_id": 8,
-    "author_name": "Raul Rodriguez",
-    "department": "marketing",
-    "role": "c-level",
-    "audio_filename": "",
-    "duration_seconds": 3,
-    "transcript": "Haló, Haló, Haló, Haló, Haló, UŽ to jeden, dva, tri, čtyri, peky, jedno, dva, tri, čtyri, peky.",
-    "status": "new",
-    "ai_score": 1,
-    "ai_analysis": "{\"score\": 1, \"clarity\": 1, \"feasibility\": 1, \"relevance\": 1, \"summary\": \"Nápad neobsahuje žiadnu konkrétnu obchodnú alebo procestnú myšlienku. Transkript pozostáva iba z opakujúcich sa slov bez zmyslu a nie je možné z neho identifikovať aký problém má byť riešený ani aká je navrhnutá hodnota.\", \"strengths\": [], \"weaknesses\": [\"Úplne chýba konkrétny obsah a jasná myšlienka\", \"Nie je možné pochopiť, ako by mal nápad prispieť k marketingovým cieľom\", \"Chýba akýkoľvek údaj, metrika alebo špecifikácia\", \"Nie je jasné, kto by mal nápad implementovať a ako\", \"Transkript vyzerá ako technická chyba alebo záznamu\"], \"next_steps\": [\"Skontaktovať zamestnanca a požiadať o jasné a podrobné vysvetlenie nápadu\", \"Overovať, či ide o technickú chybu pri nahrávaní alebo transcripcii\", \"Ak ide o opravdu komunikovaný nápad, vrátiť so žiadosťou o prepracovanie s jasným popisom problému a riešenia\"], \"category\": \"other\", \"tags\": []}",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-05 09:35:48.722582+00",
-    "visibility": "company",
-    "tags": "[]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null
-  },
-  {
     "author_id": 7,
     "author_name": "Lucia Stoffova",
     "department": "marketing",
