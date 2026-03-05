@@ -21,7 +21,29 @@ const API_BASE = storeGet('apiBase', 'https://ridea.onrender.com');
 let mainWindow = null;
 let tray = null;
 
-// --- PNG icon generator (no external deps) ---
+// --- Find the real icon.ico file ---
+function getIconPath() {
+  // Try multiple locations where icon.ico might be
+  const candidates = [
+    path.join(__dirname, 'assets', 'icon.ico'),
+    path.join(__dirname, 'icon.ico'),
+    path.join(process.resourcesPath || __dirname, 'icon.ico'),
+    path.join(app.getAppPath(), 'assets', 'icon.ico'),
+    path.join(app.getAppPath(), 'icon.ico')
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) {
+        console.log('Found icon at:', p);
+        return p;
+      }
+    } catch {}
+  }
+  console.log('No icon.ico found, using fallback');
+  return null;
+}
+
+// --- PNG icon generator (fallback if no .ico found) ---
 function _crc32(buf) {
   let c = 0xFFFFFFFF;
   for (let i = 0; i < buf.length; i++) {
@@ -36,26 +58,23 @@ function _pngChunk(type, data) {
   const crc = Buffer.alloc(4); crc.writeUInt32BE(_crc32(Buffer.concat([t, data])));
   return Buffer.concat([len, t, data, crc]);
 }
-function makeTrayIcon() {
-  const size = 16;
-  // Purple circle on transparent background (#512D6D)
+function makeFallbackIcon(size) {
+  // Purple square with RI text (basic fallback)
   const R = 81, G = 45, B = 109;
   const raw = Buffer.alloc(size * (1 + size * 4));
   for (let y = 0; y < size; y++) {
     const base = y * (1 + size * 4);
-    raw[base] = 0; // filter: None
+    raw[base] = 0;
     for (let x = 0; x < size; x++) {
-      const cx = x - 7.5, cy = y - 7.5;
-      const inside = (cx * cx + cy * cy) < 52;
-      raw[base + 1 + x * 4]     = inside ? R : 0;
-      raw[base + 1 + x * 4 + 1] = inside ? G : 0;
-      raw[base + 1 + x * 4 + 2] = inside ? B : 0;
-      raw[base + 1 + x * 4 + 3] = inside ? 255 : 0;
+      raw[base + 1 + x * 4]     = R;
+      raw[base + 1 + x * 4 + 1] = G;
+      raw[base + 1 + x * 4 + 2] = B;
+      raw[base + 1 + x * 4 + 3] = 255;
     }
   }
   const ihdrData = Buffer.alloc(13);
   ihdrData.writeUInt32BE(size, 0); ihdrData.writeUInt32BE(size, 4);
-  ihdrData[8] = 8; ihdrData[9] = 6; // RGBA
+  ihdrData[8] = 8; ihdrData[9] = 6;
   const sig = Buffer.from([0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A]);
   const png = Buffer.concat([
     sig,
@@ -66,12 +85,43 @@ function makeTrayIcon() {
   return nativeImage.createFromBuffer(png);
 }
 
+// Get the app icon as nativeImage
+function getAppIcon() {
+  const iconPath = getIconPath();
+  if (iconPath) {
+    try {
+      return nativeImage.createFromPath(iconPath);
+    } catch(e) {
+      console.log('Failed to load icon from path:', e.message);
+    }
+  }
+  return makeFallbackIcon(256);
+}
+
+// Get smaller icon for tray
+function getTrayIcon() {
+  const iconPath = getIconPath();
+  if (iconPath) {
+    try {
+      const img = nativeImage.createFromPath(iconPath);
+      // Resize to 16x16 for tray
+      return img.resize({ width: 16, height: 16 });
+    } catch(e) {
+      console.log('Failed to load tray icon:', e.message);
+    }
+  }
+  return makeFallbackIcon(16);
+}
+
 function createWindow() {
+  const appIcon = getAppIcon();
+
   mainWindow = new BrowserWindow({
     width: 380,
     height: 580,
     resizable: false,
     title: 'Ridea',
+    icon: appIcon,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -101,7 +151,7 @@ function createWindow() {
 }
 
 function createTray() {
-  const icon = makeTrayIcon();
+  const icon = getTrayIcon();
   tray = new Tray(icon);
 
   const contextMenu = Menu.buildFromTemplate([

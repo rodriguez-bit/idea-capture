@@ -74,7 +74,9 @@ jobs:
           cp electron/main.js build-src/
           cp electron/preload.js build-src/
           cp electron/recorder.html build-src/
-          cp -r electron/assets build-src/ 2>/dev/null || true
+          mkdir -p build-src/assets
+          cp electron/assets/icon.ico build-src/assets/
+          cp electron/assets/icon.png build-src/assets/
           cd build-src
           npm init -y
           npm install electron@28.3.3 electron-updater@6.8.3
@@ -82,6 +84,7 @@ jobs:
 
           echo "=== Verify icon ==="
           ls -la build-src/assets/icon.ico
+          ls -la build-src/assets/icon.png
 
           npx --yes @electron/packager@latest build-src Ridea \
             --platform=win32 \
@@ -90,14 +93,22 @@ jobs:
             --overwrite \
             --app-version=${{ steps.ver.outputs.version }} \
             --icon=build-src/assets/icon.ico \
-            --no-prune 2>&1
+            --no-prune \
+            --no-asar 2>&1
           echo "Packaging done"
 
-          # Copy icon.ico to root of packaged app (next to Ridea.exe)
+          # Copy icon files next to Ridea.exe as well (extra fallback)
           cp electron/assets/icon.ico win-out/Ridea-win32-x64/icon.ico
-          echo "=== Verify icon in output ==="
+          mkdir -p win-out/Ridea-win32-x64/resources/app/assets
+          cp electron/assets/icon.ico win-out/Ridea-win32-x64/resources/app/assets/icon.ico
+          cp electron/assets/icon.png win-out/Ridea-win32-x64/resources/app/assets/icon.png
+
+          echo "=== Verify icons in output ==="
           ls -la win-out/Ridea-win32-x64/icon.ico
+          ls -la win-out/Ridea-win32-x64/resources/app/assets/icon.ico
           ls -la win-out/Ridea-win32-x64/Ridea.exe
+          echo "=== List app dir ==="
+          ls -la win-out/Ridea-win32-x64/resources/app/
 
       - name: Create Inno Setup script
         shell: pwsh
@@ -192,7 +203,7 @@ jobs:
           gh release create "v${VERSION}" \
             --repo "${REPO}" \
             --title "Ridea v${VERSION}" \
-            --notes "Ridea v${VERSION} - opravena ikona na ploche, auto-update" \
+            --notes "Ridea v${VERSION} - fix: ikona sa zobrazuje v taskbare aj v tray, mic+system nahravanie spolu" \
             --latest 2>/dev/null || echo "Release already exists"
 
           gh release upload "v${VERSION}" \
