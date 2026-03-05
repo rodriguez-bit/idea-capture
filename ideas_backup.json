@@ -313,5 +313,26 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "f9d48c44-80a9-4431-8184-f19a8c67cbf2.webm",
+    "duration_seconds": 4,
+    "transcript": "Blah, pardon, blah, blah, blah, blah, blah, blah, blah, blah, neviem, a niečo?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-05 13:48:06.280434+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null
   }
 ]
