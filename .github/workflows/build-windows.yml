@@ -34,7 +34,6 @@ jobs:
           pip install Pillow
           python3 << 'PYEOF'
           from PIL import Image, ImageDraw, ImageFont
-          import struct
 
           def make_icon_image(size):
               img = Image.new('RGBA', (size, size), (81, 45, 109, 255))
@@ -74,45 +73,17 @@ jobs:
       - name: Build NSIS installer
         shell: bash
         working-directory: electron
-        env:
-          DEBUG: "electron-builder"
         run: |
-          npx electron-builder --win nsis --x64 --publish never 2>&1 || true
-          echo "=== checking dist ==="
-          ls -la dist/ 2>/dev/null || echo "No dist folder found"
-          find dist -type f -name "*.exe" 2>/dev/null || echo "No exe files"
+          npx electron-builder --win nsis --x64 --publish never 2>&1
+          echo "Build done"
 
-      - name: Fallback - use electron-packager if builder failed
-        if: success()
+      - name: List output files
+        if: always()
         shell: bash
         run: |
-          if [ ! -f electron/dist/*.exe ] 2>/dev/null; then
-            echo "electron-builder failed, falling back to electron-packager"
-            mkdir -p build-src
-            cp electron/main.js build-src/
-            cp electron/preload.js build-src/
-            cp electron/recorder.html build-src/
-            cp -r electron/assets build-src/ 2>/dev/null || true
-            cd build-src
-            npm init -y
-            npm install electron@28.3.3 electron-updater@6.8.3
-            cd ..
-            npx --yes @electron/packager@latest build-src Ridea \
-              --platform=win32 --arch=x64 --out=win-out --overwrite \
-              --app-version=${{ steps.ver.outputs.version }} \
-              --icon=electron/assets/icon.ico \
-              --no-prune 2>&1
-            echo "Packager done"
-          fi
-
-      - name: Create ZIP from packager output
-        if: success()
-        shell: pwsh
-        run: |
-          if (Test-Path "win-out\Ridea-win32-x64") {
-            Compress-Archive -Path "win-out\Ridea-win32-x64\*" -DestinationPath "Ridea-${{ steps.ver.outputs.version }}-win-x64.zip"
-            Write-Host "Created ZIP"
-          }
+          echo "=== dist contents ==="
+          find electron/dist -type f -name "*.exe" 2>/dev/null || echo "No exe files"
+          find electron/dist -type f 2>/dev/null | head -20
 
       - name: Create Release and Upload
         if: success()
@@ -120,20 +91,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          gh release create "v${{ steps.ver.outputs.version }}" \
-            --repo ${{ github.repository }} \
-            --title "Ridea v${{ steps.ver.outputs.version }}" \
-            --notes "Ridea v${{ steps.ver.outputs.version }} - NSIS installer, fialovy dizajn, textove napady, logo RI" \
-            --latest 2>/dev/null || true
+          VERSION="${{ steps.ver.outputs.version }}"
+          REPO="${{ github.repository }}"
 
-          # Upload NSIS installer .exe if exists
-          for f in electron/dist/*.exe; do
-            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
-              --repo ${{ github.repository }} --clobber && echo "Uploaded $f"
+          gh release create "v${VERSION}" \
+            --repo "${REPO}" \
+            --title "Ridea v${VERSION}" \
+            --notes "Ridea v${VERSION} - NSIS installer, fialovy dizajn, textove napady, logo RI" \
+            --latest 2>/dev/null || echo "Release already exists"
+
+          # Find and upload all .exe files
+          find electron/dist -name "*.exe" -type f | while read f; do
+            echo "Uploading: $f"
+            gh release upload "v${VERSION}" "$f" --repo "${REPO}" --clobber || echo "Upload failed for $f"
           done
 
-          # Upload ZIP fallback if exists
-          for f in *.zip; do
-            [ -f "$f" ] && gh release upload "v${{ steps.ver.outputs.version }}" "$f" \
-              --repo ${{ github.repository }} --clobber && echo "Uploaded $f"
-          done
+          echo "Upload complete"

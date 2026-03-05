@@ -1,6 +1,6 @@
 {
   "name": "ridea",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Interny nastroj pre zachytavanie hlasovych napadov",
   "main": "main.js",
   "scripts": {
