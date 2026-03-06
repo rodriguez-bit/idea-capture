@@ -791,7 +791,9 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
         return None, 0, None
 
     try:
+        print(f'ElevenLabs Scribe: Attempting import...')
         from elevenlabs.client import ElevenLabs
+        print(f'ElevenLabs Scribe: Import OK, creating client...')
         client = ElevenLabs(api_key=api_key)
 
         file_size = os.path.getsize(file_path)
@@ -2211,12 +2213,22 @@ def service_worker():
 def health():
     el_key = os.environ.get('ELEVENLABS_API_KEY', '')
     oa_key = os.environ.get('OPENAI_API_KEY', '')
+    # Check if elevenlabs package is importable
+    el_import_ok = False
+    el_import_error = ''
+    try:
+        from elevenlabs.client import ElevenLabs as _EL
+        el_import_ok = True
+    except Exception as e:
+        el_import_error = f'{type(e).__name__}: {e}'
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.8.2',
+        'version': '2.8.3',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
+        'elevenlabs_import_ok': el_import_ok,
+        'elevenlabs_import_error': el_import_error,
         'openai_key_set': bool(oa_key),
     })
 
