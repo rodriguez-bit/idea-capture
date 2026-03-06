@@ -143,6 +143,31 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .file-name { font-size: 13px; color: #f0e6f6; font-weight: 600; word-break: break-all; }
 .file-size { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
 #file-preview { border-radius: 8px; margin-top: 6px; }
+
+/* Vault banner - unsent recordings */
+.vault-banner { display: none; flex-shrink: 0; background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); border-radius: 8px; padding: 8px 10px; cursor: pointer; transition: all .2s; }
+.vault-banner.show { display: flex; align-items: center; gap: 8px; }
+.vault-banner:hover { background: rgba(248,113,113,0.18); }
+.vault-icon { font-size: 18px; }
+.vault-text { flex: 1; font-size: 12px; color: #f87171; font-weight: 600; }
+.vault-count { font-size: 11px; color: rgba(255,255,255,0.4); }
+.vault-list { display: none; flex-direction: column; gap: 6px; flex-shrink: 0; max-height: 220px; overflow-y: auto; }
+.vault-list.open { display: flex; }
+.vault-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 10px; }
+.vault-item .vi-top { display: flex; justify-content: space-between; align-items: center; }
+.vault-item .vi-info { font-size: 11px; color: rgba(255,255,255,0.5); }
+.vault-item .vi-status { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+.vault-item .vi-status.pending { background: rgba(250,204,21,0.15); color: #facc15; }
+.vault-item .vi-status.uploading { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.vault-item .vi-status.error { background: rgba(248,113,113,0.15); color: #f87171; }
+.vault-item .vi-actions { display: flex; gap: 6px; margin-top: 6px; }
+.vault-item .vi-btn { padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.vi-btn.retry { background: rgba(74,222,128,0.15); color: #4ade80; }
+.vi-btn.retry:hover { background: rgba(74,222,128,0.25); }
+.vi-btn.download { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.vi-btn.download:hover { background: rgba(96,165,250,0.25); }
+.vi-btn.delete { background: rgba(248,113,113,0.1); color: rgba(248,113,113,0.6); }
+.vi-btn.delete:hover { background: rgba(248,113,113,0.2); color: #f87171; }
 </style>
 </head>
 <body>
@@ -191,6 +216,13 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
     <button type="button" class="tab-btn" id="tab-file" onclick="switchTab('file')">&#128206; Subor</button>
   </div>
 
+  <div class="vault-banner" id="vault-banner" onclick="toggleVaultList()">
+    <span class="vault-icon">&#128190;</span>
+    <span class="vault-text">Neodoslane nahravky</span>
+    <span class="vault-count" id="vault-count"></span>
+  </div>
+  <div class="vault-list" id="vault-list"></div>
+
   <div id="voice-panel" class="active">
     <canvas id="visualizer"></canvas>
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div></button>
@@ -229,6 +261,237 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+// AudioVault — IndexedDB backup for recordings (Electron)
+// ══════════════════════════════════════════════════════════════
+var _vaultDB = null;
+var _vaultOpen = false;
+
+function openVaultDB() {
+  return new Promise(function(resolve, reject) {
+    if (_vaultDB) { resolve(_vaultDB); return; }
+    var req = indexedDB.open('RideaAudioVault', 1);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains('recordings')) {
+        var store = db.createObjectStore('recordings', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('status', 'status', { unique: false });
+      }
+    };
+    req.onsuccess = function(e) { _vaultDB = e.target.result; resolve(_vaultDB); };
+    req.onerror = function() { reject(new Error('IndexedDB unavailable')); };
+  });
+}
+
+function vaultSave(blobData, filename, dept, role, visibility) {
+  return openVaultDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('recordings', 'readwrite');
+      var store = tx.objectStore('recordings');
+      var record = {
+        blob: blobData,
+        filename: filename,
+        dept: dept,
+        role: role,
+        visibility: visibility,
+        created: new Date().toISOString(),
+        size: blobData.size,
+        status: 'pending',
+        jobId: null,
+        errorMsg: null,
+        retries: 0
+      };
+      var req = store.add(record);
+      req.onsuccess = function() { resolve(req.result); };
+      req.onerror = function() { reject(new Error('Vault save failed')); };
+    });
+  });
+}
+
+function vaultUpdate(id, fields) {
+  return openVaultDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('recordings', 'readwrite');
+      var store = tx.objectStore('recordings');
+      var getReq = store.get(id);
+      getReq.onsuccess = function() {
+        var rec = getReq.result;
+        if (!rec) { resolve(); return; }
+        Object.keys(fields).forEach(function(k) { rec[k] = fields[k]; });
+        store.put(rec);
+        resolve();
+      };
+      getReq.onerror = function() { reject(new Error('Vault update failed')); };
+    });
+  });
+}
+
+function vaultDelete(id) {
+  return openVaultDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction('recordings', 'readwrite');
+      tx.objectStore('recordings').delete(id);
+      tx.oncomplete = function() { resolve(); };
+      tx.onerror = function() { reject(); };
+    });
+  });
+}
+
+function vaultGetAll() {
+  return openVaultDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction('recordings', 'readonly');
+      var req = tx.objectStore('recordings').getAll();
+      req.onsuccess = function() { resolve(req.result || []); };
+      req.onerror = function() { resolve([]); };
+    });
+  });
+}
+
+function vaultGet(id) {
+  return openVaultDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction('recordings', 'readonly');
+      var req = tx.objectStore('recordings').get(id);
+      req.onsuccess = function() { resolve(req.result || null); };
+      req.onerror = function() { resolve(null); };
+    });
+  });
+}
+
+function toggleVaultList() {
+  _vaultOpen = !_vaultOpen;
+  document.getElementById('vault-list').classList.toggle('open', _vaultOpen);
+}
+
+function refreshVaultUI() {
+  vaultGetAll().then(function(items) {
+    var pending = items.filter(function(i) { return i.status !== 'done'; });
+    var banner = document.getElementById('vault-banner');
+    var list = document.getElementById('vault-list');
+    if (pending.length === 0) {
+      banner.classList.remove('show');
+      list.classList.remove('open'); list.innerHTML = ''; _vaultOpen = false;
+      return;
+    }
+    banner.classList.add('show');
+    document.getElementById('vault-count').textContent = pending.length + ' zaznam' + (pending.length > 1 ? 'ov' : '');
+    var html = '';
+    pending.forEach(function(item) {
+      var d = new Date(item.created);
+      var time = d.getDate() + '.' + (d.getMonth()+1) + '. ' + d.getHours() + ':' + (d.getMinutes()<10?'0':'') + d.getMinutes();
+      var sizeMB = (item.size / 1024 / 1024).toFixed(1);
+      var statusLabel = item.status === 'pending' ? 'Caka' : item.status === 'uploading' ? 'Odosielam...' : 'Chyba';
+      var statusCls = item.status === 'pending' ? 'pending' : item.status === 'uploading' ? 'uploading' : 'error';
+      html += '<div class="vault-item">';
+      html += '<div class="vi-top"><span class="vi-info">' + time + ' &middot; ' + sizeMB + ' MB</span>';
+      html += '<span class="vi-status ' + statusCls + '">' + statusLabel + '</span></div>';
+      if (item.errorMsg) html += '<div style="font-size:10px;color:#f87171;margin-top:3px">' + item.errorMsg + '</div>';
+      html += '<div class="vi-actions">';
+      if (item.status !== 'uploading') {
+        html += '<button class="vi-btn retry" onclick="vaultRetry(' + item.id + ')">&#8635; Odoslat znova</button>';
+      }
+      html += '<button class="vi-btn download" onclick="vaultDownload(' + item.id + ')">&#11015; Stiahnut</button>';
+      html += '<button class="vi-btn delete" onclick="vaultRemove(' + item.id + ')">&#10005;</button>';
+      html += '</div></div>';
+    });
+    list.innerHTML = html;
+  });
+}
+
+function vaultDownload(id) {
+  vaultGet(id).then(function(rec) {
+    if (!rec) return;
+    var url = URL.createObjectURL(rec.blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = rec.filename || ('nahravka_' + id + '.webm');
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  });
+}
+
+function vaultRemove(id) {
+  if (!confirm('Naozaj vymazat nahravku? Tato akcia je nevratna.')) return;
+  vaultDelete(id).then(refreshVaultUI);
+}
+
+function vaultRetry(id) {
+  vaultGet(id).then(function(rec) {
+    if (!rec || !rec.blob) { setMsg('Nahravka nenajdena', 'err'); return; }
+    vaultUpdate(id, { status: 'uploading', errorMsg: null, retries: rec.retries + 1 }).then(function() {
+      refreshVaultUI();
+      _doVaultUpload(id, rec.blob, rec.filename, rec.dept, rec.role, rec.visibility);
+    });
+  });
+}
+
+function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility) {
+  var fill = document.getElementById('bfill');
+  fill.style.width = '15%';
+  setMsg('Odosielam zalohovanu nahravku...', 'inf');
+  var fd = new FormData();
+  fd.append('audio', blobData, filename);
+  fd.append('department', dept);
+  fd.append('role', role);
+  fd.append('visibility', visibility);
+  fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include' })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Chyba ' + r.status); });
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.job_id) {
+        setMsg('Prepisujem...', 'inf'); fill.style.width = '40%';
+        vaultUpdate(vaultId, { jobId: data.job_id });
+        _pollVaultJob(vaultId, data.job_id, fill);
+      } else {
+        fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok');
+        vaultUpdate(vaultId, { status: 'done' }).then(function() {
+          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+        });
+      }
+    })
+    .catch(function(err) {
+      fill.style.width = '0%';
+      setMsg('Chyba: ' + err.message + ' - nahravka ulozena lokalne', 'err');
+      vaultUpdate(vaultId, { status: 'error', errorMsg: err.message }).then(refreshVaultUI);
+    });
+}
+
+function _pollVaultJob(vaultId, jobId, fill) {
+  var attempts = 0;
+  function poll() {
+    if (attempts >= 200) {
+      setMsg('Timeout - nahravka ulozena lokalne', 'err'); fill.style.width = '0%';
+      vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
+      return;
+    }
+    attempts++;
+    fetch(API + '/api/ideas/job/' + jobId, { credentials: 'include' })
+      .then(function(r) {
+        if (r.status === 202) {
+          fill.style.width = Math.min(40 + attempts, 95) + '%';
+          if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
+          setTimeout(poll, 3000); return;
+        }
+        if (r.ok || r.status === 404) {
+          fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok');
+          vaultUpdate(vaultId, { status: 'done' }).then(function() {
+            setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+          });
+        } else {
+          r.json().catch(function() { return {}; }).then(function(d) {
+            setMsg(d.error || 'Chyba pri spracovani', 'err'); fill.style.width = '0%';
+            vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' }).then(refreshVaultUI);
+          });
+        }
+      })
+      .catch(function() { setTimeout(poll, 3000); });
+  }
+  setTimeout(poll, 3000);
+}
+// ══════════════════════════════════════════════════════════════
+
 var API = 'https://ridea.onrender.com';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
 var audioCtx = null, analyserNode = null, animId = null, activeStreams = [], mixedDest = null;
@@ -267,7 +530,17 @@ document.addEventListener('visibilitychange', function() {
       blob = new Blob(chunks, { type: 'audio/webm' });
       document.getElementById('acts').style.display = 'flex';
       document.getElementById('rhint').textContent = 'Nahravka prerusena (obrazovka zamknuta)';
-      setMsg('Nahravanie bolo prerusene. Mozete odoslat co sa nahrato.', 'err');
+      setMsg('Nahravanie prerusene. Zalohujem...', 'inf');
+      // Auto-save interrupted recording to vault
+      var dept = document.getElementById('dept').value;
+      var role = document.getElementById('role').value;
+      if (dept && role) {
+        vaultSave(blob, 'prerusena_' + Date.now() + '.webm', dept, role, currentVisibility)
+          .then(function() { setMsg('Prerusena nahravka zalohovana! Mozete odoslat alebo stiahnut.', 'err'); refreshVaultUI(); })
+          .catch(function() { setMsg('Nahravanie prerusene. Odoslte co najskor.', 'err'); });
+      } else {
+        setMsg('Nahravanie prerusene. Mozete odoslat co sa nahrato.', 'err');
+      }
     } else {
       document.getElementById('rhint').textContent = 'Nahravanie prerusene';
       setMsg('Android zastavil nahravanie pri zamknuti obrazovky.', 'err');
@@ -549,24 +822,32 @@ async function sendIdea() {
   if (!dept||!role) { setMsg('Vyber oddelenie a rolu','err'); return; }
   var btn = document.getElementById('bsend');
   btn.disabled=true; btn.textContent='Odosielam...';
-  setMsg('Nahravam subor...','inf');
   var fill = document.getElementById('bfill');
-  fill.style.width='15%';
+  fill.style.width='5%';
+  var filename = 'idea_'+Date.now()+'.webm';
+  
+  // Save to vault FIRST
+  var vaultId = null;
+  try {
+    vaultId = await vaultSave(blob, filename, dept, role, currentVisibility);
+    setMsg('Nahravka zalohovana. Odosielam...','inf');
+    fill.style.width='15%';
+    refreshVaultUI();
+  } catch(e) { /* continue without vault */ }
+  
   try {
     var fd = new FormData();
-    fd.append('audio', blob, 'idea_'+Date.now()+'.webm');
+    fd.append('audio', blob, filename);
     fd.append('department', dept);
     fd.append('role', role);
     fd.append('visibility', currentVisibility);
     var r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include'});
     if (!r.ok) {
       var d=await r.json().catch(function(){return {};});
-      setMsg(d.error||'Chyba','err');
-      btn.disabled=false; btn.textContent='Odoslat napad';
-      fill.style.width='0%';
-      return;
+      throw new Error(d.error||'Chyba '+r.status);
     }
     var data = await r.json();
+    if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
     if (data.job_id) {
       setMsg('Prepisujem... 10-60 sekund','inf');
       fill.style.width='40%';
@@ -584,6 +865,9 @@ async function sendIdea() {
           if (jr.ok || jr.status === 404) {
             var jdata = jr.ok ? await jr.json().catch(function(){return {};}) : {};
             fill.style.width='100%';
+            if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
+              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
+            });
             if (jdata.warning) {
               setMsg(jdata.warning,'err');
               setTimeout(discard, 8000);
@@ -595,17 +879,32 @@ async function sendIdea() {
             var jd=await jr.json().catch(function(){return {};});
             setMsg(jd.error||'Chyba pri spracovani','err');
             fill.style.width='0%';
+            if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: jd.error || 'Server error' }).then(refreshVaultUI);
           }
           break;
         } catch(e) { continue; }
       }
-      if (attempts >= 200) { setMsg('Timeout - skus znova','err'); fill.style.width='0%'; }
+      if (attempts >= 200) {
+        setMsg('Timeout - nahravka ulozena lokalne','err');
+        fill.style.width='0%';
+        if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
+      }
     } else {
       fill.style.width='100%';
       setMsg('Napad odoslany!','ok');
+      if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
+        setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
+      });
       setTimeout(discard, 2500);
     }
-  } catch(e) { setMsg('Chyba: '+e.message,'err'); }
+  } catch(e) {
+    if (vaultId) {
+      setMsg('Chyba: '+e.message+' \u2014 nahravka je ulozena lokalne','err');
+      vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(refreshVaultUI);
+    } else {
+      setMsg('Chyba: '+e.message,'err');
+    }
+  }
   finally { btn.disabled=false; btn.textContent='Odoslat napad'; setTimeout(function(){fill.style.width='0%';},2000); }
 }
 
@@ -686,9 +985,18 @@ async function sendFileIdea() {
   if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
   var btn = document.getElementById('fileSend');
   btn.disabled = true; btn.textContent = 'Odosiela sa...';
-  setMsg('Nahravam subor...', 'inf');
   var fill = document.getElementById('bfill');
-  fill.style.width = '15%';
+  fill.style.width = '5%';
+  
+  // Save to vault FIRST
+  var vaultId = null;
+  try {
+    vaultId = await vaultSave(selectedFile, selectedFile.name, dept, role, currentVisibility);
+    setMsg('Subor zalohovany. Odosielam...', 'inf');
+    fill.style.width = '15%';
+    refreshVaultUI();
+  } catch(e) { /* continue without vault */ }
+  
   try {
     var fd = new FormData();
     fd.append('audio', selectedFile, selectedFile.name);
@@ -698,30 +1006,36 @@ async function sendFileIdea() {
     var r = await fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include' });
     if (!r.ok) {
       var d = await r.json().catch(function() { return {}; });
-      setMsg(d.error || 'Chyba', 'err');
-      btn.disabled = false; btn.textContent = 'Odoslat audio napad';
-      fill.style.width = '0%';
-      return;
+      throw new Error(d.error || 'Chyba ' + r.status);
     }
     var data = await r.json();
+    if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
     if (data.job_id) {
       setMsg('Prepisujem... 10-60 sekund', 'inf');
       fill.style.width = '40%';
-      await pollFileJob(data.job_id, fill, btn);
+      await pollFileJob(data.job_id, fill, btn, vaultId);
     } else {
       fill.style.width = '100%';
       setMsg('Napad odoslany!', 'ok');
+      if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
+        setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
+      });
       setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
       btn.disabled = false; btn.textContent = 'Odoslat audio napad';
     }
   } catch(e) {
-    setMsg('Chyba: ' + e.message, 'err');
+    if (vaultId) {
+      setMsg('Chyba: ' + e.message + ' \u2014 subor je ulozeny lokalne', 'err');
+      vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(refreshVaultUI);
+    } else {
+      setMsg('Chyba: ' + e.message, 'err');
+    }
     btn.disabled = false; btn.textContent = 'Odoslat audio napad';
     fill.style.width = '0%';
   }
 }
 
-async function pollFileJob(jobId, fill, btn) {
+async function pollFileJob(jobId, fill, btn, vaultId) {
   var attempts = 0;
   while (attempts < 200) {
     await new Promise(function(r) { setTimeout(r, 3000); });
@@ -736,6 +1050,9 @@ async function pollFileJob(jobId, fill, btn) {
       if (r.ok) {
         var data = await r.json();
         fill.style.width = '100%';
+        if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
+          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
+        });
         if (data.warning) {
           setMsg(data.warning, 'err');
           setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; }, 8000);
@@ -746,18 +1063,23 @@ async function pollFileJob(jobId, fill, btn) {
       } else if (r.status === 404) {
         fill.style.width = '100%';
         setMsg('Napad spracovany!', 'ok');
+        if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
+          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
+        });
         setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
       } else {
         var d = await r.json().catch(function() { return {}; });
         setMsg(d.error || 'Chyba pri spracovani', 'err');
         fill.style.width = '0%';
+        if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' }).then(refreshVaultUI);
       }
       break;
     } catch(e) { continue; }
   }
   if (attempts >= 200) {
-    setMsg('Timeout - skus znova', 'err');
+    setMsg('Timeout - nahravka ulozena lokalne', 'err');
     fill.style.width = '0%';
+    if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
   }
   btn.disabled = false; btn.textContent = 'Odoslat audio napad';
 }
@@ -788,6 +1110,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 init();
+refreshVaultUI();
 </script>
 </body>
 </html>
