@@ -817,10 +817,14 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
         print(f'ElevenLabs Scribe: {len(transcript)} chars, duration={duration}s, lang={lang_code}')
 
         if transcript and transcript.strip():
+            # Check if ElevenLabs returned a hallucination too
+            if _is_whisper_hallucination(transcript.strip()):
+                print(f'ElevenLabs Scribe: Hallucination detected: "{transcript.strip()}" — treating as valid but short')
+                # ElevenLabs is more reliable, so keep it if it returned something
             return transcript.strip(), duration, None
 
-        print('ElevenLabs Scribe: Empty transcript returned')
-        return None, 0, None
+        print(f'ElevenLabs Scribe: Empty transcript returned (audio may be silent or too short)')
+        return '', 0, None  # Return empty string (not None) to indicate "processed but no speech"
 
     except Exception as e:
         err_str = str(e).lower()
@@ -879,6 +883,62 @@ def _split_audio_chunks(file_path, max_size_mb=20):
             continue
 
     return chunks if chunks else [file_path]
+
+
+# Known Whisper hallucination phrases (appear when audio is silent/noisy)
+_WHISPER_HALLUCINATION_BLACKLIST = [
+    'ďakujem za pozornosť',
+    'dakujem za pozornost',
+    'dobre to je všetko',
+    'dobre to je vsetko',
+    'ďakujem',
+    'dakujem',
+    'thank you for watching',
+    'thanks for watching',
+    'thank you',
+    'thanks for listening',
+    'subscribe',
+    'like and subscribe',
+    'please subscribe',
+    'subtitles by',
+    'translated by',
+    'amara.org',
+    'copyright',
+    'music',
+    'applause',
+    'silence',
+    'you',
+    'bye',
+    'goodbye',
+    'dovidenia',
+    'na zhledanou',
+    'na shledanou',
+    'koniec',
+    'the end',
+    'end',
+]
+
+
+def _is_whisper_hallucination(text):
+    """Check if text is a known Whisper hallucination on silent/noisy audio."""
+    if not text:
+        return True
+    normalized = text.lower().strip().rstrip('.!?,;:')
+    # Remove all punctuation for comparison
+    import string
+    clean = normalized.translate(str.maketrans('', '', string.punctuation))
+    clean = ' '.join(clean.split())  # normalize whitespace
+    # Exact match against blacklist
+    if clean in _WHISPER_HALLUCINATION_BLACKLIST or normalized in _WHISPER_HALLUCINATION_BLACKLIST:
+        return True
+    # Very short text that's just punctuation or whitespace
+    if len(clean) < 3:
+        return True
+    # Text is just one or two common words repeated
+    words = clean.split()
+    if len(words) <= 3 and len(set(words)) == 1:
+        return True
+    return False
 
 
 def _clean_hallucinations(text):
@@ -1007,12 +1067,18 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
         if el_warning:
             stt_warning = el_warning
-        if el_text:
+        if el_text:  # Non-empty string = successful transcription
             transcript_text = el_text
             total_duration = el_duration
             stt_engine = 'elevenlabs'
             print(f'Upload job {job_id}: ElevenLabs succeeded ({len(transcript_text)} chars)')
-        else:
+        elif el_text is not None:  # Empty string '' = ElevenLabs processed but no speech found
+            # Don't fall back to Whisper — it would hallucinate on silent/noisy audio
+            print(f'Upload job {job_id}: ElevenLabs found no speech — skipping Whisper to avoid hallucination')
+            transcript_text = ''
+            total_duration = el_duration
+            stt_engine = 'elevenlabs'
+        else:  # None = ElevenLabs error/unavailable — fall back to Whisper
             # ── FALLBACK: OpenAI Whisper ──
             print(f'Upload job {job_id}: ElevenLabs failed/unavailable, falling back to Whisper')
             client = openai.OpenAI(api_key=api_key)
@@ -1064,9 +1130,18 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             transcript_text = ' '.join(all_text).strip()
             stt_engine = 'whisper'
 
+            # Check if Whisper produced a known hallucination
+            if transcript_text and _is_whisper_hallucination(transcript_text):
+                print(f'Upload job {job_id}: Whisper hallucination detected: "{transcript_text}" — discarding')
+                transcript_text = ''
+
         # Final hallucination check on combined text
         if transcript_text:
             transcript_text = _clean_hallucinations(transcript_text)
+            # Re-check after cleaning
+            if transcript_text and _is_whisper_hallucination(transcript_text):
+                print(f'Upload job {job_id}: Post-clean hallucination detected: "{transcript_text}" — discarding')
+                transcript_text = ''
 
         # Even if transcript is empty, SAVE the idea with audio backup reference
         if not transcript_text:

@@ -105,6 +105,22 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
 .adml { font-size: 11px; color: rgba(255,255,255,0.3); text-align: center; cursor: pointer; flex-shrink: 0; padding-bottom: 4px; }
 .adml:hover { color: #d4a6f5; }
 
+/* Recent ideas */
+.recent-section { flex-shrink: 0; margin-top: 4px; }
+.recent-toggle { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; cursor: pointer; padding: 6px 0; transition: color .2s; }
+.recent-toggle:hover { color: #d4a6f5; }
+.recent-list { display: none; max-height: 180px; overflow-y: auto; padding: 0 4px; }
+.recent-list.show { display: block; }
+.recent-item { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; transition: background .2s; }
+.recent-item:hover { background: rgba(255,255,255,0.12); }
+.recent-item .ri-top { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
+.recent-item .ri-id { font-weight: 600; color: #d4a6f5; }
+.recent-item .ri-text { font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.4; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.recent-item .ri-meta { display: flex; gap: 8px; margin-top: 3px; font-size: 9px; color: rgba(255,255,255,0.3); }
+.recent-item .ri-badge { display: inline-block; padding: 1px 5px; border-radius: 4px; font-size: 9px; }
+.ri-badge.el { background: rgba(106,212,134,0.15); color: #6ad486; }
+.ri-badge.wh { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
 #file-panel { display: none; flex-direction: column; gap: 10px; flex: 1; min-height: 0; justify-content: center; }
 #file-panel.active { display: flex; }
 .file-upload-area {
@@ -249,6 +265,12 @@ body { background: #512D6D; font-family: -apple-system, BlinkMacSystemFont, 'Seg
   </div>
   <div class="bar"><div class="bfill" id="bfill"></div></div>
   <div class="smsg" id="smsg"></div>
+
+  <div class="recent-section">
+    <div class="recent-toggle" id="recent-toggle" onclick="toggleRecent()">&#9662; Posledné nápady</div>
+    <div class="recent-list" id="recent-list"></div>
+  </div>
+
   <div class="adml" onclick="openAdmin()">&#9881; Admin konzola</div>
 </div>
 
@@ -446,7 +468,7 @@ function _doVaultUpload(vaultId, blob, filename, dept, role, visibility) {
         return _pollVaultJob(vaultId, data.job_id, fill);
       } else {
         fill.style.width = '100%';
-        setMsg('Napad odoslany!', 'ok');
+        setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
         vaultUpdate(vaultId, { status: 'done' }).then(function() {
           setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
         });
@@ -479,7 +501,7 @@ function _pollVaultJob(vaultId, jobId, fill) {
         }
         if (r.ok || r.status === 404) {
           fill.style.width = '100%';
-          setMsg('Napad odoslany!', 'ok');
+          setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
           vaultUpdate(vaultId, { status: 'done' }).then(function() {
             setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
           });
@@ -639,6 +661,56 @@ async function doLogout() {
 
 function openAdmin() {
   window.location.href = '/admin';
+}
+
+// ── Recent Ideas ──
+var _recentOpen = false;
+function toggleRecent() {
+  _recentOpen = !_recentOpen;
+  var list = document.getElementById('recent-list');
+  var toggle = document.getElementById('recent-toggle');
+  if (_recentOpen) {
+    list.classList.add('show');
+    toggle.innerHTML = '&#9652; Posledn\u00e9 n\u00e1pady';
+    loadRecentIdeas();
+  } else {
+    list.classList.remove('show');
+    toggle.innerHTML = '&#9662; Posledn\u00e9 n\u00e1pady';
+  }
+}
+
+async function loadRecentIdeas() {
+  var list = document.getElementById('recent-list');
+  list.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:rgba(255,255,255,0.3)">Na\u010d\u00edtavam...</div>';
+  try {
+    var r = await fetch('/api/ideas/my-recent', {credentials: 'include'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    var data = await r.json();
+    if (!data.length) {
+      list.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:rgba(255,255,255,0.3)">\u017diadne n\u00e1pady</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < data.length; i++) {
+      var idea = data[i];
+      var date = idea.created_at ? new Date(idea.created_at).toLocaleString('sk-SK', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+      var badge = idea.stt_engine === 'elevenlabs' ? '<span class="ri-badge el">EL</span>' : idea.stt_engine === 'whisper' ? '<span class="ri-badge wh">W</span>' : '';
+      var dur = idea.duration ? Math.round(idea.duration) + 's' : '';
+      var vis = idea.visibility === 'company' ? '\uD83C\uDFE2' : '\uD83D\uDD12';
+      html += '<div class="recent-item" onclick="window.open(\'/admin#idea-' + idea.id + '\', \'_blank\')">';
+      html += '<div class="ri-top"><span class="ri-id">#' + idea.id + '</span><span>' + date + '</span></div>';
+      html += '<div class="ri-text">' + escapeHtml(idea.preview) + '</div>';
+      html += '<div class="ri-meta"><span>' + vis + ' ' + (idea.department || '') + '</span>' + (dur ? '<span>' + dur + '</span>' : '') + badge + '</div>';
+      html += '</div>';
+    }
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:#f87171">Chyba: ' + e.message + '</div>';
+  }
+}
+
+function escapeHtml(t) {
+  var d = document.createElement('div'); d.textContent = t; return d.innerHTML;
 }
 
 // ── Visualizer ──
@@ -905,7 +977,7 @@ async function submitIdea() {
       await pollJob(data.job_id, fill, btn, vaultId);
     } else {
       fill.style.width = '100%';
-      setMsg('Napad odoslany!', 'ok');
+      setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
       if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
         setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
       });
@@ -980,7 +1052,7 @@ async function pollJob(jobId, fill, btn, vaultId) {
           setMsg(data.warning, 'err');
           setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 8000);
         } else {
-          setMsg('Napad odoslany!', 'ok');
+          setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
           setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
         }
       } else if (r.status === 404) {
@@ -1115,7 +1187,7 @@ async function sendFileIdea() {
       await pollFileJob(data.job_id, fill, btn, vaultId);
     } else {
       fill.style.width = '100%';
-      setMsg('Napad odoslany!', 'ok');
+      setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
       if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
         setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
       });
@@ -1156,7 +1228,7 @@ async function pollFileJob(jobId, fill, btn, vaultId) {
           setMsg(data.warning, 'err');
           setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; }, 8000);
         } else {
-          setMsg('Napad odoslany!', 'ok');
+          setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
           setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
         }
       } else if (r.status === 404) {
