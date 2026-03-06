@@ -264,28 +264,6 @@
     "audio_data": ""
   },
   {
-    "author_id": 4,
-    "author_name": "Dominika Michalec Kovačovičová",
-    "department": "marketing",
-    "role": "manager",
-    "audio_filename": "3d9934aa-816c-492e-88cb-34193dadbb9c.webm",
-    "duration_seconds": 156,
-    "transcript": "Môžeš. Na úrovni jedna dve zo sto že toto je ten krok ktorý musí a teraz pred pol rokom by to jasné že bolo že toto rozpísovačky hento toto bláblá dva týždne. Teraz my sa bavíme fakt na úrovni že toto sa dá vyklikať spraviť obvoľať aleby sa bude časovo lebo chceš vedieť ja mám predstavu že takto že do 10 dní odteraz bude poslaný mail na 100 žien alebo kontakt na 100 žien a budeme čakať odpoveď. Budeme kontaktovať ďalších 100 žien alebo ďalších 100 žien až kurva kým sa neozve 10 ľudí z ktorých vyjdu 3. Toto je cieľ to znamená že Tatiana by mala ukázať na konci tohoto meseca 200 až 300 že odoslaných kontaktov personalizovaných na konkrétnu ženu z našou ponukou prečo sa s ňom chceme stretnúť prečo sme chceme robiť prečo proste na zaujala dddd a od aprila už by sme mali riešiť konkrétne veci z konkrétnou ženou. Toto je moja vízia toho čo Tatiana by mala doniesť. Dobre. Dobre. Toto ja potrebujem. Toto je ono. Vždy akože z priebehu toho procesu ja potrebujem aby sa s tebou spájala ale že presne čiže ja na konci tohto meseca budem vedieť že úhodnok mi za to či priniesla tieto dve tri ženy a my sme na apríl pripravení že môžeme rozísť konkrétnu z nich. Presne tak. Toto ja potrebujem.",
-    "status": "new",
-    "ai_score": 5,
-    "ai_analysis": "{\"score\": 5, \"clarity\": 2, \"feasibility\": 6, \"relevance\": 6, \"summary\": \"Nápad sa týka spustenia systematickej outreach kampane zameranej na oslovenie 200-300 potenciálnych klientok s personalizovanými správami cieľom získať 10 kvalitných kontaktov do konca mesiaca. Od apríla by sa mal prejsť na konkrétne rokovania so zvolenými kandidátkami.\", \"strengths\": [\"Jasný a merateľný cieľ (200-300 kontaktov, cieľ získať 3 kvalitné veci)\", \"Reálna časová os a zrozumiteľný funnel s konverziou\", \"Iteratívny prístup - ak sa ozvú 10 ľudí, pokračovať v ďalších vlnách\", \"Konkrétne metriky na konci mesiaca pre vyhodnotenie úspechu\"], \"weaknesses\": [\"Extrémne nízka jasnosť a zrozumiteľnosť prezentácie nápadu\", \"Chýba konkrétna špecifikácia cieľovej skupiny a segmentácie\", \"Nedefinované kritériá na výber a personalizáciu správ\", \"Nejasný obsah ponuky a messaging pre potenciálne klientky\", \"Absentuje konkrétny komunikačný plán a šablóny\", \"Nejasne definované role a zodpovednosti osôb zapojených\"], \"next_steps\": [\"Zdokumentovať nápad v jasnej a štruktúrovanej forme\", \"Definovať presný profil cieľovej skupiny a kritériá segmentácie\", \"Vytvoriť šablóny personalizovaných správ s jasným value propositionom\", \"Stanoveť konkrétne metriky úspechu a spôsob ich merania\", \"Zorganizovať kickoff meeting s Tatianou s detailným plánom a zodpovednosťami\"], \"category\": \"revenue\", \"tags\": [\"marketing\", \"customer\", \"process\", \"quick_win\"]}",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-05 14:42:56.470193+00",
-    "visibility": "company",
-    "tags": "[\"marketing\", \"customer\", \"process\", \"quick_win\"]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null,
-    "audio_data": ""
-  },
-  {
     "author_id": 8,
     "author_name": "Raul Rodriguez",
     "department": "marketing",
