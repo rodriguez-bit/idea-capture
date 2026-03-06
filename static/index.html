@@ -509,7 +509,7 @@ tbody.innerHTML=ideas.map(i=>`
       <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
       <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
       <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:12px;cursor:pointer">${formatDate(i.created_at)}</td>
-      <td onclick="event.stopPropagation()">${(i.has_audio || i.audio_data) ? `<button id="play-btn-${i.id}"onclick="toggleAudio(${i.id}, this)"style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px">▶</button>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
+      <td onclick="event.stopPropagation()">${(i.has_audio || i.audio_data) ? `<button id="play-btn-${i.id}"onclick="toggleAudio(${i.id}, this)"style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px">▶</button>${i.duration_seconds > 0 ? `<span style="color:var(--muted);font-size:12px;margin-left:6px">${Math.floor(i.duration_seconds/60)}:${('0'+(i.duration_seconds%60)).slice(-2)}</span>` : ''}` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
     </tr>
   `).join('');}
 function renderPagination(total){const pages=Math.ceil(total/PAGE_SIZE);const pg=document.getElementById('pagination');if(pages<=1){pg.innerHTML='';return;}
