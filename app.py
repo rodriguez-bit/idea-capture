@@ -391,6 +391,8 @@ def init_db():
             db.execute("ALTER TABLE ideas ADD COLUMN transcribed_at TEXT DEFAULT ''")
         if 'stt_engine' not in existing_cols3:
             db.execute("ALTER TABLE ideas ADD COLUMN stt_engine TEXT DEFAULT ''")
+        if 'idea_type' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN idea_type TEXT DEFAULT 'napad'")
         db.commit()
     elif DATABASE_URL:
         try:
@@ -413,6 +415,9 @@ def init_db():
                   END IF;
                   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='stt_engine') THEN
                     ALTER TABLE ideas ADD COLUMN stt_engine TEXT DEFAULT '';
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='idea_type') THEN
+                    ALTER TABLE ideas ADD COLUMN idea_type TEXT DEFAULT 'napad';
                   END IF;
                 END $$;
             """)
@@ -659,6 +664,11 @@ def api_ideas():
         filters.append('(transcript LIKE ? OR author_name LIKE ?)')
         params.extend([f'%{search}%', f'%{search}%'])
 
+    idea_type = request.args.get('idea_type')
+    if idea_type:
+        filters.append('idea_type = ?')
+        params.append(idea_type)
+
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
     total = db.execute(f'SELECT COUNT(*) FROM ideas {where}', params).fetchone()[0]
     # Performance: exclude audio_data (base64 blob, ~100KB each) and ai_analysis from listing.
@@ -695,12 +705,14 @@ def api_idea_detail(idea_id):
 @reviewer_required
 def api_idea_update(idea_id):
     data = request.get_json() or {}
-    allowed = {'status', 'reviewer_note', 'visibility', 'tags', 'assigned_to', 'deadline'}
+    allowed = {'status', 'reviewer_note', 'visibility', 'tags', 'assigned_to', 'deadline', 'idea_type'}
     updates = {k: v for k, v in data.items() if k in allowed}
     if 'visibility' in updates and updates['visibility'] not in ('personal', 'company'):
         return jsonify({'error': 'Neplatná hodnota viditeľnosti'}), 400
     if 'status' in updates and updates['status'] not in ('new', 'in_review', 'accepted', 'rejected', 'v_realizacii'):
         return jsonify({'error': 'Neplatný status'}), 400
+    if 'idea_type' in updates and updates['idea_type'] not in ('napad', 'porada'):
+        return jsonify({'error': 'Neplatný typ záznamu'}), 400
     if 'tags' in updates:
         try:
             parsed = json.loads(updates['tags']) if isinstance(updates['tags'], str) else updates['tags']
@@ -1658,6 +1670,31 @@ def api_ideas_bulk_delete():
     return jsonify({'ok': True, 'deleted': len(ids)})
 
 
+@app.route('/api/ideas/bulk-update', methods=['POST'])
+@reviewer_required
+def api_ideas_bulk_update():
+    data = request.get_json() or {}
+    ids = data.get('ids', [])
+    updates = data.get('updates', {})
+    if not ids or not isinstance(ids, list):
+        return jsonify({'error': 'Žiadne záznamy na aktualizáciu'}), 400
+    allowed = {'idea_type', 'status', 'visibility'}
+    updates = {k: v for k, v in updates.items() if k in allowed}
+    if not updates:
+        return jsonify({'error': 'Nič na aktualizáciu'}), 400
+    if 'idea_type' in updates and updates['idea_type'] not in ('napad', 'porada'):
+        return jsonify({'error': 'Neplatný typ záznamu'}), 400
+    db = get_db()
+    placeholders = ','.join(['?'] * len(ids))
+    set_clause = ', '.join(f'{k} = ?' for k in updates)
+    values = list(updates.values()) + ids
+    db.execute(f'UPDATE ideas SET {set_clause} WHERE id IN ({placeholders})', values)
+    db.commit()
+    db.close()
+    save_ideas_backup()
+    return jsonify({'ok': True, 'updated': len(ids)})
+
+
 # ─── Routes: Users (admin) ────────────────────────────────────────────────────
 @app.route('/api/users', methods=['GET'])
 @admin_required
@@ -2262,7 +2299,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '3.1.0',
+        'version': '3.2.0',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
