@@ -1172,6 +1172,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         if stt_warning:
             result['warning'] = stt_warning
         _upload_jobs[job_id] = {'status': 'done', 'result': result}
+        print(f'Upload job {job_id}: DONE, saved to _upload_jobs (total jobs: {len(_upload_jobs)})')
     except Exception as e:
         print(f'Upload job {job_id} error: {e}')
         _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
@@ -1238,6 +1239,7 @@ def api_ideas_upload():
 @login_required
 def api_ideas_job(job_id):
     job = _upload_jobs.get(job_id)
+    print(f'Job poll: {job_id}, found={job is not None}, status={job["status"] if job else "N/A"}, total_jobs={len(_upload_jobs)}')
     if not job:
         return jsonify({'error': 'Job nenájdený'}), 404
     if job['status'] == 'done':
@@ -2212,7 +2214,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.8.1',
+        'version': '2.8.2',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'openai_key_set': bool(oa_key),
