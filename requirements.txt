@@ -7,4 +7,4 @@ gunicorn>=21.2.0
 psycopg2-binary>=2.9.9
 PyPDF2>=3.0.0
 python-docx>=1.0.0
-elevenlabs>=1.0.0
+elevenlabs==2.38.0  # kept for health check import test only; STT uses direct REST API

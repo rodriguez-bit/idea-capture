@@ -783,7 +783,8 @@ Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické
 
 # ─── ElevenLabs Scribe STT (primary) ────────────────────────────────────────────
 def _transcribe_with_elevenlabs(file_path, language='slk'):
-    """Transcribe audio using ElevenLabs Scribe v2. Best accuracy for Slovak (3.1% WER), handles noisy audio.
+    """Transcribe audio using ElevenLabs Scribe v2 REST API (direct HTTP, no SDK dependency).
+    Best accuracy for Slovak (3.1% WER), handles noisy audio.
     Returns (transcript, duration, warning) - warning is set if credits are low/exhausted."""
     api_key = os.environ.get('ELEVENLABS_API_KEY')
     if not api_key:
@@ -791,39 +792,53 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
         return None, 0, None
 
     try:
-        print(f'ElevenLabs Scribe: Attempting import...')
-        from elevenlabs.client import ElevenLabs
-        print(f'ElevenLabs Scribe: Import OK, creating client...')
-        client = ElevenLabs(api_key=api_key)
-
         file_size = os.path.getsize(file_path)
-        print(f'ElevenLabs Scribe: Transcribing {file_size / 1024 / 1024:.1f}MB audio...')
+        print(f'ElevenLabs Scribe: Transcribing {file_size / 1024 / 1024:.1f}MB audio via REST API...')
 
+        import requests as _req
         with open(file_path, 'rb') as f:
-            transcription = client.speech_to_text.convert(
-                file=f,
-                model_id='scribe_v2',
-                language_code=language,
-                tag_audio_events=False,
-                diarize=False,
+            resp = _req.post(
+                'https://api.elevenlabs.io/v1/speech-to-text',
+                headers={'xi-api-key': api_key},
+                files={'file': (os.path.basename(file_path), f)},
+                data={
+                    'model_id': 'scribe_v2',
+                    'language_code': language,
+                    'tag_audio_events': 'false',
+                    'diarize': 'false',
+                },
+                timeout=120,
             )
 
-        transcript = transcription.text if hasattr(transcription, 'text') else ''
+        if resp.status_code == 401:
+            print(f'ElevenLabs Scribe: 401 Unauthorized — API key may be invalid or expired')
+            return None, 0, None
+
+        if resp.status_code == 402:
+            warning = 'ElevenLabs kredity boli vyčerpané. Prepis bol vykonaný cez záložný systém (Whisper). Pre lepšiu kvalitu prepisu doplňte kredity na elevenlabs.io.'
+            print(f'ElevenLabs Scribe: Credits exhausted (402)')
+            return None, 0, warning
+
+        if resp.status_code != 200:
+            print(f'ElevenLabs Scribe: HTTP {resp.status_code} — {resp.text[:300]}')
+            return None, 0, None
+
+        data = resp.json()
+        transcript = data.get('text', '')
+
         # Calculate duration from word timestamps if available
         duration = 0
-        if hasattr(transcription, 'words') and transcription.words:
-            last_word = transcription.words[-1]
-            if hasattr(last_word, 'end'):
-                duration = int(last_word.end)
+        words = data.get('words', [])
+        if words:
+            last_word = words[-1]
+            duration = int(last_word.get('end', 0))
 
-        lang_code = getattr(transcription, 'language_code', language)
+        lang_code = data.get('language_code', language)
         print(f'ElevenLabs Scribe: {len(transcript)} chars, duration={duration}s, lang={lang_code}')
 
         if transcript and transcript.strip():
-            # Check if ElevenLabs returned a hallucination too
             if _is_whisper_hallucination(transcript.strip()):
                 print(f'ElevenLabs Scribe: Hallucination detected: "{transcript.strip()}" — treating as valid but short')
-                # ElevenLabs is more reliable, so keep it if it returned something
             return transcript.strip(), duration, None
 
         print(f'ElevenLabs Scribe: Empty transcript returned (audio may be silent or too short)')
@@ -832,19 +847,14 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
     except Exception as e:
         err_str = str(e).lower()
         warning = None
-        # Detect credit/quota exhaustion errors (be very specific to avoid false positives)
-        # Note: 'subscription' alone is too broad - ElevenLabs uses it in many non-credit errors
         credit_keywords = ['insufficient credits', 'out of credits', 'credit limit',
                           'credits have been exhausted', 'no credits remaining']
         is_credit_error = any(kw in err_str for kw in credit_keywords)
-        # Also check HTTP 402 Payment Required (but not in status_code field to avoid matching other codes)
-        if hasattr(e, 'status_code') and e.status_code == 402:
-            is_credit_error = True
         if is_credit_error:
             warning = 'ElevenLabs kredity boli vyčerpané. Prepis bol vykonaný cez záložný systém (Whisper). Pre lepšiu kvalitu prepisu doplňte kredity na elevenlabs.io.'
             print(f'ElevenLabs Scribe: Credits exhausted - {e}')
         else:
-            print(f'ElevenLabs Scribe error (type={type(e).__name__}, status={getattr(e, "status_code", "N/A")}): {e}')
+            print(f'ElevenLabs Scribe error: {type(e).__name__}: {e}')
         return None, 0, warning
 
 
@@ -2230,7 +2240,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.8.4',
+        'version': '2.9.0',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
@@ -2243,9 +2253,8 @@ def health():
 @app.route('/debug/test-elevenlabs')
 @login_required
 def debug_test_elevenlabs():
-    """Test ElevenLabs Scribe directly on the server — returns the exact error if it fails."""
+    """Test ElevenLabs Scribe directly on the server via REST API."""
     import io, wave, struct, math
-    # Generate a tiny WAV with a tone (just to test the API call)
     sample_rate = 16000
     duration = 1.0
     num_samples = int(sample_rate * duration)
@@ -2268,32 +2277,30 @@ def debug_test_elevenlabs():
         result['key_set'] = bool(api_key)
         result['key_prefix'] = api_key[:8] + '...' if api_key else 'NONE'
 
-        result['step'] = 'import'
-        from elevenlabs.client import ElevenLabs
-        result['import'] = 'ok'
-
-        result['step'] = 'client'
-        client = ElevenLabs(api_key=api_key)
-        result['client'] = 'ok'
-
-        result['step'] = 'transcribe'
+        result['step'] = 'rest_api'
+        import requests as _req
         with open(tmp, 'rb') as f:
-            transcription = client.speech_to_text.convert(
-                file=f,
-                model_id='scribe_v2',
-                language_code='slk',
-                tag_audio_events=False,
-                diarize=False,
+            resp = _req.post(
+                'https://api.elevenlabs.io/v1/speech-to-text',
+                headers={'xi-api-key': api_key},
+                files={'file': ('test.wav', f)},
+                data={'model_id': 'scribe_v2', 'language_code': 'slk',
+                      'tag_audio_events': 'false', 'diarize': 'false'},
+                timeout=60,
             )
-        result['step'] = 'done'
-        result['text'] = getattr(transcription, 'text', '(no text attr)')
-        result['text_len'] = len(result['text'])
-        result['success'] = True
+        result['http_status'] = resp.status_code
+        result['response_body'] = resp.text[:500]
+        if resp.status_code == 200:
+            data = resp.json()
+            result['text'] = data.get('text', '')
+            result['text_len'] = len(result['text'])
+            result['success'] = True
+        else:
+            result['success'] = False
     except Exception as e:
         result['success'] = False
         result['error_type'] = type(e).__name__
         result['error'] = str(e)[:500]
-        result['status_code'] = getattr(e, 'status_code', None)
     finally:
         try:
             os.unlink(tmp)
