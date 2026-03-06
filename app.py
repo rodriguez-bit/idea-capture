@@ -87,6 +87,7 @@ def login_required(f):
     def decorated(*args, **kwargs):
         if not session.get('authenticated'):
             if request.path.startswith('/api/'):
+                print(f'AUTH FAIL: {request.method} {request.path} from origin={request.headers.get("Origin","?")} UA={request.headers.get("User-Agent","?")[:60]}')
                 return jsonify({'error': 'Unauthorized'}), 401
             return redirect('/login')
         return f(*args, **kwargs)
@@ -1185,6 +1186,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
 @app.route('/api/ideas/upload', methods=['POST'])
 @login_required
 def api_ideas_upload():
+    print(f'Upload request from user_id={session.get("user_id")}, origin={request.headers.get("Origin","?")}')
     api_key = os.environ.get('OPENAI_API_KEY', '')
     el_key = os.environ.get('ELEVENLABS_API_KEY', '')
     if not api_key and not el_key:
@@ -2201,7 +2203,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.7.1',
+        'version': '2.8.0',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'openai_key_set': bool(oa_key),
@@ -2215,4 +2217,4 @@ with app.app_context():
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', '').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-# v2.7.1
+# v2.8.0

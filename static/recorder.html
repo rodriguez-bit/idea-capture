@@ -500,11 +500,16 @@ function _pollVaultJob(vaultId, jobId, fill) {
           return;
         }
         if (r.ok || r.status === 404) {
-          fill.style.width = '100%';
-          setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
-          vaultUpdate(vaultId, { status: 'done' }).then(function() {
-            setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
-          });
+          if (r.status === 404) {
+            setMsg('Server bol restartovany pocas spracovania. Skuste znova.', 'err'); fill.style.width = '0%';
+            vaultUpdate(vaultId, { status: 'error', errorMsg: 'Job lost - server restart' }).then(refreshVaultUI);
+          } else {
+            fill.style.width = '100%';
+            setMsg('Napad odoslany!', 'ok'); if(_recentOpen) loadRecentIdeas();
+            vaultUpdate(vaultId, { status: 'done' }).then(function() {
+              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+            });
+          }
         } else {
           r.json().catch(function() { return {}; }).then(function(d) {
             setMsg(d.error || 'Chyba pri spracovani', 'err');
@@ -1056,12 +1061,9 @@ async function pollJob(jobId, fill, btn, vaultId) {
           setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
         }
       } else if (r.status === 404) {
-        fill.style.width = '100%';
-        setMsg('Napad spracovany!', 'ok');
-        if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
-          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-        });
-        setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
+        setMsg('Server bol restartovany pocas spracovania. Skuste znova.', 'err');
+        fill.style.width = '0%';
+        if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: 'Job lost - server restart' }).then(refreshVaultUI);
       } else {
         var d = await r.json().catch(function() { return {}; });
         setMsg(d.error || 'Chyba pri spracovani', 'err');
@@ -1232,12 +1234,9 @@ async function pollFileJob(jobId, fill, btn, vaultId) {
           setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
         }
       } else if (r.status === 404) {
-        fill.style.width = '100%';
-        setMsg('Napad spracovany!', 'ok');
-        if (vaultId) vaultUpdate(vaultId, { status: 'done' }).then(function() {
-          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-        });
-        setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
+        setMsg('Server bol restartovany pocas spracovania. Skuste znova.', 'err');
+        fill.style.width = '0%';
+        if (vaultId) vaultUpdate(vaultId, { status: 'error', errorMsg: 'Job lost - server restart' }).then(refreshVaultUI);
       } else {
         var d = await r.json().catch(function() { return {}; });
         setMsg(d.error || 'Chyba pri spracovani', 'err');
