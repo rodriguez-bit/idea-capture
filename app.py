@@ -882,10 +882,47 @@ def _split_audio_chunks(file_path, max_size_mb=20):
 
 
 def _clean_hallucinations(text):
-    """Remove repeated phrases that indicate Whisper hallucination."""
+    """Remove repeated phrases that indicate STT hallucination."""
     if not text or len(text) < 50:
         return text
 
+    # ── Phase 1: Detect repeated short patterns within continuous text ──
+    # Catches: "konecne konecne konecne..." or "na ten na ten na ten..."
+    def remove_repeated_patterns(t):
+        words = t.split()
+        if len(words) < 10:
+            return t
+        # Try pattern lengths 1-5 words
+        for plen in range(1, 6):
+            i = 0
+            result_words = []
+            while i < len(words):
+                # Check if a pattern of length plen repeats 5+ times starting at i
+                pattern = words[i:i+plen]
+                if len(pattern) < plen:
+                    result_words.extend(words[i:])
+                    break
+                repeat_count = 0
+                j = i
+                while j + plen <= len(words) and words[j:j+plen] == pattern:
+                    repeat_count += 1
+                    j += plen
+                if repeat_count >= 5:
+                    # Keep pattern once, skip the rest
+                    result_words.extend(pattern)
+                    i = j
+                else:
+                    result_words.append(words[i])
+                    i += 1
+            # If we removed a lot, use the cleaned version
+            if len(result_words) < len(words) * 0.7:
+                t = ' '.join(result_words)
+                words = t.split()
+        return t
+
+    text = remove_repeated_patterns(text)
+
+    # ── Phase 2: Sentence-level repetition detection ──
     # Split into sentences
     sentences = re_module.split(r'[.!?]+', text)
     sentences = [s.strip() for s in sentences if s.strip()]
