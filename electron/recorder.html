@@ -222,6 +222,23 @@ document.addEventListener('visibilitychange', function() {
       document.getElementById('rtime').textContent = m+':'+(s<10?'0':'')+s;
     }
   }
+  // Detect if recording was killed while screen was off
+  if (document.visibilityState === 'visible' && mr && mr.state === 'inactive' && recordStartTime) {
+    recordStartTime = null;
+    releaseWakeLock();
+    stopSilentAudio();
+    clearInterval(ti);
+    document.getElementById('rbtn').classList.remove('on');
+    if (chunks.length > 0) {
+      blob = new Blob(chunks, { type: 'audio/webm' });
+      document.getElementById('acts').style.display = 'flex';
+      document.getElementById('rhint').textContent = 'Nahravka prerusena (obrazovka zamknuta)';
+      setMsg('Nahravanie bolo prerusene. Mozete odoslat co sa nahrato.', 'err');
+    } else {
+      document.getElementById('rhint').textContent = 'Nahravanie prerusene';
+      setMsg('Android zastavil nahravanie pri zamknuti obrazovky.', 'err');
+    }
+  }
 });
 function startSilentAudio() {
   try {

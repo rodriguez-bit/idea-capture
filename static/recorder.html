@@ -215,6 +215,26 @@ document.addEventListener('visibilitychange', function() {
       document.getElementById('rtime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
     }
   }
+  // Detect if recording was killed by Android while screen was off
+  if (document.visibilityState === 'visible' && mediaRecorder && mediaRecorder.state === 'inactive' && recordStartTime) {
+    // Recording was stopped by the system
+    recordStartTime = null;
+    releaseWakeLock();
+    stopSilentAudio();
+    clearInterval(timerInterval);
+    document.getElementById('rbtn').classList.remove('on');
+    if (audioChunks.length > 0) {
+      // We have partial data - save it
+      var mime = 'audio/webm';
+      audioBlob = new Blob(audioChunks, { type: mime });
+      document.getElementById('acts').style.display = 'flex';
+      document.getElementById('rhint').textContent = 'Nahravka prerusena (obrazovka zamknuta)';
+      setMsg('Nahravanie bolo prerusene. Mozete odoslat co sa nahrato.', 'err');
+    } else {
+      document.getElementById('rhint').textContent = 'Nahravanie prerusene';
+      setMsg('Android zastavil nahravanie pri zamknuti obrazovky.', 'err');
+    }
+  }
 });
 
 // ── Silent audio: keeps browser audio session alive on Android ──
@@ -437,6 +457,11 @@ async function startRecording() {
     // Keep screen on and audio session alive on Android
     await requestWakeLock();
     startSilentAudio();
+
+    // Show Android warning if on mobile
+    if (/Android/i.test(navigator.userAgent)) {
+      setMsg('\u26a0 Neza\u0161kn\u00e1vajte obrazovku - nahr\u00e1vanie sa zastav\u00ed','inf');
+    }
 
     document.getElementById('rbtn').classList.add('on');
     document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
