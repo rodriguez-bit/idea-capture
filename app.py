@@ -667,12 +667,22 @@ def api_ideas():
                     'duration_seconds, transcript, status, visibility, ai_score, tags, '
                     'assigned_to, deadline, campaign_id, stt_engine, transcribed_at, '
                     'reviewed_at, reviewed_by, reviewer_note, created_at')
-    rows = db.execute(f'SELECT {listing_cols} FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
-                      params + [limit, offset]).fetchall()
+    use_fallback = False
+    try:
+        rows = db.execute(f'SELECT {listing_cols} FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                          params + [limit, offset]).fetchall()
+    except Exception as e:
+        print(f'api_ideas: SELECT with listing_cols failed ({e}), falling back to SELECT *')
+        use_fallback = True
+        rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                          params + [limit, offset]).fetchall()
     db.close()
     data = []
     for r in rows:
         d = dict(r)
+        if use_fallback:
+            d.pop('audio_data', None)
+            d.pop('ai_analysis', None)
         d['has_audio'] = bool(d.get('audio_filename'))
         data.append(d)
     return jsonify({'data': data, 'total': total})
