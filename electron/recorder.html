@@ -198,6 +198,42 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 var API = 'https://ridea.onrender.com';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
 var audioCtx = null, analyserNode = null, animId = null, activeStreams = [], mixedDest = null;
+var wakeLock = null, silentAudio = null, recordStartTime = null;
+
+// ── Wake Lock: keeps screen on during recording (prevents Android/mobile sleep) ──
+async function requestWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', function() {
+      if (mr && mr.state === 'recording') requestWakeLock();
+    });
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release().catch(function(){}); wakeLock = null; }
+}
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && mr && mr.state === 'recording') {
+    requestWakeLock();
+    if (recordStartTime) {
+      secs = Math.floor((Date.now() - recordStartTime) / 1000);
+      var m = Math.floor(secs/60), s = secs%60;
+      document.getElementById('rtime').textContent = m+':'+(s<10?'0':'')+s;
+    }
+  }
+});
+function startSilentAudio() {
+  try {
+    if (silentAudio) return;
+    silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+    silentAudio.loop = true; silentAudio.volume = 0.01;
+    silentAudio.play().catch(function(){});
+  } catch(e) {}
+}
+function stopSilentAudio() {
+  if (silentAudio) { silentAudio.pause(); silentAudio.src = ''; silentAudio = null; }
+}
 
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
@@ -408,12 +444,17 @@ async function startRec() {
     };
     mr.start(1000);
 
+    // Keep screen on and audio session alive
+    await requestWakeLock();
+    startSilentAudio();
+
     document.getElementById('rbtn').classList.add('on');
     document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
     document.getElementById('acts').style.display = 'none';
-    secs = 0; document.getElementById('rtime').textContent = '0:00';
+    secs = 0; recordStartTime = Date.now();
+    document.getElementById('rtime').textContent = '0:00';
     ti = setInterval(function(){
-      secs++;
+      secs = Math.floor((Date.now() - recordStartTime) / 1000);
       var m=Math.floor(secs/60), s=secs%60;
       document.getElementById('rtime').textContent = m+':'+(s<10?'0':'')+s;
     }, 1000);
@@ -427,6 +468,9 @@ async function startRec() {
 function stopRec() {
   if (mr && mr.state!=='inactive') mr.stop();
   clearInterval(ti);
+  releaseWakeLock();
+  stopSilentAudio();
+  recordStartTime = null;
   document.getElementById('rbtn').classList.remove('on');
 }
 
@@ -434,6 +478,9 @@ function discard() {
   blob=null; chunks=[];
   stopAllStreams();
   stopVisualizer();
+  releaseWakeLock();
+  stopSilentAudio();
+  recordStartTime = null;
   document.getElementById('acts').style.display = 'none';
   document.getElementById('rbtn').classList.remove('on');
   document.getElementById('rtime').textContent = '\u2014';
