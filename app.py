@@ -937,12 +937,9 @@ def _save_audio_backup(tmp_path, ext, job_id):
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
     import openai
 
-    # FIRST: Save raw audio backup so recording is never lost
-    audio_filename, audio_data = _save_audio_backup(tmp_path, ext, job_id)
-
     try:
-        # Save audio backup BEFORE transcription
-        audio_filename, audio_data = _save_audio_backup(tmp_path, ext, user_id)
+        # Save audio backup BEFORE transcription — use job_id for unique filename
+        audio_filename, audio_data = _save_audio_backup(tmp_path, ext, job_id)
 
         file_size = os.path.getsize(tmp_path)
         print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB')
