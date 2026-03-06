@@ -825,8 +825,11 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
     except Exception as e:
         err_str = str(e).lower()
         warning = None
-        # Detect credit/quota exhaustion errors
-        if any(kw in err_str for kw in ['quota', 'credit', 'limit', 'exceeded', 'insufficient', 'billing', 'payment', 'subscription', '402', '429']):
+        # Detect credit/quota exhaustion errors (be specific to avoid false positives)
+        credit_keywords = ['insufficient credits', 'out of credits', 'credit limit', 'quota exceeded',
+                          'billing', 'payment required', 'subscription', 'credit balance']
+        is_credit_error = any(kw in err_str for kw in credit_keywords) or '402' in err_str
+        if is_credit_error:
             warning = 'ElevenLabs kredity boli vyčerpané. Prepis bol vykonaný cez záložný systém (Whisper). Pre lepšiu kvalitu prepisu doplňte kredity na elevenlabs.io.'
             print(f'ElevenLabs Scribe: Credits exhausted - {e}')
         else:
