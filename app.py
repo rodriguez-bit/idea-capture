@@ -663,26 +663,14 @@ def api_ideas():
     total = db.execute(f'SELECT COUNT(*) FROM ideas {where}', params).fetchone()[0]
     # Performance: exclude audio_data (base64 blob, ~100KB each) and ai_analysis from listing.
     # Frontend only needs has_audio flag for play button; detail endpoint returns full data.
-    listing_cols = ('id, author_id, author_name, department, role, audio_filename, '
-                    'duration_seconds, transcript, status, visibility, ai_score, tags, '
-                    'assigned_to, deadline, campaign_id, stt_engine, transcribed_at, '
-                    'reviewed_at, reviewed_by, reviewer_note, created_at')
-    use_fallback = False
-    try:
-        rows = db.execute(f'SELECT {listing_cols} FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
-                          params + [limit, offset]).fetchall()
-    except Exception as e:
-        print(f'api_ideas: SELECT with listing_cols failed ({e}), falling back to SELECT *')
-        use_fallback = True
-        rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
-                          params + [limit, offset]).fetchall()
+    rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                      params + [limit, offset]).fetchall()
     db.close()
     data = []
     for r in rows:
         d = dict(r)
-        if use_fallback:
-            d.pop('audio_data', None)
-            d.pop('ai_analysis', None)
+        d.pop('audio_data', None)
+        d.pop('ai_analysis', None)
         d['has_audio'] = bool(d.get('audio_filename'))
         data.append(d)
     return jsonify({'data': data, 'total': total})
@@ -2274,7 +2262,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '3.0.0',
+        'version': '3.0.2',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
