@@ -1241,11 +1241,20 @@ def api_ideas_job(job_id):
     if not job:
         return jsonify({'error': 'Job nenájdený'}), 404
     if job['status'] == 'done':
-        del _upload_jobs[job_id]
-        return jsonify(job['result'])
+        result = job['result']
+        # Keep job in memory for 60s so multiple poll requests can find it
+        if 'completed_at' not in job:
+            job['completed_at'] = time.time()
+        elif time.time() - job['completed_at'] > 60:
+            del _upload_jobs[job_id]
+        return jsonify(result)
     elif job['status'] == 'error':
         err = job.get('error', 'Neznáma chyba')
-        del _upload_jobs[job_id]
+        # Keep error jobs for 60s too
+        if 'completed_at' not in job:
+            job['completed_at'] = time.time()
+        elif time.time() - job['completed_at'] > 60:
+            del _upload_jobs[job_id]
         return jsonify({'error': err}), 500
     else:
         return jsonify({'status': 'processing'}), 202
@@ -2203,7 +2212,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.8.0',
+        'version': '2.8.1',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'openai_key_set': bool(oa_key),
