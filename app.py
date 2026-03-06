@@ -1307,7 +1307,7 @@ def api_idea_audio(idea_id):
 def api_idea_retranscribe(idea_id):
     """Re-run transcription on stored audio_data. Uses Deepgram (primary) with Whisper fallback."""
     db = get_db()
-    idea = db.execute('SELECT audio_data, audio_filename FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+    idea = db.execute('SELECT audio_data, audio_filename, duration_seconds FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     db.close()
     if not idea or not idea['audio_data']:
         return jsonify({'error': 'Audio nie je k dispozícii pre tento nápad'}), 404
@@ -1326,8 +1326,11 @@ def api_idea_retranscribe(idea_id):
         el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
         if el_warning:
             stt_warning = el_warning
-        if el_text:
+        if el_text:  # Non-empty = successful transcription
             transcript_text = el_text
+            total_duration = el_duration
+        elif el_text is not None:  # Empty string = ElevenLabs processed but no speech
+            transcript_text = ''
             total_duration = el_duration
         else:
             # FALLBACK: Whisper
@@ -1359,7 +1362,7 @@ def api_idea_retranscribe(idea_id):
         if transcript_text:
             transcript_text = _clean_hallucinations(transcript_text)
         transcript_text = transcript_text or '[Transkript nedostupný]'
-        retranscribe_engine = 'elevenlabs' if el_text else 'whisper'
+        retranscribe_engine = 'elevenlabs' if el_text is not None else 'whisper'
         retranscribe_time = datetime.now().isoformat()
 
         db2 = get_db()
