@@ -1137,6 +1137,33 @@ def api_ideas_job(job_id):
         return jsonify({'status': 'processing'}), 202
 
 
+@app.route('/api/ideas/my-recent', methods=['GET'])
+@login_required
+def api_my_recent_ideas():
+    """Return last 10 ideas for the current user (for recorder feedback)."""
+    user_id = session['user_id']
+    db = get_db()
+    rows = db.execute('''
+        SELECT id, transcript, department, status, visibility, created_at, duration_seconds, stt_engine
+        FROM ideas WHERE author_id = ? ORDER BY id DESC LIMIT 10
+    ''', (user_id,)).fetchall()
+    db.close()
+    ideas = []
+    for r in rows:
+        t = r['transcript'] or ''
+        ideas.append({
+            'id': r['id'],
+            'preview': (t[:80] + '...') if len(t) > 80 else t,
+            'department': r['department'],
+            'status': r['status'],
+            'visibility': r['visibility'] or 'personal',
+            'created_at': r['created_at'],
+            'duration': r['duration_seconds'] or 0,
+            'stt_engine': r['stt_engine'] or ''
+        })
+    return jsonify(ideas)
+
+
 @app.route('/api/ideas/<int:idea_id>/audio', methods=['GET'])
 @login_required
 def api_idea_audio(idea_id):
