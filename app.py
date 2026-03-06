@@ -671,10 +671,20 @@ def api_ideas():
 
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
     total = db.execute(f'SELECT COUNT(*) FROM ideas {where}', params).fetchone()[0]
-    # Performance: exclude audio_data (base64 blob, ~100KB each) and ai_analysis from listing.
-    # Frontend only needs has_audio flag for play button; detail endpoint returns full data.
-    rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
-                      params + [limit, offset]).fetchall()
+    # Performance: exclude audio_data (base64 blob, can be MBs each) from listing query.
+    # This is critical — SELECT * would force PG to read huge TOAST columns for every row.
+    listing_cols = ('id, author_id, author_name, department, role, audio_filename, '
+                    'duration_seconds, transcript, status, ai_score, ai_analysis, '
+                    'reviewer_note, reviewed_by, reviewed_at, created_at, '
+                    'visibility, tags, assigned_to, deadline, campaign_id, '
+                    'transcribed_at, stt_engine, idea_type')
+    try:
+        rows = db.execute(f'SELECT {listing_cols} FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                          params + [limit, offset]).fetchall()
+    except Exception:
+        # Fallback if a column doesn't exist yet (schema migration pending)
+        rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                          params + [limit, offset]).fetchall()
     db.close()
     data = []
     for r in rows:
@@ -1813,7 +1823,12 @@ def api_ideas_export_csv():
         params.extend([f'%{search}%', f'%{search}%'])
 
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
-    rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC', params).fetchall()
+    export_cols = ('id, author_name, department, role, transcript, ai_score, status, '
+                   'visibility, assigned_to, deadline, tags, created_at, idea_type')
+    try:
+        rows = db.execute(f'SELECT {export_cols} FROM ideas {where} ORDER BY created_at DESC', params).fetchall()
+    except Exception:
+        rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC', params).fetchall()
     db.close()
 
     output = io.StringIO()
