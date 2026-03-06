@@ -378,6 +378,10 @@ def init_db():
             db.execute("ALTER TABLE ideas ADD COLUMN campaign_id INTEGER DEFAULT NULL")
         if 'audio_data' not in existing_cols3:
             db.execute("ALTER TABLE ideas ADD COLUMN audio_data TEXT DEFAULT ''")
+        if 'transcribed_at' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN transcribed_at TEXT DEFAULT ''")
+        if 'stt_engine' not in existing_cols3:
+            db.execute("ALTER TABLE ideas ADD COLUMN stt_engine TEXT DEFAULT ''")
         db.commit()
     elif DATABASE_URL:
         try:
@@ -394,6 +398,12 @@ def init_db():
                   END IF;
                   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='audio_data') THEN
                     ALTER TABLE ideas ADD COLUMN audio_data TEXT DEFAULT '';
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='transcribed_at') THEN
+                    ALTER TABLE ideas ADD COLUMN transcribed_at TEXT DEFAULT '';
+                  END IF;
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ideas' AND column_name='stt_engine') THEN
+                    ALTER TABLE ideas ADD COLUMN stt_engine TEXT DEFAULT '';
                   END IF;
                 END $$;
             """)
@@ -1021,9 +1031,9 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         with app.app_context():
             db = get_db()
             cursor = db.execute('''
-                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, audio_data, duration_seconds, transcript, status, visibility)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?)
-            ''', (user_id, user_name, department, role, audio_filename or '', audio_data or '', total_duration, transcript_text, visibility))
+                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, audio_data, duration_seconds, transcript, status, visibility, transcribed_at, stt_engine)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?)
+            ''', (user_id, user_name, department, role, audio_filename or '', audio_data or '', total_duration, transcript_text, visibility, datetime.now().isoformat(), stt_engine))
             idea_id = cursor.lastrowid
             db.commit()
             db.close()
@@ -1203,14 +1213,16 @@ def api_idea_retranscribe(idea_id):
         if transcript_text:
             transcript_text = _clean_hallucinations(transcript_text)
         transcript_text = transcript_text or '[Transkript nedostupný]'
+        retranscribe_engine = 'elevenlabs' if el_text else 'whisper'
+        retranscribe_time = datetime.now().isoformat()
 
         db2 = get_db()
-        db2.execute('UPDATE ideas SET transcript = ?, duration_seconds = ? WHERE id = ?',
-                    (transcript_text, total_duration or idea['duration_seconds'] if 'duration_seconds' in idea.keys() else 0, idea_id))
+        db2.execute('UPDATE ideas SET transcript = ?, duration_seconds = ?, transcribed_at = ?, stt_engine = ? WHERE id = ?',
+                    (transcript_text, total_duration or idea['duration_seconds'] if 'duration_seconds' in idea.keys() else 0, retranscribe_time, retranscribe_engine, idea_id))
         db2.commit()
         db2.close()
         save_ideas_backup()
-        result = {'ok': True, 'transcript': transcript_text}
+        result = {'ok': True, 'transcript': transcript_text, 'transcribed_at': retranscribe_time, 'stt_engine': retranscribe_engine}
         if stt_warning:
             result['warning'] = stt_warning
         return jsonify(result)
