@@ -482,9 +482,15 @@ async function sendIdea() {
             continue;
           }
           if (jr.ok || jr.status === 404) {
+            var jdata = jr.ok ? await jr.json().catch(function(){return {};}) : {};
             fill.style.width='100%';
-            setMsg('Napad odoslany!','ok');
-            setTimeout(discard, 2500);
+            if (jdata.warning) {
+              setMsg(jdata.warning,'err');
+              setTimeout(discard, 8000);
+            } else {
+              setMsg('Napad odoslany!','ok');
+              setTimeout(discard, 2500);
+            }
           } else {
             var jd=await jr.json().catch(function(){return {};});
             setMsg(jd.error||'Chyba pri spracovani','err');

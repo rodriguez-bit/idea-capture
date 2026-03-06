@@ -772,11 +772,12 @@ Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické
 
 # ─── ElevenLabs Scribe STT (primary) ────────────────────────────────────────────
 def _transcribe_with_elevenlabs(file_path, language='slk'):
-    """Transcribe audio using ElevenLabs Scribe v2. Best accuracy for Slovak (3.1% WER), handles noisy audio."""
+    """Transcribe audio using ElevenLabs Scribe v2. Best accuracy for Slovak (3.1% WER), handles noisy audio.
+    Returns (transcript, duration, warning) - warning is set if credits are low/exhausted."""
     api_key = os.environ.get('ELEVENLABS_API_KEY')
     if not api_key:
         print('ElevenLabs: API key not set, skipping')
-        return None, 0
+        return None, 0, None
 
     try:
         from elevenlabs.client import ElevenLabs
@@ -806,14 +807,21 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
         print(f'ElevenLabs Scribe: {len(transcript)} chars, duration={duration}s, lang={lang_code}')
 
         if transcript and transcript.strip():
-            return transcript.strip(), duration
+            return transcript.strip(), duration, None
 
         print('ElevenLabs Scribe: Empty transcript returned')
-        return None, 0
+        return None, 0, None
 
     except Exception as e:
-        print(f'ElevenLabs Scribe error: {e}')
-        return None, 0
+        err_str = str(e).lower()
+        warning = None
+        # Detect credit/quota exhaustion errors
+        if any(kw in err_str for kw in ['quota', 'credit', 'limit', 'exceeded', 'insufficient', 'billing', 'payment', 'subscription', '402', '429']):
+            warning = 'ElevenLabs kredity boli vyčerpané. Prepis bol vykonaný cez záložný systém (Whisper). Pre lepšiu kvalitu prepisu doplňte kredity na elevenlabs.io.'
+            print(f'ElevenLabs Scribe: Credits exhausted - {e}')
+        else:
+            print(f'ElevenLabs Scribe error: {e}')
+        return None, 0, warning
 
 
 def _split_audio_chunks(file_path, max_size_mb=20):
@@ -942,9 +950,12 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         transcript_text = ''
         total_duration = 0
         stt_engine = 'none'
+        stt_warning = None
 
         # ── PRIMARY: Try ElevenLabs Scribe v2 (best Slovak accuracy, handles noisy audio) ──
-        el_text, el_duration = _transcribe_with_elevenlabs(tmp_path)
+        el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
+        if el_warning:
+            stt_warning = el_warning
         if el_text:
             transcript_text = el_text
             total_duration = el_duration
@@ -1024,16 +1035,16 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         # Auto-analyze with Claude
         _auto_analyze(idea_id)
 
-        _upload_jobs[job_id] = {
-            'status': 'done',
-            'result': {
-                'id': idea_id,
-                'transcript': transcript_text,
-                'duration_seconds': total_duration,
-                'stt_engine': stt_engine,
-                'message': 'Napad uspesne zaznamenany'
-            }
+        result = {
+            'id': idea_id,
+            'transcript': transcript_text,
+            'duration_seconds': total_duration,
+            'stt_engine': stt_engine,
+            'message': 'Napad uspesne zaznamenany'
         }
+        if stt_warning:
+            result['warning'] = stt_warning
+        _upload_jobs[job_id] = {'status': 'done', 'result': result}
     except Exception as e:
         print(f'Upload job {job_id} error: {e}')
         _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
@@ -1156,9 +1167,12 @@ def api_idea_retranscribe(idea_id):
     try:
         transcript_text = ''
         total_duration = 0
+        stt_warning = None
 
         # PRIMARY: Try ElevenLabs Scribe
-        el_text, el_duration = _transcribe_with_elevenlabs(tmp_path)
+        el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
+        if el_warning:
+            stt_warning = el_warning
         if el_text:
             transcript_text = el_text
             total_duration = el_duration
@@ -1199,7 +1213,10 @@ def api_idea_retranscribe(idea_id):
         db2.commit()
         db2.close()
         save_ideas_backup()
-        return jsonify({'ok': True, 'transcript': transcript_text})
+        result = {'ok': True, 'transcript': transcript_text}
+        if stt_warning:
+            result['warning'] = stt_warning
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:

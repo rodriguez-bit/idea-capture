@@ -506,9 +506,15 @@ async function pollJob(jobId, fill, btn) {
         continue;
       }
       if (r.ok) {
+        var data = await r.json();
         fill.style.width = '100%';
-        setMsg('Napad odoslany!', 'ok');
-        setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
+        if (data.warning) {
+          setMsg(data.warning, 'err');
+          setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 8000);
+        } else {
+          setMsg('Napad odoslany!', 'ok');
+          setTimeout(function() { discardRecording(); fill.style.width = '0%'; }, 2500);
+        }
       } else if (r.status === 404) {
         fill.style.width = '100%';
         setMsg('Napad spracovany!', 'ok');
