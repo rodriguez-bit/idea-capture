@@ -74,6 +74,14 @@ def set_security_headers(response):
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     if not app.debug:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    # ── Cache headers for static assets ──
+    path = request.path
+    if path.startswith('/static/') or path in ('/manifest.json',):
+        response.headers['Cache-Control'] = 'public, max-age=86400'  # 1 day
+    elif path.endswith(('.png', '.ico', '.svg', '.woff2')):
+        response.headers['Cache-Control'] = 'public, max-age=604800'  # 7 days
+    elif path == '/sw.js':
+        response.headers['Cache-Control'] = 'no-cache'  # always revalidate SW
     return response
 
 @app.route('/api/<path:path>', methods=['OPTIONS'])
@@ -653,10 +661,21 @@ def api_ideas():
 
     where = ('WHERE ' + ' AND '.join(filters)) if filters else ''
     total = db.execute(f'SELECT COUNT(*) FROM ideas {where}', params).fetchone()[0]
-    rows = db.execute(f'SELECT * FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
+    # Performance: exclude audio_data (base64 blob, ~100KB each) and ai_analysis from listing.
+    # Frontend only needs has_audio flag for play button; detail endpoint returns full data.
+    listing_cols = ('id, author_id, author_name, department, role, audio_filename, '
+                    'duration_seconds, transcript, status, visibility, ai_score, tags, '
+                    'assigned_to, deadline, campaign_id, stt_engine, transcribed_at, '
+                    'reviewed_at, reviewed_by, reviewer_note, created_at')
+    rows = db.execute(f'SELECT {listing_cols} FROM ideas {where} ORDER BY created_at DESC LIMIT ? OFFSET ?',
                       params + [limit, offset]).fetchall()
     db.close()
-    return jsonify({'data': [dict(r) for r in rows], 'total': total})
+    data = []
+    for r in rows:
+        d = dict(r)
+        d['has_audio'] = bool(d.get('audio_filename'))
+        data.append(d)
+    return jsonify({'data': data, 'total': total})
 
 
 @app.route('/api/ideas/<int:idea_id>', methods=['GET'])
@@ -1805,7 +1824,7 @@ def api_stats():
     by_visibility = {}
     for row in db.execute('SELECT visibility, COUNT(*) as cnt FROM ideas GROUP BY visibility').fetchall():
         by_visibility[row['visibility']] = row['cnt']
-    recent = db.execute('SELECT * FROM ideas ORDER BY created_at DESC LIMIT 5').fetchall()
+    recent = db.execute('SELECT id, author_name, department, transcript, ai_score, status, created_at FROM ideas ORDER BY created_at DESC LIMIT 5').fetchall()
 
     # Score distribution for chart
     score_dist = {}
@@ -2162,7 +2181,7 @@ def api_campaign_detail(campaign_id):
         db.close()
         return jsonify({'error': 'Kampaň nenájdená'}), 404
     d = dict(c)
-    ideas = db.execute('SELECT * FROM ideas WHERE campaign_id = ? ORDER BY created_at DESC',
+    ideas = db.execute('SELECT id, author_name, department, role, transcript, ai_score, status, visibility, tags, created_at FROM ideas WHERE campaign_id = ? ORDER BY created_at DESC',
                        (campaign_id,)).fetchall()
     d['ideas'] = [dict(r) for r in ideas]
     db.close()
@@ -2245,7 +2264,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.9.1',
+        'version': '3.0.0',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
