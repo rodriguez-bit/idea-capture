@@ -125,6 +125,24 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 .smsg.ok { color: #4ade80; } .smsg.err { color: #f87171; } .smsg.inf { color: #d4a6f5; }
 .adml { font-size: 11px; color: rgba(255,255,255,0.3); text-align: center; cursor: pointer; flex-shrink: 0; }
 .adml:hover { color: #d4a6f5; }
+
+#file-panel { display: none; flex-direction: column; gap: 8px; flex: 1; min-height: 0; justify-content: center; }
+#file-panel.active { display: flex; }
+.file-upload-area {
+  border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px;
+  padding: 24px 14px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.file-upload-area:hover, .file-upload-area.dragover {
+  border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05);
+}
+.file-icon { font-size: 32px; margin-bottom: 6px; }
+.file-hint { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+.file-formats { font-size: 10px; color: rgba(255,255,255,0.3); }
+.file-selected { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px; }
+.file-name { font-size: 13px; color: #f0e6f6; font-weight: 600; word-break: break-all; }
+.file-size { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+#file-preview { border-radius: 8px; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -168,8 +186,9 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
   </div>
 
   <div class="tab-row">
-    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">Hlasovy napad</button>
-    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">Textovy napad</button>
+    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">&#127908; Hlasovy</button>
+    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">&#9997; Textovy</button>
+    <button type="button" class="tab-btn" id="tab-file" onclick="switchTab('file')">&#128206; Subor</button>
   </div>
 
   <div id="voice-panel" class="active">
@@ -183,6 +202,21 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
   <div id="text-panel">
     <textarea class="txt-area" id="txtIdea" placeholder="Napiste svoj napad..."></textarea>
     <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odoslat textovy napad</button>
+  </div>
+
+  <div id="file-panel">
+    <div class="file-upload-area" id="file-drop-area">
+      <div class="file-icon">&#127925;</div>
+      <div class="file-hint">Kliknite alebo presunte audio subor</div>
+      <div class="file-formats">MP3, WAV, OGG, M4A, WebM, FLAC, OPUS</div>
+      <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.flac,.opus,.mp4,.mpeg" style="display:none" onchange="handleFileSelect(this)">
+    </div>
+    <div class="file-selected" id="file-selected" style="display:none">
+      <div class="file-name" id="file-name"></div>
+      <div class="file-size" id="file-size"></div>
+      <audio id="file-preview" controls style="width:100%;"></audio>
+    </div>
+    <button class="txt-send" id="fileSend" onclick="sendFileIdea()" style="display:none">Odoslat audio napad</button>
   </div>
 
   <div class="acts" id="acts" style="display:none">
@@ -255,8 +289,10 @@ function stopSilentAudio() {
 function switchTab(tab) {
   document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
   document.getElementById('tab-text').classList.toggle('active', tab === 'text');
+  document.getElementById('tab-file').classList.toggle('active', tab === 'file');
   document.getElementById('voice-panel').classList.toggle('active', tab === 'voice');
   document.getElementById('text-panel').classList.toggle('active', tab === 'text');
+  document.getElementById('file-panel').classList.toggle('active', tab === 'file');
 }
 
 function setVisibility(val) {
@@ -603,8 +639,152 @@ async function sendTextIdea() {
 function setMsg(t,c){ var e=document.getElementById('smsg'); e.textContent=t; e.className='smsg '+c; }
 function clearMsg(){ var e=document.getElementById('smsg'); e.textContent=''; e.className='smsg'; }
 
+// ── File Upload ──
+var selectedFile = null;
+
+function handleFileSelect(input) {
+  if (input.files.length > 0) processSelectedFile(input.files[0]);
+}
+
+function processSelectedFile(file) {
+  var ext = file.name.split('.').pop().toLowerCase();
+  var allowed = ['mp3','wav','ogg','m4a','webm','flac','opus','mp4','mpeg','wma','aac'];
+  if (allowed.indexOf(ext) === -1 && !file.type.startsWith('audio/')) {
+    setMsg('Nepodporovany format. Pouzite audio subor.', 'err');
+    return;
+  }
+  if (file.size > 200 * 1024 * 1024) {
+    setMsg('Subor je prilis velky (max 200MB)', 'err');
+    return;
+  }
+  selectedFile = file;
+  document.getElementById('file-drop-area').style.display = 'none';
+  document.getElementById('file-selected').style.display = 'block';
+  document.getElementById('fileSend').style.display = 'block';
+  document.getElementById('file-name').textContent = file.name;
+  var sizeMB = (file.size / 1024 / 1024).toFixed(1);
+  document.getElementById('file-size').textContent = sizeMB + ' MB';
+  var preview = document.getElementById('file-preview');
+  preview.src = URL.createObjectURL(file);
+  clearMsg();
+}
+
+function resetFileUpload() {
+  selectedFile = null;
+  document.getElementById('file-drop-area').style.display = '';
+  document.getElementById('file-selected').style.display = 'none';
+  document.getElementById('fileSend').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  var preview = document.getElementById('file-preview');
+  if (preview.src) { URL.revokeObjectURL(preview.src); preview.src = ''; }
+}
+
+async function sendFileIdea() {
+  if (!selectedFile) return;
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
+  if (!dept || !role) { setMsg('Vyber oddelenie a rolu', 'err'); return; }
+  var btn = document.getElementById('fileSend');
+  btn.disabled = true; btn.textContent = 'Odosiela sa...';
+  setMsg('Nahravam subor...', 'inf');
+  var fill = document.getElementById('bfill');
+  fill.style.width = '15%';
+  try {
+    var fd = new FormData();
+    fd.append('audio', selectedFile, selectedFile.name);
+    fd.append('department', dept);
+    fd.append('role', role);
+    fd.append('visibility', currentVisibility);
+    var r = await fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include' });
+    if (!r.ok) {
+      var d = await r.json().catch(function() { return {}; });
+      setMsg(d.error || 'Chyba', 'err');
+      btn.disabled = false; btn.textContent = 'Odoslat audio napad';
+      fill.style.width = '0%';
+      return;
+    }
+    var data = await r.json();
+    if (data.job_id) {
+      setMsg('Prepisujem... 10-60 sekund', 'inf');
+      fill.style.width = '40%';
+      await pollFileJob(data.job_id, fill, btn);
+    } else {
+      fill.style.width = '100%';
+      setMsg('Napad odoslany!', 'ok');
+      setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
+      btn.disabled = false; btn.textContent = 'Odoslat audio napad';
+    }
+  } catch(e) {
+    setMsg('Chyba: ' + e.message, 'err');
+    btn.disabled = false; btn.textContent = 'Odoslat audio napad';
+    fill.style.width = '0%';
+  }
+}
+
+async function pollFileJob(jobId, fill, btn) {
+  var attempts = 0;
+  while (attempts < 200) {
+    await new Promise(function(r) { setTimeout(r, 3000); });
+    attempts++;
+    try {
+      var r = await fetch(API + '/api/ideas/job/' + jobId, { credentials: 'include' });
+      if (r.status === 202) {
+        fill.style.width = Math.min(40 + attempts, 95) + '%';
+        if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
+        continue;
+      }
+      if (r.ok) {
+        var data = await r.json();
+        fill.style.width = '100%';
+        if (data.warning) {
+          setMsg(data.warning, 'err');
+          setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; }, 8000);
+        } else {
+          setMsg('Napad odoslany!', 'ok');
+          setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
+        }
+      } else if (r.status === 404) {
+        fill.style.width = '100%';
+        setMsg('Napad spracovany!', 'ok');
+        setTimeout(function() { resetFileUpload(); fill.style.width = '0%'; clearMsg(); }, 2500);
+      } else {
+        var d = await r.json().catch(function() { return {}; });
+        setMsg(d.error || 'Chyba pri spracovani', 'err');
+        fill.style.width = '0%';
+      }
+      break;
+    } catch(e) { continue; }
+  }
+  if (attempts >= 200) {
+    setMsg('Timeout - skus znova', 'err');
+    fill.style.width = '0%';
+  }
+  btn.disabled = false; btn.textContent = 'Odoslat audio napad';
+}
+
 document.addEventListener('keydown', function(e){
   if (e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') doLogin();
+});
+
+// Click & drag-drop for file upload area
+document.addEventListener('DOMContentLoaded', function() {
+  var dropArea = document.getElementById('file-drop-area');
+  if (!dropArea) return;
+  dropArea.addEventListener('click', function() {
+    document.getElementById('fileInput').click();
+  });
+  dropArea.addEventListener('dragover', function(e) {
+    e.preventDefault(); dropArea.classList.add('dragover');
+  });
+  dropArea.addEventListener('dragleave', function() {
+    dropArea.classList.remove('dragover');
+  });
+  dropArea.addEventListener('drop', function(e) {
+    e.preventDefault(); dropArea.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) {
+      processSelectedFile(e.dataTransfer.files[0]);
+    }
+  });
 });
 
 init();
