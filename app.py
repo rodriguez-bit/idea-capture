@@ -2196,7 +2196,16 @@ def service_worker():
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'ok', 'time': datetime.now().isoformat()})
+    el_key = os.environ.get('ELEVENLABS_API_KEY', '')
+    oa_key = os.environ.get('OPENAI_API_KEY', '')
+    return jsonify({
+        'status': 'ok',
+        'time': datetime.now().isoformat(),
+        'version': '2.7.1',
+        'elevenlabs_key_set': bool(el_key),
+        'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
+        'openai_key_set': bool(oa_key),
+    })
 
 
 # ─── Start ────────────────────────────────────────────────────────────────────
