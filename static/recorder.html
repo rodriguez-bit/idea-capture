@@ -495,13 +495,14 @@ async function sendTextIdea() {
 
 async function pollJob(jobId, fill, btn) {
   var attempts = 0;
-  while (attempts < 60) {
+  while (attempts < 200) {
     await new Promise(function(r) { setTimeout(r, 3000); });
     attempts++;
     try {
       var r = await fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' });
       if (r.status === 202) {
-        fill.style.width = Math.min(40 + attempts * 2, 90) + '%';
+        fill.style.width = Math.min(40 + attempts, 95) + '%';
+        if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
         continue;
       }
       if (r.ok) {
@@ -522,7 +523,7 @@ async function pollJob(jobId, fill, btn) {
       continue;
     }
   }
-  if (attempts >= 60) {
+  if (attempts >= 200) {
     setMsg('Timeout - skus znova', 'err');
     fill.style.width = '0%';
   }

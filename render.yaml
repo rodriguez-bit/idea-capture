@@ -3,7 +3,7 @@ services:
     name: ridea
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --workers 2 --timeout 120
+    startCommand: gunicorn app:app --workers 2 --timeout 300
     envVars:
       - key: FLASK_DEBUG
         value: false
@@ -20,6 +20,8 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: GITHUB_TOKEN
+        sync: false
+      - key: ELEVENLABS_API_KEY
         sync: false
       - key: GITHUB_REPO
         value: dajanarodriguez/ridea

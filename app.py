@@ -24,7 +24,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = not bool(os.environ.get('FLASK_DEBUG'))
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 DB_PATH = 'ideas.db'
@@ -770,6 +770,52 @@ Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické
         print(f'Auto-analyze error for idea {idea_id}: {e}')
 
 
+# ─── ElevenLabs Scribe STT (primary) ────────────────────────────────────────────
+def _transcribe_with_elevenlabs(file_path, language='slk'):
+    """Transcribe audio using ElevenLabs Scribe v2. Best accuracy for Slovak (3.1% WER), handles noisy audio."""
+    api_key = os.environ.get('ELEVENLABS_API_KEY')
+    if not api_key:
+        print('ElevenLabs: API key not set, skipping')
+        return None, 0
+
+    try:
+        from elevenlabs.client import ElevenLabs
+        client = ElevenLabs(api_key=api_key)
+
+        file_size = os.path.getsize(file_path)
+        print(f'ElevenLabs Scribe: Transcribing {file_size / 1024 / 1024:.1f}MB audio...')
+
+        with open(file_path, 'rb') as f:
+            transcription = client.speech_to_text.convert(
+                file=f,
+                model_id='scribe_v2',
+                language_code=language,
+                tag_audio_events=False,
+                diarize=False,
+            )
+
+        transcript = transcription.text if hasattr(transcription, 'text') else ''
+        # Calculate duration from word timestamps if available
+        duration = 0
+        if hasattr(transcription, 'words') and transcription.words:
+            last_word = transcription.words[-1]
+            if hasattr(last_word, 'end'):
+                duration = int(last_word.end)
+
+        lang_code = getattr(transcription, 'language_code', language)
+        print(f'ElevenLabs Scribe: {len(transcript)} chars, duration={duration}s, lang={lang_code}')
+
+        if transcript and transcript.strip():
+            return transcript.strip(), duration
+
+        print('ElevenLabs Scribe: Empty transcript returned')
+        return None, 0
+
+    except Exception as e:
+        print(f'ElevenLabs Scribe error: {e}')
+        return None, 0
+
+
 def _split_audio_chunks(file_path, max_size_mb=20):
     """Split audio file into chunks under max_size_mb for Whisper API (25MB limit)."""
     file_size = os.path.getsize(file_path)
@@ -890,57 +936,71 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         # Save audio backup BEFORE transcription
         audio_filename, audio_data = _save_audio_backup(tmp_path, ext, user_id)
 
-        client = openai.OpenAI(api_key=api_key)
-
         file_size = os.path.getsize(tmp_path)
         print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB')
 
-        # Split large files into chunks for Whisper 25MB limit
-        chunks = _split_audio_chunks(tmp_path)
-        print(f'Upload job {job_id}: {len(chunks)} chunk(s)')
-
-        all_text = []
+        transcript_text = ''
         total_duration = 0
+        stt_engine = 'none'
 
-        for i, chunk_path in enumerate(chunks):
-            chunk_size = os.path.getsize(chunk_path)
-            if chunk_size > 25 * 1024 * 1024:
-                print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
-                continue
+        # ── PRIMARY: Try ElevenLabs Scribe v2 (best Slovak accuracy, handles noisy audio) ──
+        el_text, el_duration = _transcribe_with_elevenlabs(tmp_path)
+        if el_text:
+            transcript_text = el_text
+            total_duration = el_duration
+            stt_engine = 'elevenlabs'
+            print(f'Upload job {job_id}: ElevenLabs succeeded ({len(transcript_text)} chars)')
+        else:
+            # ── FALLBACK: OpenAI Whisper ──
+            print(f'Upload job {job_id}: ElevenLabs failed/unavailable, falling back to Whisper')
+            client = openai.OpenAI(api_key=api_key)
 
-            try:
-                with open(chunk_path, 'rb') as f:
-                    transcription = client.audio.transcriptions.create(
-                        model='whisper-1',
-                        file=f,
-                        language='sk',
-                        response_format='verbose_json',
-                        prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
-                    )
+            # Split large files into chunks for Whisper 25MB limit
+            chunks = _split_audio_chunks(tmp_path)
+            print(f'Upload job {job_id}: {len(chunks)} chunk(s)')
 
-                chunk_text = transcription.text or ''
-                chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
-                total_duration += chunk_dur
+            all_text = []
 
-                # Clean hallucinations from each chunk
-                cleaned = _clean_hallucinations(chunk_text)
-                if cleaned:
-                    all_text.append(cleaned)
+            for i, chunk_path in enumerate(chunks):
+                chunk_size = os.path.getsize(chunk_path)
+                if chunk_size > 25 * 1024 * 1024:
+                    print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
+                    continue
 
-                print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
-            except Exception as whisper_err:
-                print(f'Upload job {job_id}: Whisper error on chunk {i}: {whisper_err}')
-                continue
-
-        # Clean up chunk files
-        for chunk_path in chunks:
-            if chunk_path != tmp_path and os.path.exists(chunk_path):
                 try:
-                    os.unlink(chunk_path)
-                except Exception:
-                    pass
+                    with open(chunk_path, 'rb') as f:
+                        transcription = client.audio.transcriptions.create(
+                            model='whisper-1',
+                            file=f,
+                            language='sk',
+                            response_format='verbose_json',
+                            prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
+                        )
 
-        transcript_text = ' '.join(all_text).strip()
+                    chunk_text = transcription.text or ''
+                    chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
+                    total_duration += chunk_dur
+
+                    # Clean hallucinations from each chunk
+                    cleaned = _clean_hallucinations(chunk_text)
+                    if cleaned:
+                        all_text.append(cleaned)
+
+                    print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
+                except Exception as whisper_err:
+                    print(f'Upload job {job_id}: Whisper error on chunk {i}: {whisper_err}')
+                    continue
+
+            # Clean up chunk files
+            for chunk_path in chunks:
+                if chunk_path != tmp_path and os.path.exists(chunk_path):
+                    try:
+                        os.unlink(chunk_path)
+                    except Exception:
+                        pass
+
+            transcript_text = ' '.join(all_text).strip()
+            stt_engine = 'whisper'
 
         # Final hallucination check on combined text
         if transcript_text:
@@ -970,6 +1030,7 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
                 'id': idea_id,
                 'transcript': transcript_text,
                 'duration_seconds': total_duration,
+                'stt_engine': stt_engine,
                 'message': 'Napad uspesne zaznamenany'
             }
         }
@@ -987,9 +1048,10 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
 @app.route('/api/ideas/upload', methods=['POST'])
 @login_required
 def api_ideas_upload():
-    api_key = os.environ.get('OPENAI_API_KEY')
-    if not api_key:
-        return jsonify({'error': 'OpenAI API kľúč nie je nastavený'}), 500
+    api_key = os.environ.get('OPENAI_API_KEY', '')
+    el_key = os.environ.get('ELEVENLABS_API_KEY', '')
+    if not api_key and not el_key:
+        return jsonify({'error': 'Ani ElevenLabs ani OpenAI API kľúč nie je nastavený'}), 500
 
     if 'audio' not in request.files:
         return jsonify({'error': 'Chýba audio súbor'}), 400
@@ -1079,10 +1141,7 @@ def api_idea_audio(idea_id):
 @app.route('/api/ideas/<int:idea_id>/retranscribe', methods=['POST'])
 @login_required
 def api_idea_retranscribe(idea_id):
-    """Re-run Whisper transcription on stored audio_data."""
-    api_key = os.environ.get('OPENAI_API_KEY')
-    if not api_key:
-        return jsonify({'error': 'OPENAI_API_KEY nie je nastavený'}), 500
+    """Re-run transcription on stored audio_data. Uses Deepgram (primary) with Whisper fallback."""
     db = get_db()
     idea = db.execute('SELECT audio_data, audio_filename FROM ideas WHERE id = ?', (idea_id,)).fetchone()
     db.close()
@@ -1095,28 +1154,45 @@ def api_idea_retranscribe(idea_id):
         tmp.write(audio_bytes)
         tmp_path = tmp.name
     try:
-        client = openai.OpenAI(api_key=api_key)
-        chunks = _split_audio_chunks(tmp_path)
-        all_text = []
+        transcript_text = ''
         total_duration = 0
-        for i, chunk_path in enumerate(chunks):
-            if os.path.getsize(chunk_path) > 25 * 1024 * 1024:
-                continue
-            with open(chunk_path, 'rb') as f:
-                tr = client.audio.transcriptions.create(
-                    model='whisper-1', file=f, language='sk',
-                    response_format='verbose_json',
-                    prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else (all_text[-1][-200:] if all_text else '')
-                )
-            cleaned = _clean_hallucinations(tr.text or '')
-            total_duration += int(getattr(tr, 'duration', 0) or 0)
-            if cleaned:
-                all_text.append(cleaned)
+
+        # PRIMARY: Try ElevenLabs Scribe
+        el_text, el_duration = _transcribe_with_elevenlabs(tmp_path)
+        if el_text:
+            transcript_text = el_text
+            total_duration = el_duration
+        else:
+            # FALLBACK: Whisper
+            api_key = os.environ.get('OPENAI_API_KEY')
+            if not api_key:
+                return jsonify({'error': 'Ani ElevenLabs ani OpenAI API kľúč nie je nastavený'}), 500
+            client = openai.OpenAI(api_key=api_key)
+            chunks = _split_audio_chunks(tmp_path)
+            all_text = []
+            for i, chunk_path in enumerate(chunks):
+                if os.path.getsize(chunk_path) > 25 * 1024 * 1024:
+                    continue
+                with open(chunk_path, 'rb') as f:
+                    tr = client.audio.transcriptions.create(
+                        model='whisper-1', file=f, language='sk',
+                        response_format='verbose_json',
+                        prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else (all_text[-1][-200:] if all_text else '')
+                    )
+                cleaned = _clean_hallucinations(tr.text or '')
+                total_duration += int(getattr(tr, 'duration', 0) or 0)
+                if cleaned:
+                    all_text.append(cleaned)
             for cp in chunks:
                 if cp != tmp_path and os.path.exists(cp):
                     try: os.unlink(cp)
                     except Exception: pass
-        transcript_text = ' '.join(all_text).strip() or '[Transkript nedostupný]'
+            transcript_text = ' '.join(all_text).strip()
+
+        if transcript_text:
+            transcript_text = _clean_hallucinations(transcript_text)
+        transcript_text = transcript_text or '[Transkript nedostupný]'
+
         db2 = get_db()
         db2.execute('UPDATE ideas SET transcript = ?, duration_seconds = ? WHERE id = ?',
                     (transcript_text, total_duration or idea['duration_seconds'] if 'duration_seconds' in idea.keys() else 0, idea_id))

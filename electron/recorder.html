@@ -444,21 +444,61 @@ function discard() {
 
 async function sendIdea() {
   if (!blob) return;
+  var dept = document.getElementById('dept').value;
+  var role = document.getElementById('role').value;
+  if (!dept||!role) { setMsg('Vyber oddelenie a rolu','err'); return; }
   var btn = document.getElementById('bsend');
   btn.disabled=true; btn.textContent='Odosielam...';
-  setMsg('Prepisujem... 10-30 sekund','inf');
-  var fill = document.getElementById('bfill'), w=0;
-  var p = setInterval(function(){ w=Math.min(w+2,85); fill.style.width=w+'%'; if(w>=85) clearInterval(p); }, 600);
+  setMsg('Nahravam subor...','inf');
+  var fill = document.getElementById('bfill');
+  fill.style.width='15%';
   try {
     var fd = new FormData();
     fd.append('audio', blob, 'idea_'+Date.now()+'.webm');
-    fd.append('department', document.getElementById('dept').value);
-    fd.append('role', document.getElementById('role').value);
+    fd.append('department', dept);
+    fd.append('role', role);
     fd.append('visibility', currentVisibility);
     var r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include'});
-    clearInterval(p); fill.style.width='100%';
-    if (r.ok) { setMsg('Napad odoslany!','ok'); setTimeout(discard, 2500); }
-    else { var d=await r.json().catch(function(){return {};}); setMsg(d.error||'Chyba','err'); }
+    if (!r.ok) {
+      var d=await r.json().catch(function(){return {};});
+      setMsg(d.error||'Chyba','err');
+      btn.disabled=false; btn.textContent='Odoslat napad';
+      fill.style.width='0%';
+      return;
+    }
+    var data = await r.json();
+    if (data.job_id) {
+      setMsg('Prepisujem... 10-60 sekund','inf');
+      fill.style.width='40%';
+      var attempts = 0;
+      while (attempts < 200) {
+        await new Promise(function(resolve){ setTimeout(resolve, 3000); });
+        attempts++;
+        try {
+          var jr = await fetch(API+'/api/ideas/job/'+data.job_id, {credentials:'include'});
+          if (jr.status === 202) {
+            fill.style.width = Math.min(40 + attempts, 95)+'%';
+            if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu','inf');
+            continue;
+          }
+          if (jr.ok || jr.status === 404) {
+            fill.style.width='100%';
+            setMsg('Napad odoslany!','ok');
+            setTimeout(discard, 2500);
+          } else {
+            var jd=await jr.json().catch(function(){return {};});
+            setMsg(jd.error||'Chyba pri spracovani','err');
+            fill.style.width='0%';
+          }
+          break;
+        } catch(e) { continue; }
+      }
+      if (attempts >= 200) { setMsg('Timeout - skus znova','err'); fill.style.width='0%'; }
+    } else {
+      fill.style.width='100%';
+      setMsg('Napad odoslany!','ok');
+      setTimeout(discard, 2500);
+    }
   } catch(e) { setMsg('Chyba: '+e.message,'err'); }
   finally { btn.disabled=false; btn.textContent='Odoslat napad'; setTimeout(function(){fill.style.width='0%';},2000); }
 }
