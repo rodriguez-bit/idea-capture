@@ -811,7 +811,12 @@ def _transcribe_with_elevenlabs(file_path, language='slk'):
             )
 
         if resp.status_code == 401:
-            print(f'ElevenLabs Scribe: 401 Unauthorized — API key may be invalid or expired')
+            body = resp.text[:500]
+            if 'unusual_activity' in body or 'abuse' in body.lower() or 'Free Tier' in body:
+                warning = 'ElevenLabs zablokoval prepis z dôvodu "unusual activity" na zdieľanom serveri. Pre odstránenie tohto problému je potrebný platený plán ElevenLabs. Prepis bol vykonaný cez Whisper.'
+                print(f'ElevenLabs Scribe: 401 - Free Tier blocked on shared IP (Render). Body: {body[:200]}')
+                return None, 0, warning
+            print(f'ElevenLabs Scribe: 401 Unauthorized — {body[:200]}')
             return None, 0, None
 
         if resp.status_code == 402:
@@ -2240,7 +2245,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '2.9.0',
+        'version': '2.9.1',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
