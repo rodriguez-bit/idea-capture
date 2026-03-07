@@ -1106,132 +1106,166 @@ def _save_audio_backup(tmp_path, ext, job_id):
 
 
 def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role, visibility, api_key):
-    import openai
-
+    """Phase 1: Save audio to disk + DB immediately, return 'done' to client.
+    Phase 2: Transcription + analysis runs in background thread."""
     try:
-        # Save audio backup BEFORE transcription — use job_id for unique filename
+        # ── PHASE 1: FAST — save audio, insert DB row, return done ──
         audio_filename, audio_data = _save_audio_backup(tmp_path, ext, job_id)
 
         file_size = os.path.getsize(tmp_path)
-        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB')
+        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB — saving immediately')
+
+        # Save idea to DB with placeholder transcript — audio is SAFE on server
+        idea_id = None
+        with app.app_context():
+            db = get_db()
+            cursor = db.execute('''
+                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, audio_data,
+                    duration_seconds, transcript, status, visibility, transcribed_at, stt_engine)
+                VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'new', ?, ?, 'pending')
+            ''', (user_id, user_name, department, role, audio_filename or '', audio_data or '',
+                  '[Prebieha prepis nahravky...]', visibility, datetime.now().isoformat()))
+            idea_id = cursor.lastrowid
+            db.commit()
+            db.close()
+
+        # ── Mark job as DONE immediately — client gets instant response ──
+        result = {
+            'id': idea_id,
+            'transcript': '',
+            'duration_seconds': 0,
+            'stt_engine': 'pending',
+            'message': 'Nahravka ulozena! Prepis prebieha na pozadi.'
+        }
+        _upload_jobs[job_id] = {'status': 'done', 'result': result}
+        print(f'Upload job {job_id}: SAVED to DB (idea #{idea_id}), client notified. Starting background transcription...')
+
+        # ── PHASE 2: BACKGROUND — transcription + analysis ──
+        # Keep tmp_path alive for background thread (don't delete in finally)
+        threading.Thread(
+            target=_process_transcription_background,
+            args=(job_id, idea_id, tmp_path, ext, api_key),
+            daemon=True
+        ).start()
+
+    except Exception as e:
+        print(f'Upload job {job_id} error: {e}')
+        _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
+        # Only clean up tmp on error — background thread handles cleanup on success
+        if os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+
+def _process_transcription_background(job_id, idea_id, tmp_path, ext, api_key):
+    """Background: transcribe audio and update the existing DB row. Client already got 'done'."""
+    import openai
+
+    try:
+        file_size = os.path.getsize(tmp_path)
+        print(f'Background transcription job {job_id} (idea #{idea_id}): {file_size / 1024 / 1024:.1f}MB')
 
         transcript_text = ''
         total_duration = 0
         stt_engine = 'none'
         stt_warning = None
 
-        # ── PRIMARY: Try ElevenLabs Scribe v2 (best Slovak accuracy, handles noisy audio) ──
+        # ── PRIMARY: Try ElevenLabs Scribe v2 ──
         el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
         if el_warning:
             stt_warning = el_warning
-        if el_text:  # Non-empty string = successful transcription
+        if el_text:
             transcript_text = el_text
             total_duration = el_duration
             stt_engine = 'elevenlabs'
-            print(f'Upload job {job_id}: ElevenLabs succeeded ({len(transcript_text)} chars)')
-        elif el_text is not None:  # Empty string '' = ElevenLabs processed but no speech found
-            # Don't fall back to Whisper — it would hallucinate on silent/noisy audio
-            print(f'Upload job {job_id}: ElevenLabs found no speech — skipping Whisper to avoid hallucination')
+            print(f'Background job {job_id}: ElevenLabs succeeded ({len(transcript_text)} chars)')
+        elif el_text is not None:
+            print(f'Background job {job_id}: ElevenLabs found no speech — skipping Whisper')
             transcript_text = ''
             total_duration = el_duration
             stt_engine = 'elevenlabs'
-        else:  # None = ElevenLabs error/unavailable — fall back to Whisper
+        else:
             # ── FALLBACK: OpenAI Whisper ──
-            print(f'Upload job {job_id}: ElevenLabs failed/unavailable, falling back to Whisper')
+            print(f'Background job {job_id}: ElevenLabs failed, falling back to Whisper')
             client = openai.OpenAI(api_key=api_key)
-
-            # Split large files into chunks for Whisper 25MB limit
             chunks = _split_audio_chunks(tmp_path)
-            print(f'Upload job {job_id}: {len(chunks)} chunk(s)')
-
+            print(f'Background job {job_id}: {len(chunks)} chunk(s)')
             all_text = []
 
             for i, chunk_path in enumerate(chunks):
                 chunk_size = os.path.getsize(chunk_path)
                 if chunk_size > 25 * 1024 * 1024:
-                    print(f'Upload job {job_id}: chunk {i} too large ({chunk_size / 1024 / 1024:.1f}MB), skipping')
+                    print(f'Background job {job_id}: chunk {i} too large, skipping')
                     continue
-
                 try:
                     with open(chunk_path, 'rb') as f:
                         transcription = client.audio.transcriptions.create(
-                            model='whisper-1',
-                            file=f,
-                            language='sk',
+                            model='whisper-1', file=f, language='sk',
                             response_format='verbose_json',
                             prompt='Toto je nahravka napadu alebo myslienky v slovencine.' if i == 0 else all_text[-1][-200:] if all_text else ''
                         )
-
                     chunk_text = transcription.text or ''
                     chunk_dur = int(getattr(transcription, 'duration', 0) or 0)
                     total_duration += chunk_dur
-
-                    # Clean hallucinations from each chunk
                     cleaned = _clean_hallucinations(chunk_text)
                     if cleaned:
                         all_text.append(cleaned)
-
-                    print(f'Upload job {job_id}: chunk {i} -> {len(chunk_text)} chars, cleaned -> {len(cleaned)} chars')
-                except Exception as whisper_err:
-                    print(f'Upload job {job_id}: Whisper error on chunk {i}: {whisper_err}')
+                    print(f'Background job {job_id}: chunk {i} -> {len(cleaned)} chars')
+                except Exception as we:
+                    print(f'Background job {job_id}: Whisper error chunk {i}: {we}')
                     continue
 
-            # Clean up chunk files
             for chunk_path in chunks:
                 if chunk_path != tmp_path and os.path.exists(chunk_path):
-                    try:
-                        os.unlink(chunk_path)
-                    except Exception:
-                        pass
+                    try: os.unlink(chunk_path)
+                    except Exception: pass
 
             transcript_text = ' '.join(all_text).strip()
             stt_engine = 'whisper'
-
-            # Check if Whisper produced a known hallucination
             if transcript_text and _is_whisper_hallucination(transcript_text):
-                print(f'Upload job {job_id}: Whisper hallucination detected: "{transcript_text}" — discarding')
+                print(f'Background job {job_id}: Whisper hallucination — discarding')
                 transcript_text = ''
 
-        # Final hallucination check on combined text
+        # Final hallucination check
         if transcript_text:
             transcript_text = _clean_hallucinations(transcript_text)
-            # Re-check after cleaning
             if transcript_text and _is_whisper_hallucination(transcript_text):
-                print(f'Upload job {job_id}: Post-clean hallucination detected: "{transcript_text}" — discarding')
                 transcript_text = ''
 
-        # Even if transcript is empty, SAVE the idea with audio backup reference
         if not transcript_text:
-            transcript_text = '[Nahravka ulozena - transkript nedostupny. Audio: ' + (audio_filename or 'N/A') + ']'
+            audio_filename = f'{job_id}{ext}'
+            transcript_text = '[Nahravka ulozena - transkript nedostupny. Audio: ' + audio_filename + ']'
 
+        # ── Update existing DB row with transcript ──
         with app.app_context():
             db = get_db()
-            cursor = db.execute('''
-                INSERT INTO ideas (author_id, author_name, department, role, audio_filename, audio_data, duration_seconds, transcript, status, visibility, transcribed_at, stt_engine)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?)
-            ''', (user_id, user_name, department, role, audio_filename or '', audio_data or '', total_duration, transcript_text, visibility, datetime.now().isoformat(), stt_engine))
-            idea_id = cursor.lastrowid
+            db.execute('''
+                UPDATE ideas SET transcript = ?, duration_seconds = ?, stt_engine = ?, transcribed_at = ?
+                WHERE id = ?
+            ''', (transcript_text, total_duration, stt_engine, datetime.now().isoformat(), idea_id))
             db.commit()
             db.close()
             save_ideas_backup()
 
-        result = {
-            'id': idea_id,
-            'transcript': transcript_text,
-            'duration_seconds': total_duration,
-            'stt_engine': stt_engine,
-            'message': 'Napad uspesne zaznamenany'
-        }
-        if stt_warning:
-            result['warning'] = stt_warning
-        _upload_jobs[job_id] = {'status': 'done', 'result': result}
-        print(f'Upload job {job_id}: DONE, saved to _upload_jobs (total jobs: {len(_upload_jobs)})')
+        print(f'Background job {job_id}: Transcription complete for idea #{idea_id} ({stt_engine}, {len(transcript_text)} chars)')
 
-        # Auto-analyze with Claude in background (non-blocking)
+        # Auto-analyze with Claude
         threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
+
     except Exception as e:
-        print(f'Upload job {job_id} error: {e}')
-        _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
+        print(f'Background transcription error job {job_id}: {e}')
+        # Even on error, update DB so user knows something went wrong
+        try:
+            with app.app_context():
+                db = get_db()
+                db.execute("UPDATE ideas SET transcript = ?, stt_engine = 'error' WHERE id = ?",
+                           (f'[Chyba prepisu: {str(e)[:200]}]', idea_id))
+                db.commit()
+                db.close()
+        except Exception:
+            pass
     finally:
         if os.path.exists(tmp_path):
             try:
