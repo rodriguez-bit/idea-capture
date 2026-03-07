@@ -135,7 +135,8 @@ function createWindow() {
   // Remove native menu bar (File, Edit, View...)
   Menu.setApplicationMenu(null);
 
-  mainWindow.loadFile('recorder.html');
+  // Load recorder from server (always up-to-date) with cache bypass
+  mainWindow.loadURL(API_BASE + '/recorder?v=' + Date.now());
 
   mainWindow.on('close', (e) => {
     if (!app.isQuitting) {
