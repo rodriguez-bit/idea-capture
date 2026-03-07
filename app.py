@@ -1215,9 +1215,6 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             db.close()
             save_ideas_backup()
 
-        # Auto-analyze with Claude
-        _auto_analyze(idea_id)
-
         result = {
             'id': idea_id,
             'transcript': transcript_text,
@@ -1229,6 +1226,9 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
             result['warning'] = stt_warning
         _upload_jobs[job_id] = {'status': 'done', 'result': result}
         print(f'Upload job {job_id}: DONE, saved to _upload_jobs (total jobs: {len(_upload_jobs)})')
+
+        # Auto-analyze with Claude in background (non-blocking)
+        threading.Thread(target=_auto_analyze, args=(idea_id,), daemon=True).start()
     except Exception as e:
         print(f'Upload job {job_id} error: {e}')
         _upload_jobs[job_id] = {'status': 'error', 'error': str(e)}
