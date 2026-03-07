@@ -2319,6 +2319,12 @@ def recorder_page():
     return send_from_directory('static', 'recorder.html')
 
 
+@app.route('/electron-recorder')
+@login_required
+def electron_recorder_page():
+    return send_from_directory('electron-app', 'recorder.html')
+
+
 @app.route('/sw.js')
 def service_worker():
     response = send_from_directory('static', 'sw.js')
