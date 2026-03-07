@@ -2,7 +2,6 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://ridea.onrender.com http://localhost:5001; media-src *">
 <title>Ridea</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -750,7 +749,9 @@ window.addEventListener('offline', function() {
 });
 // ══════════════════════════════════════════════════════════════
 
-var API = 'https://ridea.onrender.com';
+// When loaded from server, use relative paths (same-origin, no CORS issues)
+// When loaded from file://, use absolute URL
+var API = (window.location.protocol === 'file:') ? 'https://ridea.onrender.com' : '';
 var mr=null, chunks=[], blob=null, ti=null, secs=0, user=null, currentVisibility='company';
 var audioCtx = null, analyserNode = null, animId = null, activeStreams = [], mixedDest = null;
 var wakeLock = null, silentAudio = null, recordStartTime = null;
@@ -847,17 +848,35 @@ function show(id) {
 
 async function init() {
   show('login');
-  if (!window.electron) return;
-  API = await window.electron.getApiBase();
-  var c = await window.electron.getStore('savedCreds');
-  if (c) { document.getElementById('le').value = c.email||''; document.getElementById('lp').value = c.password||''; }
-  var u = await window.electron.getStore('user');
-  if (u) {
-    try {
-      var r = await fetch(API+'/api/current-user', {credentials:'include'});
-      if (r.ok) { user = await r.json(); showRec(); }
-    } catch(e) {}
+  console.log('[Ridea] init: protocol=' + window.location.protocol + ', electron=' + !!window.electron + ', API=' + API);
+  if (window.electron) {
+    var base = await window.electron.getApiBase();
+    // Only use absolute URL when loaded from file://
+    if (window.location.protocol === 'file:') API = base;
+    var c = await window.electron.getStore('savedCreds');
+    if (c) { document.getElementById('le').value = c.email||''; document.getElementById('lp').value = c.password||''; }
   }
+  // Try auto-login from session (works when loaded from server with valid cookie)
+  try {
+    var r = await fetch(API+'/api/current-user', {credentials:'include'});
+    console.log('[Ridea] current-user status=' + r.status);
+    if (r.ok) { user = await r.json(); console.log('[Ridea] auto-login OK: ' + user.name); showRec(); return; }
+  } catch(e) { console.log('[Ridea] current-user error: ' + e.message); }
+  // If auto-login failed, check electron store for saved user
+  if (window.electron) {
+    var u = await window.electron.getStore('user');
+    if (u) {
+      var c2 = await window.electron.getStore('savedCreds');
+      if (c2 && c2.email && c2.password) {
+        console.log('[Ridea] trying saved credentials...');
+        try {
+          var lr = await fetch(API+'/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:c2.email,password:c2.password}), credentials:'include'});
+          if (lr.ok) { var d = await lr.json(); user = {name:d.name, role:d.role, email:c2.email}; console.log('[Ridea] auto-login via saved creds OK'); showRec(); return; }
+        } catch(e2) { console.log('[Ridea] saved creds login error: ' + e2.message); }
+      }
+    }
+  }
+  console.log('[Ridea] showing login screen');
 }
 
 async function showRec() {
@@ -904,8 +923,9 @@ async function doLogout() {
 }
 
 function openAdmin() {
-  if (window.electron) window.location.href = API;
-  else window.open(API, '_blank');
+  var adminUrl = API || window.location.origin;
+  if (window.electron) window.location.href = adminUrl;
+  else window.open(adminUrl || '/', '_blank');
 }
 
 // ── Recent Ideas ──
@@ -1169,11 +1189,36 @@ async function sendIdea() {
     var sizeMB = (blob.size / 1024 / 1024).toFixed(1);
     setMsg('Odosielam ' + sizeMB + ' MB...', 'inf');
     var r;
-    try {
-      r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include', signal: uploadCtrl.signal});
-    } finally { clearTimeout(uploadTimeout); }
+    var uploadRetries = 3;
+    for (var attempt = 1; attempt <= uploadRetries; attempt++) {
+      try {
+        console.log('[Ridea] Upload attempt ' + attempt + '/' + uploadRetries + ' to ' + (API||'(relative)') + '/api/ideas/upload, size=' + sizeMB + 'MB');
+        // Re-create FormData for retry (previous may be consumed)
+        if (attempt > 1) {
+          fd = new FormData();
+          fd.append('audio', blob, filename);
+          fd.append('department', dept);
+          fd.append('role', role);
+          fd.append('visibility', currentVisibility);
+          uploadCtrl = new AbortController();
+          uploadTimeout = setTimeout(function() { uploadCtrl.abort(); }, 300000);
+          setMsg('Pokus ' + attempt + '/' + uploadRetries + '...', 'inf');
+        }
+        r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include', signal: uploadCtrl.signal});
+        clearTimeout(uploadTimeout);
+        console.log('[Ridea] Upload response: status=' + r.status + ', ok=' + r.ok);
+        break; // success - exit retry loop
+      } catch(fetchErr) {
+        clearTimeout(uploadTimeout);
+        console.error('[Ridea] Upload attempt ' + attempt + ' failed:', fetchErr.message);
+        if (attempt >= uploadRetries) throw fetchErr;
+        // Wait before retry: 2s, 4s
+        await new Promise(function(resolve){ setTimeout(resolve, attempt * 2000); });
+      }
+    }
     if (!r.ok) {
       var d=await r.json().catch(function(){return {};});
+      console.error('[Ridea] Upload server error:', JSON.stringify(d));
       throw new Error(d.error||'Chyba '+r.status);
     }
     var data = await r.json();
