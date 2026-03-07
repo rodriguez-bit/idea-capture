@@ -284,15 +284,22 @@ body { background: #512D6D; font-family: 'Segoe UI', Arial, sans-serif; font-siz
 
 <script>
 // ══════════════════════════════════════════════════════════════
-// AudioVault — IndexedDB backup for recordings (Electron)
+// AudioVault v2 — Bulletproof recording backup & auto-sync
+// Recordings are NEVER lost. They persist in IndexedDB and
+// auto-retry upload on: app start, network restore, periodic check.
+// During recording, chunks are saved every 10s as insurance.
 // ══════════════════════════════════════════════════════════════
 var _vaultDB = null;
 var _vaultOpen = false;
+var _vaultSyncing = false;  // prevents concurrent auto-uploads
+var _vaultSyncTimer = null;
+var _vaultLiveId = null;    // ID of live-recording backup in IndexedDB
+var _vaultLiveSaveTimer = null;
 
 function openVaultDB() {
   return new Promise(function(resolve, reject) {
     if (_vaultDB) { resolve(_vaultDB); return; }
-    var req = indexedDB.open('RideaAudioVault', 1);
+    var req = indexedDB.open('RideaAudioVault', 2);
     req.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (!db.objectStoreNames.contains('recordings')) {
@@ -321,7 +328,8 @@ function vaultSave(blobData, filename, dept, role, visibility) {
         status: 'pending',
         jobId: null,
         errorMsg: null,
-        retries: 0
+        retries: 0,
+        nextRetryAt: 0
       };
       var req = store.add(record);
       req.onsuccess = function() { resolve(req.result); };
@@ -388,7 +396,7 @@ function toggleVaultList() {
 
 function refreshVaultUI() {
   vaultGetAll().then(function(items) {
-    var pending = items.filter(function(i) { return i.status !== 'done'; });
+    var pending = items.filter(function(i) { return i.status !== 'done' && i.status !== 'live'; });
     var banner = document.getElementById('vault-banner');
     var list = document.getElementById('vault-list');
     if (pending.length === 0) {
@@ -405,8 +413,9 @@ function refreshVaultUI() {
       var sizeMB = (item.size / 1024 / 1024).toFixed(1);
       var statusLabel = item.status === 'pending' ? 'Caka' : item.status === 'uploading' ? 'Odosielam...' : 'Chyba';
       var statusCls = item.status === 'pending' ? 'pending' : item.status === 'uploading' ? 'uploading' : 'error';
+      var retryInfo = item.retries > 0 ? ' (pokus ' + item.retries + ')' : '';
       html += '<div class="vault-item">';
-      html += '<div class="vi-top"><span class="vi-info">' + time + ' &middot; ' + sizeMB + ' MB</span>';
+      html += '<div class="vi-top"><span class="vi-info">' + time + ' &middot; ' + sizeMB + ' MB' + retryInfo + '</span>';
       html += '<span class="vi-status ' + statusCls + '">' + statusLabel + '</span></div>';
       if (item.errorMsg) html += '<div style="font-size:10px;color:#f87171;margin-top:3px">' + item.errorMsg + '</div>';
       html += '<div class="vi-actions">';
@@ -440,18 +449,84 @@ function vaultRemove(id) {
 function vaultRetry(id) {
   vaultGet(id).then(function(rec) {
     if (!rec || !rec.blob) { setMsg('Nahravka nenajdena', 'err'); return; }
-    vaultUpdate(id, { status: 'uploading', errorMsg: null, retries: rec.retries + 1 }).then(function() {
+    vaultUpdate(id, { status: 'uploading', errorMsg: null, retries: rec.retries + 1, nextRetryAt: 0 }).then(function() {
       refreshVaultUI();
-      _doVaultUpload(id, rec.blob, rec.filename, rec.dept, rec.role, rec.visibility);
+      _doVaultUpload(id, rec.blob, rec.filename, rec.dept, rec.role, rec.visibility, false);
     });
   });
 }
 
-function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility) {
+// ── Live recording backup: save chunks to IndexedDB every 10s ──
+function vaultStartLiveSave(dept, role, visibility) {
+  _vaultLiveId = null;
+  if (_vaultLiveSaveTimer) clearInterval(_vaultLiveSaveTimer);
+  _vaultLiveSaveTimer = setInterval(function() {
+    if (!chunks || chunks.length === 0) return;
+    var mime = 'audio/webm;codecs=opus';
+    var liveBlob = new Blob(chunks, { type: mime });
+    if (_vaultLiveId) {
+      // Update existing live record
+      vaultUpdate(_vaultLiveId, { blob: liveBlob, size: liveBlob.size }).catch(function(){});
+    } else {
+      // Create new live record
+      openVaultDB().then(function(db) {
+        return new Promise(function(resolve) {
+          var tx = db.transaction('recordings', 'readwrite');
+          var store = tx.objectStore('recordings');
+          var record = {
+            blob: liveBlob,
+            filename: 'live_' + Date.now() + '.webm',
+            dept: dept,
+            role: role,
+            visibility: visibility,
+            created: new Date().toISOString(),
+            size: liveBlob.size,
+            status: 'live',
+            jobId: null,
+            errorMsg: null,
+            retries: 0,
+            nextRetryAt: 0
+          };
+          var req = store.add(record);
+          req.onsuccess = function() { _vaultLiveId = req.result; resolve(); };
+          req.onerror = function() { resolve(); };
+        });
+      }).catch(function(){});
+    }
+  }, 10000);
+}
+
+function vaultStopLiveSave() {
+  if (_vaultLiveSaveTimer) { clearInterval(_vaultLiveSaveTimer); _vaultLiveSaveTimer = null; }
+  // Delete the live backup - the final blob will be saved as 'pending' in sendIdea
+  if (_vaultLiveId) {
+    var liveId = _vaultLiveId;
+    _vaultLiveId = null;
+    vaultDelete(liveId).catch(function(){});
+  }
+}
+
+function vaultPromoteLive() {
+  // If recording was interrupted, promote live backup to pending
+  if (_vaultLiveSaveTimer) { clearInterval(_vaultLiveSaveTimer); _vaultLiveSaveTimer = null; }
+  if (_vaultLiveId) {
+    var liveId = _vaultLiveId;
+    _vaultLiveId = null;
+    return vaultUpdate(liveId, { status: 'pending', filename: 'prerusena_' + Date.now() + '.webm' })
+      .then(function() { refreshVaultUI(); return liveId; });
+  }
+  return Promise.resolve(null);
+}
+
+// ── Auto-upload: upload pending/error recordings automatically ──
+// silent=true means no UI messages (background sync)
+function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility, silent) {
   var fill = document.getElementById('bfill');
-  fill.style.width = '15%';
-  var sizeMB = (blobData.size / 1024 / 1024).toFixed(1);
-  setMsg('Odosielam zalohovanu nahravku (' + sizeMB + ' MB)...', 'inf');
+  if (!silent) {
+    fill.style.width = '15%';
+    var sizeMB = (blobData.size / 1024 / 1024).toFixed(1);
+    setMsg('Odosielam zalohovanu nahravku (' + sizeMB + ' MB)...', 'inf');
+  }
   var fd = new FormData();
   fd.append('audio', blobData, filename);
   fd.append('department', dept);
@@ -467,28 +542,34 @@ function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility) {
     })
     .then(function(data) {
       if (data.job_id) {
-        setMsg('Prepisujem...', 'inf'); fill.style.width = '40%';
+        if (!silent) { setMsg('Prepisujem...', 'inf'); fill.style.width = '40%'; }
         vaultUpdate(vaultId, { jobId: data.job_id });
-        _pollVaultJob(vaultId, data.job_id, fill);
+        _pollVaultJob(vaultId, data.job_id, fill, silent);
       } else {
-        fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok');
+        if (!silent) { fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok'); }
         vaultUpdate(vaultId, { status: 'done' }).then(function() {
-          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); if (!silent) { fill.style.width = '0%'; clearMsg(); } }, 3000);
         });
       }
     })
     .catch(function(err) {
-      fill.style.width = '0%';
-      setMsg('Chyba: ' + err.message + ' - nahravka ulozena lokalne', 'err');
-      vaultUpdate(vaultId, { status: 'error', errorMsg: err.message }).then(refreshVaultUI);
+      if (!silent) { fill.style.width = '0%'; setMsg('Chyba: ' + err.message + ' - skusim znova automaticky', 'err'); }
+      // Exponential backoff: 30s, 60s, 120s, 240s, max 5min
+      var retries = 0;
+      vaultGet(vaultId).then(function(rec) {
+        retries = rec ? (rec.retries || 0) : 0;
+        var delaySec = Math.min(30 * Math.pow(2, retries), 300);
+        var nextRetry = Date.now() + delaySec * 1000;
+        return vaultUpdate(vaultId, { status: 'error', errorMsg: err.message, retries: retries + 1, nextRetryAt: nextRetry });
+      }).then(refreshVaultUI);
     });
 }
 
-function _pollVaultJob(vaultId, jobId, fill) {
+function _pollVaultJob(vaultId, jobId, fill, silent) {
   var attempts = 0;
   function poll() {
     if (attempts >= 200) {
-      setMsg('Timeout - nahravka ulozena lokalne', 'err'); fill.style.width = '0%';
+      if (!silent) { setMsg('Timeout - skusim znova', 'err'); fill.style.width = '0%'; }
       vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
       return;
     }
@@ -496,17 +577,16 @@ function _pollVaultJob(vaultId, jobId, fill) {
     fetch(API + '/api/ideas/job/' + jobId, { credentials: 'include' })
       .then(function(r) {
         if (r.status === 202) {
-          fill.style.width = Math.min(40 + attempts, 95) + '%';
-          if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
+          if (!silent) fill.style.width = Math.min(40 + attempts, 95) + '%';
+          if (!silent && attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
           setTimeout(poll, 3000); return;
         }
         if (r.ok) {
-            fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok');
+            if (!silent) { fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok'); }
             vaultUpdate(vaultId, { status: 'done' }).then(function() {
-              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); if (!silent) { fill.style.width = '0%'; clearMsg(); } }, 3000);
             });
         } else if (r.status === 404) {
-          // Job completed fast and was cleaned up - check if idea was saved
           fetch(API + '/api/ideas/my-recent', { credentials: 'include' })
             .then(function(mr) { return mr.ok ? mr.json() : []; })
             .then(function(recent) {
@@ -516,19 +596,19 @@ function _pollVaultJob(vaultId, jobId, fill) {
                 return (now - created) < 120000;
               });
               if (found) {
-                fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok');
+                if (!silent) { fill.style.width = '100%'; setMsg('Napad odoslany!', 'ok'); }
                 vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                  setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); fill.style.width = '0%'; clearMsg(); }, 3000);
+                  setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); if (!silent) { fill.style.width = '0%'; clearMsg(); } }, 3000);
                 });
               } else {
-                setMsg('Spracovanie prebieha...', 'inf');
+                if (!silent) setMsg('Spracovanie prebieha...', 'inf');
                 setTimeout(poll, 3000);
               }
             })
             .catch(function() { setTimeout(poll, 3000); });
         } else {
           r.json().catch(function() { return {}; }).then(function(d) {
-            setMsg(d.error || 'Chyba pri spracovani', 'err'); fill.style.width = '0%';
+            if (!silent) { setMsg(d.error || 'Chyba pri spracovani', 'err'); fill.style.width = '0%'; }
             vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' }).then(refreshVaultUI);
           });
         }
@@ -537,6 +617,137 @@ function _pollVaultJob(vaultId, jobId, fill) {
   }
   setTimeout(poll, 3000);
 }
+
+// ── Vault Auto-Sync Engine ──────────────────────────────────────
+// Runs every 30s. Picks up pending/error recordings and uploads them.
+// Uses exponential backoff for errors. Only one upload at a time.
+function vaultAutoSync() {
+  if (_vaultSyncing) return;
+  if (!user) return;  // not logged in yet
+  vaultGetAll().then(function(items) {
+    var now = Date.now();
+    // Find items that need upload: pending or error with backoff expired
+    var toUpload = items.filter(function(i) {
+      if (i.status === 'done' || i.status === 'live' || i.status === 'uploading') return false;
+      if (i.status === 'error' && i.nextRetryAt && now < i.nextRetryAt) return false;
+      return true;
+    });
+    if (toUpload.length === 0) return;
+    // Upload one at a time
+    _vaultSyncing = true;
+    var item = toUpload[0];
+    console.log('VaultAutoSync: uploading id=' + item.id + ' status=' + item.status + ' retries=' + item.retries + ' size=' + (item.size/1024/1024).toFixed(1) + 'MB');
+    vaultUpdate(item.id, { status: 'uploading', errorMsg: null }).then(function() {
+      refreshVaultUI();
+      _doVaultUploadAsync(item.id, item.blob, item.filename, item.dept, item.role, item.visibility)
+        .finally(function() { _vaultSyncing = false; });
+    });
+  }).catch(function() { _vaultSyncing = false; });
+}
+
+// Promise-based upload for auto-sync
+function _doVaultUploadAsync(vaultId, blobData, filename, dept, role, visibility) {
+  var fd = new FormData();
+  fd.append('audio', blobData, filename);
+  fd.append('department', dept);
+  fd.append('role', role);
+  fd.append('visibility', visibility);
+  var ctrl = new AbortController();
+  var tout = setTimeout(function() { ctrl.abort(); }, 120000);
+  return fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include', signal: ctrl.signal })
+    .then(function(r) { clearTimeout(tout); return r; }, function(e) { clearTimeout(tout); throw e; })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Chyba ' + r.status); });
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.job_id) {
+        vaultUpdate(vaultId, { jobId: data.job_id });
+        return _pollVaultJobAsync(vaultId, data.job_id);
+      } else {
+        console.log('VaultAutoSync: id=' + vaultId + ' uploaded OK (no job)');
+        return vaultUpdate(vaultId, { status: 'done' }).then(function() {
+          setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 3000);
+        });
+      }
+    })
+    .catch(function(err) {
+      console.log('VaultAutoSync: id=' + vaultId + ' error: ' + err.message);
+      return vaultGet(vaultId).then(function(rec) {
+        var retries = rec ? (rec.retries || 0) : 0;
+        var delaySec = Math.min(30 * Math.pow(2, retries), 300);
+        var nextRetry = Date.now() + delaySec * 1000;
+        return vaultUpdate(vaultId, { status: 'error', errorMsg: err.message, retries: retries + 1, nextRetryAt: nextRetry });
+      }).then(refreshVaultUI);
+    });
+}
+
+function _pollVaultJobAsync(vaultId, jobId) {
+  return new Promise(function(resolve) {
+    var attempts = 0;
+    function poll() {
+      if (attempts >= 200) {
+        vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(function() { refreshVaultUI(); resolve(); });
+        return;
+      }
+      attempts++;
+      fetch(API + '/api/ideas/job/' + jobId, { credentials: 'include' })
+        .then(function(r) {
+          if (r.status === 202) { setTimeout(poll, 3000); return; }
+          if (r.ok) {
+            console.log('VaultAutoSync: id=' + vaultId + ' job done');
+            vaultUpdate(vaultId, { status: 'done' }).then(function() {
+              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 3000);
+              resolve();
+            });
+          } else if (r.status === 404) {
+            // Job finished fast, check recent ideas
+            fetch(API + '/api/ideas/my-recent', { credentials: 'include' })
+              .then(function(mr) { return mr.ok ? mr.json() : []; })
+              .then(function(recent) {
+                var found = (recent || []).some(function(idea) {
+                  return (Date.now() - new Date(idea.created_at).getTime()) < 120000;
+                });
+                if (found) {
+                  vaultUpdate(vaultId, { status: 'done' }).then(function() {
+                    setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 3000);
+                    resolve();
+                  });
+                } else { setTimeout(poll, 3000); }
+              })
+              .catch(function() { setTimeout(poll, 3000); });
+          } else {
+            r.json().catch(function() { return {}; }).then(function(d) {
+              vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' }).then(function() { refreshVaultUI(); resolve(); });
+            });
+          }
+        })
+        .catch(function() { setTimeout(poll, 3000); });
+    }
+    setTimeout(poll, 3000);
+  });
+}
+
+// Start auto-sync timer
+function vaultStartAutoSync() {
+  if (_vaultSyncTimer) return;
+  // Run immediately once, then every 30 seconds
+  setTimeout(vaultAutoSync, 3000);
+  _vaultSyncTimer = setInterval(vaultAutoSync, 30000);
+}
+
+// ── Online/Offline detection ──────────────────────────────────────
+window.addEventListener('online', function() {
+  console.log('VaultAutoSync: Network restored, triggering sync');
+  setMsg('Pripojenie obnovene, odosielam nahravky...', 'inf');
+  setTimeout(vaultAutoSync, 2000);
+});
+window.addEventListener('offline', function() {
+  console.log('VaultAutoSync: Network lost');
+  if (mr && mr.state === 'recording') {
+    setMsg('Bez pripojenia - nahravka sa ulozi lokalne', 'inf');
+  }
+});
 // ══════════════════════════════════════════════════════════════
 
 var API = 'https://ridea.onrender.com';
@@ -577,18 +788,23 @@ document.addEventListener('visibilitychange', function() {
       blob = new Blob(chunks, { type: 'audio/webm' });
       document.getElementById('acts').style.display = 'flex';
       document.getElementById('rhint').textContent = 'Nahravka prerusena (obrazovka zamknuta)';
-      setMsg('Nahravanie prerusene. Zalohujem...', 'inf');
-      // Auto-save interrupted recording to vault
-      var dept = document.getElementById('dept').value;
-      var role = document.getElementById('role').value;
-      if (dept && role) {
-        vaultSave(blob, 'prerusena_' + Date.now() + '.webm', dept, role, currentVisibility)
-          .then(function() { setMsg('Prerusena nahravka zalohovana! Mozete odoslat alebo stiahnut.', 'err'); refreshVaultUI(); })
-          .catch(function() { setMsg('Nahravanie prerusene. Odoslte co najskor.', 'err'); });
-      } else {
-        setMsg('Nahravanie prerusene. Mozete odoslat co sa nahrato.', 'err');
-      }
+      // Promote live backup to pending (it already has chunks saved every 10s)
+      vaultPromoteLive().then(function(promotedId) {
+        if (promotedId) {
+          setMsg('Prerusena nahravka zalohovana! Automaticky sa pokusi odoslat.', 'inf');
+        } else {
+          // No live backup existed, save manually
+          var dept = document.getElementById('dept').value;
+          var role = document.getElementById('role').value;
+          if (dept && role) {
+            vaultSave(blob, 'prerusena_' + Date.now() + '.webm', dept, role, currentVisibility)
+              .then(function() { setMsg('Prerusena nahravka zalohovana!', 'inf'); refreshVaultUI(); })
+              .catch(function() { setMsg('Nahravanie prerusene. Odoslte co najskor.', 'err'); });
+          }
+        }
+      });
     } else {
+      vaultPromoteLive();  // Try to rescue any live data
       document.getElementById('rhint').textContent = 'Nahravanie prerusene';
       setMsg('Android zastavil nahravanie pri zamknuti obrazovky.', 'err');
     }
@@ -653,6 +869,8 @@ async function showRec() {
   if (dept) document.getElementById('dept').value = dept;
   if (role) document.getElementById('role').value = role;
   show('rec');
+  // Start auto-sync engine: retry pending/failed uploads automatically
+  vaultStartAutoSync();
 }
 
 function savePref(key, value) {
@@ -869,6 +1087,9 @@ async function startRec() {
     };
     mr.start(1000);
 
+    // Start live backup: save chunks to IndexedDB every 10s as insurance
+    vaultStartLiveSave(dept, role, currentVisibility);
+
     // Keep screen on and audio session alive
     await requestWakeLock();
     startSilentAudio();
@@ -893,6 +1114,7 @@ async function startRec() {
 function stopRec() {
   if (mr && mr.state!=='inactive') mr.stop();
   clearInterval(ti);
+  vaultStopLiveSave();  // remove live backup (final blob saved in sendIdea)
   releaseWakeLock();
   stopSilentAudio();
   recordStartTime = null;
@@ -903,6 +1125,7 @@ function discard() {
   blob=null; chunks=[];
   stopAllStreams();
   stopVisualizer();
+  vaultStopLiveSave();
   releaseWakeLock();
   stopSilentAudio();
   recordStartTime = null;
