@@ -5,6 +5,8 @@ const zlib = require('zlib');
 
 // Allow cross-origin cookies from file:// -> ridea.onrender.com
 app.commandLine.appendSwitch('disable-features', 'SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure');
+// Prevent proxy-related connection issues in Electron
+app.commandLine.appendSwitch('no-proxy-server');
 
 // Simple JSON store (replaces electron-store to avoid ESM issues)
 let _storeData = {};
@@ -217,15 +219,16 @@ function checkForUpdates() {
 
 app.whenReady().then(() => {
   // Allow Set-Cookie from ridea.onrender.com to be stored and sent back
+  // Normalize SameSite cookies for Electron compatibility
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const hdrs = details.responseHeaders || {};
-    // Strip SameSite=Lax/Strict and replace with SameSite=None; Secure
     if (hdrs['set-cookie']) {
-      hdrs['set-cookie'] = hdrs['set-cookie'].map(c =>
-        c.replace(/;\s*SameSite=(Lax|Strict)/gi, '; SameSite=None')
-         .replace(/;\s*Secure/gi, '')
-         + '; SameSite=None; Secure'
-      );
+      hdrs['set-cookie'] = hdrs['set-cookie'].map(c => {
+        // Remove all existing SameSite and Secure directives first
+        let cleaned = c.replace(/;\s*SameSite=[^;]*/gi, '').replace(/;\s*Secure/gi, '');
+        // Add SameSite=None; Secure once
+        return cleaned + '; SameSite=None; Secure';
+      });
     }
     callback({ responseHeaders: hdrs });
   });
