@@ -450,13 +450,17 @@ function vaultRetry(id) {
 function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility) {
   var fill = document.getElementById('bfill');
   fill.style.width = '15%';
-  setMsg('Odosielam zalohovanu nahravku...', 'inf');
+  var sizeMB = (blobData.size / 1024 / 1024).toFixed(1);
+  setMsg('Odosielam zalohovanu nahravku (' + sizeMB + ' MB)...', 'inf');
   var fd = new FormData();
   fd.append('audio', blobData, filename);
   fd.append('department', dept);
   fd.append('role', role);
   fd.append('visibility', visibility);
-  fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include' })
+  var ctrl = new AbortController();
+  var tout = setTimeout(function() { ctrl.abort(); }, 120000);
+  fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include', signal: ctrl.signal })
+    .then(function(r) { clearTimeout(tout); return r; }, function(e) { clearTimeout(tout); throw e; })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Chyba ' + r.status); });
       return r.json();
@@ -849,17 +853,19 @@ async function startRec() {
     }
     draw();
 
-    // Record mixed stream
+    // Record with low bitrate for compression (32kbps mono ~6MB for 27min vs ~30MB default)
     chunks = [];
     var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-    mr = new MediaRecorder(mixedStream, {mimeType:mime});
+    mr = new MediaRecorder(mixedStream, {mimeType: mime, audioBitsPerSecond: 32000});
     mr.ondataavailable = function(e) { if (e.data.size>0) chunks.push(e.data); };
     mr.onstop = function() {
       blob = new Blob(chunks, {type:mime});
+      var sizeMB = (blob.size / 1024 / 1024).toFixed(1);
       stopAllStreams();
       stopVisualizer();
       document.getElementById('acts').style.display = 'flex';
       document.getElementById('rhint').textContent = 'Nahravka pripravena';
+      document.getElementById('audio-info').innerHTML = '<span class="active-src">' + sizeMB + ' MB</span>';
     };
     mr.start(1000);
 
@@ -934,7 +940,15 @@ async function sendIdea() {
     fd.append('department', dept);
     fd.append('role', role);
     fd.append('visibility', currentVisibility);
-    var r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include'});
+    // Upload with 120s timeout to prevent "connection closed" on slow networks
+    var uploadCtrl = new AbortController();
+    var uploadTimeout = setTimeout(function() { uploadCtrl.abort(); }, 120000);
+    var sizeMB = (blob.size / 1024 / 1024).toFixed(1);
+    setMsg('Odosielam ' + sizeMB + ' MB...', 'inf');
+    var r;
+    try {
+      r = await fetch(API+'/api/ideas/upload', {method:'POST', body:fd, credentials:'include', signal: uploadCtrl.signal});
+    } finally { clearTimeout(uploadTimeout); }
     if (!r.ok) {
       var d=await r.json().catch(function(){return {};});
       throw new Error(d.error||'Chyba '+r.status);
