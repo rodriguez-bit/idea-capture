@@ -542,7 +542,7 @@ function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility, sil
     })
     .then(function(data) {
       if (data.job_id) {
-        if (!silent) { setMsg('Prepisujem...', 'inf'); fill.style.width = '40%'; }
+        if (!silent) { setMsg('Ukladam na server...', 'inf'); fill.style.width = '40%'; }
         vaultUpdate(vaultId, { jobId: data.job_id });
         _pollVaultJob(vaultId, data.job_id, fill, silent);
       } else {
@@ -1179,7 +1179,7 @@ async function sendIdea() {
     var data = await r.json();
     if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
     if (data.job_id) {
-      setMsg('Prepisujem... 10-60 sekund','inf');
+      setMsg('Ukladam na server...','inf');
       fill.style.width='40%';
       var attempts = 0;
       while (attempts < 200) {
@@ -1362,7 +1362,7 @@ async function sendFileIdea() {
     var data = await r.json();
     if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
     if (data.job_id) {
-      setMsg('Prepisujem... 10-60 sekund', 'inf');
+      setMsg('Ukladam na server...', 'inf');
       fill.style.width = '40%';
       await pollFileJob(data.job_id, fill, btn, vaultId);
     } else {
