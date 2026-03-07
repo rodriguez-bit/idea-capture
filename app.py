@@ -23,7 +23,9 @@ app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-app.config['SESSION_COOKIE_SECURE'] = not bool(os.environ.get('FLASK_DEBUG'))
+# FLASK_DEBUG env var is string 'false' — bool('false') is True in Python!
+# So we explicitly check for truthy values
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_DEBUG', '').lower() not in ('true', '1', 'yes')
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
@@ -2320,8 +2322,8 @@ def recorder_page():
 
 
 @app.route('/electron-recorder')
-@login_required
 def electron_recorder_page():
+    # No login_required — the recorder page handles its own auth flow
     return send_from_directory('electron-app', 'recorder.html')
 
 
