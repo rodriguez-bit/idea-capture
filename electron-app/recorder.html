@@ -533,7 +533,7 @@ function _doVaultUpload(vaultId, blobData, filename, dept, role, visibility, sil
   fd.append('role', role);
   fd.append('visibility', visibility);
   var ctrl = new AbortController();
-  var tout = setTimeout(function() { ctrl.abort(); }, 120000);
+  var tout = setTimeout(function() { ctrl.abort(); }, 300000);
   fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include', signal: ctrl.signal })
     .then(function(r) { clearTimeout(tout); return r; }, function(e) { clearTimeout(tout); throw e; })
     .then(function(r) {
@@ -653,7 +653,7 @@ function _doVaultUploadAsync(vaultId, blobData, filename, dept, role, visibility
   fd.append('role', role);
   fd.append('visibility', visibility);
   var ctrl = new AbortController();
-  var tout = setTimeout(function() { ctrl.abort(); }, 120000);
+  var tout = setTimeout(function() { ctrl.abort(); }, 300000);
   return fetch(API + '/api/ideas/upload', { method: 'POST', body: fd, credentials: 'include', signal: ctrl.signal })
     .then(function(r) { clearTimeout(tout); return r; }, function(e) { clearTimeout(tout); throw e; })
     .then(function(r) {
@@ -1163,9 +1163,9 @@ async function sendIdea() {
     fd.append('department', dept);
     fd.append('role', role);
     fd.append('visibility', currentVisibility);
-    // Upload with 120s timeout to prevent "connection closed" on slow networks
+    // Upload with 300s timeout for large recordings on slow networks
     var uploadCtrl = new AbortController();
-    var uploadTimeout = setTimeout(function() { uploadCtrl.abort(); }, 120000);
+    var uploadTimeout = setTimeout(function() { uploadCtrl.abort(); }, 300000);
     var sizeMB = (blob.size / 1024 / 1024).toFixed(1);
     setMsg('Odosielam ' + sizeMB + ' MB...', 'inf');
     var r;
@@ -1250,8 +1250,9 @@ async function sendIdea() {
     }
   } catch(e) {
     if (vaultId) {
-      setMsg('Chyba: '+e.message+' \u2014 nahravka je ulozena lokalne','err');
-      vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(refreshVaultUI);
+      setMsg('Odosielanie zlyhalo - skusam znova na pozadi...','inf');
+      vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(function(){ refreshVaultUI(); setTimeout(vaultAutoSync, 3000); });
+      discard();
     } else {
       setMsg('Chyba: '+e.message,'err');
     }
