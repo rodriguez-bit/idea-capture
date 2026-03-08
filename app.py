@@ -2367,7 +2367,7 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
   <div class="card">
     <h2>&#128241; Android <span class="badge badge-green">APK</span></h2>
     <p>Nativna Android aplikacia &#8212; stiahnite a naintalujte priamo</p>
-    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0.apk">Stiahnut pre Android</a>
+    <a class="btn btn-primary" href="/dl/android">Stiahnut pre Android</a>
     <div class="file-size">Ridea-2.5.0.apk (3 MB)</div>
     <div class="steps">
       <b>Instalacia:</b> Po stiahnut&#237; otvorte subor a povolte instalaciu z neznameho zdroja.
@@ -2378,7 +2378,7 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
   <div class="card">
     <h2>&#128187; Windows <span class="badge badge-blue">Desktop</span></h2>
     <p>Desktopova aplikacia s nahravanim systemoveho zvuku</p>
-    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-Setup-2.5.0.exe">Stiahnut pre Windows</a>
+    <a class="btn btn-primary" href="/dl/windows">Stiahnut pre Windows</a>
     <div class="file-size">Ridea-Setup-2.5.0.exe (108 MB)</div>
     <div class="steps">Spustite installer a postupujte podla pokynov.</div>
   </div>
@@ -2386,7 +2386,7 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
   <div class="card">
     <h2>&#127822; macOS <span class="badge badge-purple">Desktop</span></h2>
     <p>Desktopova aplikacia pre Mac</p>
-    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0-mac.zip">Stiahnut pre macOS</a>
+    <a class="btn btn-primary" href="/dl/mac">Stiahnut pre macOS</a>
     <div class="file-size">Ridea-2.5.0-mac.zip (96 MB)</div>
     <div class="steps">
       Rozbalte ZIP a presunte <b>Ridea.app</b> do priecinka Applications.<br>
@@ -2404,6 +2404,45 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
 @app.route('/download')
 def download_page():
     return Response(DOWNLOAD_HTML, mimetype='text/html')
+
+
+_RELEASE_ASSETS = {
+    'android': {
+        'url': 'https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0.apk',
+        'filename': 'Ridea-2.5.0.apk',
+        'mime': 'application/vnd.android.package-archive',
+    },
+    'windows': {
+        'url': 'https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-Setup-2.5.0.exe',
+        'filename': 'Ridea-Setup-2.5.0.exe',
+        'mime': 'application/octet-stream',
+    },
+    'mac': {
+        'url': 'https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0-mac.zip',
+        'filename': 'Ridea-2.5.0-mac.zip',
+        'mime': 'application/zip',
+    },
+}
+
+@app.route('/dl/<platform>')
+def download_asset(platform):
+    asset = _RELEASE_ASSETS.get(platform)
+    if not asset:
+        return 'Not found', 404
+    try:
+        r = requests.get(asset['url'], stream=True, timeout=30, allow_redirects=True)
+        r.raise_for_status()
+        headers = {
+            'Content-Disposition': f'attachment; filename="{asset["filename"]}"',
+            'Content-Type': asset['mime'],
+        }
+        cl = r.headers.get('Content-Length')
+        if cl:
+            headers['Content-Length'] = cl
+        return Response(r.iter_content(chunk_size=65536), headers=headers)
+    except Exception as e:
+        print(f'Download proxy error for {platform}: {e}')
+        return redirect(asset['url'])
 
 
 @app.route('/sw.js')
