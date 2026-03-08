@@ -99,7 +99,7 @@ def login_required(f):
             if request.path.startswith('/api/'):
                 print(f'AUTH FAIL: {request.method} {request.path} from origin={request.headers.get("Origin","?")} UA={request.headers.get("User-Agent","?")[:60]}')
                 return jsonify({'error': 'Unauthorized'}), 401
-            return redirect('/login')
+            return redirect('/login?next=' + request.path)
         return f(*args, **kwargs)
     return decorated
 
@@ -562,7 +562,8 @@ LOGIN_HTML = '''<!DOCTYPE html>
       body: JSON.stringify({email, password})
     });
     if (r.ok) {
-      window.location.href = '/';
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = params.get('next') || '/recorder';
     } else {
       const d = await r.json();
       err.textContent = d.error || 'Nesprávne prihlasovacie údaje';
@@ -578,7 +579,8 @@ LOGIN_HTML = '''<!DOCTYPE html>
 @app.route('/login')
 def login_page():
     if session.get('authenticated'):
-        return redirect('/')
+        nxt = request.args.get('next', '/recorder')
+        return redirect(nxt)
     from flask import Response
     return Response(LOGIN_HTML, mimetype='text/html')
 
