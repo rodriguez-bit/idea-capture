@@ -433,8 +433,10 @@ def init_db():
 
     # Seed default users if none exist
     count = db.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+    default_password = os.environ.get('DEFAULT_USER_PASSWORD', '')
     if count == 0:
-        default_password = os.environ.get('DEFAULT_USER_PASSWORD', os.urandom(16).hex())
+        if not default_password:
+            default_password = os.urandom(16).hex()
         default_hash = generate_password_hash(default_password)
         seed_users = [
             ('admin@dajanarodriguez.com', 'Admin', default_hash, 'admin', ''),
@@ -448,6 +450,17 @@ def init_db():
             )
         db.commit()
         print(f'Seeded default users. Default password env: DEFAULT_USER_PASSWORD')
+    elif default_password:
+        # Sync password hash for seed users if DEFAULT_USER_PASSWORD is set
+        new_hash = generate_password_hash(default_password)
+        seed_emails = ['admin@dajanarodriguez.com', 'raul@dajanarodriguez.com', 'dajana@dajanarodriguez.com']
+        for email in seed_emails:
+            row = db.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,)).fetchone()
+            if row and not check_password_hash(row['password_hash'] if isinstance(row, dict) else row[1], default_password):
+                uid = row['id'] if isinstance(row, dict) else row[0]
+                db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, uid))
+                print(f'Password hash updated for {email}')
+        db.commit()
 
     # Restore from backup
     _restore_from_backup(db)
@@ -2515,7 +2528,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '3.2.1',
+        'version': '3.2.2',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
@@ -2592,4 +2605,4 @@ with app.app_context():
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', '').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-# v3.2.1
+# v3.2.2
