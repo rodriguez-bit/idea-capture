@@ -2338,7 +2338,7 @@ DOWNLOAD_HTML = '''<!DOCTYPE html>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#512D6D;color:#f0e6f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.wrap{max-width:400px;width:100%;text-align:center;}
+.wrap{max-width:420px;width:100%;text-align:center;}
 .logo{font-size:48px;margin-bottom:12px;}
 h1{font-size:24px;font-weight:700;margin-bottom:6px;}
 .sub{color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:32px;}
@@ -2355,78 +2355,60 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
 .badge-green{background:rgba(52,211,153,0.2);color:#34d399;}
 .badge-blue{background:rgba(96,165,250,0.2);color:#60a5fa;}
+.badge-purple{background:rgba(167,139,250,0.2);color:#a78bfa;}
+.badge-orange{background:rgba(251,146,60,0.2);color:#fb923c;}
+.file-size{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;text-align:center;}
 .back{margin-top:24px;}
 .back a{color:rgba(255,255,255,0.4);font-size:13px;text-decoration:none;}
 .back a:hover{color:#fff;}
-#pwa-prompt{display:none;}
+.version{margin-top:16px;font-size:11px;color:rgba(255,255,255,0.25);}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">&#128161;</div>
+  <div class="logo">&#9889;</div>
   <h1>Ridea</h1>
   <p class="sub">Interny nastroj pre zachytavanie napadov</p>
 
-  <div class="card" id="android-card">
-    <h2>&#128241; Android <span class="badge badge-green">Odporucane</span></h2>
-    <p>Nainstalovane priamo z prehliadaca &#8212; funguje ako nativna aplikacia</p>
-    <button class="btn btn-primary" id="pwa-install-btn" onclick="installPWA()">Nainstalovat na Android</button>
-    <div id="pwa-prompt" class="steps">
-      <b>Manualna instalacia:</b><br>
-      1. Otvorte <a href="/recorder" style="color:#a78bfa">ridea.onrender.com/recorder</a> v Chrome<br>
-      2. Kliknite na &#8942; (menu) v pravom hornom rohu<br>
-      3. Zvolte <b>"Pridat na plochu"</b> alebo <b>"Nainstalovat aplikaciu"</b><br>
-      4. Potvrdte a aplikacia sa objavi na ploche
+  <div class="card">
+    <h2>&#128241; Android <span class="badge badge-green">APK</span></h2>
+    <p>Nativna Android aplikacia &#8212; stiahnite a naintalujte priamo</p>
+    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0.apk">Stiahnut pre Android</a>
+    <div class="file-size">Ridea-2.5.0.apk (3 MB)</div>
+    <div class="steps">
+      <b>Instalacia:</b> Po stiahnut&#237; otvorte subor a povolte instalaciu z neznameho zdroja.
+      Pri prvom spusten&#237; povolte pristup k mikrofonu.
     </div>
   </div>
 
   <div class="card">
     <h2>&#128187; Windows <span class="badge badge-blue">Desktop</span></h2>
-    <p>Samostatna desktopova aplikacia s nahravanim a auto-aktualizaciou</p>
-    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/latest" target="_blank">Stiahnut pre Windows</a>
-    <div class="steps">Stiahnite <b>Ridea-Setup-*.exe</b> a spustite installer</div>
+    <p>Desktopova aplikacia s nahravanim systemoveho zvuku</p>
+    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-Setup-2.5.0.exe">Stiahnut pre Windows</a>
+    <div class="file-size">Ridea-Setup-2.5.0.exe (108 MB)</div>
+    <div class="steps">Spustite installer a postupujte podla pokynov.</div>
   </div>
 
   <div class="card">
-    <h2>&#127760; Web verzia</h2>
+    <h2>&#127822; macOS <span class="badge badge-purple">Desktop</span></h2>
+    <p>Desktopova aplikacia pre Mac</p>
+    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/download/v2.5.0/Ridea-2.5.0-mac.zip">Stiahnut pre macOS</a>
+    <div class="file-size">Ridea-2.5.0-mac.zip (96 MB)</div>
+    <div class="steps">
+      Rozbalte ZIP a presunte <b>Ridea.app</b> do priecinka Applications.<br>
+      Pri prvom spusten&#237;: Prave tlacidlo &rarr; Otvorit &rarr; Potvrdit.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#127760; Web verzia <span class="badge badge-orange">Prehliadac</span></h2>
     <p>Otvorte priamo v prehliadaci bez instalacie</p>
     <a class="btn btn-outline" href="/recorder">Otvorit recorder</a>
   </div>
 
   <div class="back"><a href="/">&larr; Spat na hlavnu stranku</a></div>
+  <div class="version">v2.5.0</div>
 </div>
-<script>
-var deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',function(e){
-  e.preventDefault();
-  deferredPrompt=e;
-  document.getElementById('pwa-prompt').style.display='none';
-  document.getElementById('pwa-install-btn').textContent='Nainstalovat na Android';
-});
-function installPWA(){
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(r){
-      if(r.outcome==='accepted'){
-        document.getElementById('pwa-install-btn').textContent='Nainstalovane!';
-        document.getElementById('pwa-install-btn').disabled=true;
-      }
-      deferredPrompt=null;
-    });
-  } else {
-    document.getElementById('pwa-prompt').style.display='block';
-    document.getElementById('pwa-install-btn').textContent='Zobrazit navod';
-    document.getElementById('pwa-install-btn').onclick=function(){
-      document.getElementById('pwa-prompt').style.display=
-        document.getElementById('pwa-prompt').style.display==='block'?'none':'block';
-    };
-  }
-}
-if(window.matchMedia('(display-mode: standalone)').matches){
-  document.getElementById('pwa-install-btn').textContent='Uz nainstalovane';
-  document.getElementById('pwa-install-btn').disabled=true;
-}
-</script>
 </body>
 </html>'''
 
@@ -2541,4 +2523,4 @@ with app.app_context():
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', '').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-# v2.8.0
+# v2.9.0
