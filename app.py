@@ -2525,6 +2525,7 @@ def health():
             el_version = 'unknown'
     except Exception as e:
         el_import_error = f'{type(e).__name__}: {e}'
+    dpw = os.environ.get('DEFAULT_USER_PASSWORD', '')
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
@@ -2535,7 +2536,33 @@ def health():
         'elevenlabs_import_error': el_import_error,
         'elevenlabs_version': el_version,
         'openai_key_set': bool(oa_key),
+        'default_pw_set': bool(dpw),
+        'default_pw_len': len(dpw),
     })
+
+
+@app.route('/admin/reset-password', methods=['POST'])
+def admin_reset_password():
+    """Reset seed user passwords. Requires SECRET_KEY as auth token."""
+    token = request.json.get('token', '')
+    if token != app.secret_key:
+        return jsonify({'error': 'unauthorized'}), 403
+    new_password = request.json.get('password', '')
+    if not new_password or len(new_password) < 8:
+        return jsonify({'error': 'password too short (min 8 chars)'}), 400
+    db = get_db()
+    new_hash = generate_password_hash(new_password)
+    emails = request.json.get('emails', ['admin@dajanarodriguez.com', 'raul@dajanarodriguez.com', 'dajana@dajanarodriguez.com'])
+    updated = []
+    for email in emails:
+        row = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+        if row:
+            uid = row['id'] if isinstance(row, dict) else row[0]
+            db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, uid))
+            updated.append(email)
+    db.commit()
+    db.close()
+    return jsonify({'updated': updated})
 
 
 @app.route('/debug/test-elevenlabs')
