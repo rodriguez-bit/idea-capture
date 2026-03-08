@@ -2526,67 +2526,16 @@ def health():
             el_version = 'unknown'
     except Exception as e:
         el_import_error = f'{type(e).__name__}: {e}'
-    dpw = os.environ.get('DEFAULT_USER_PASSWORD', '')
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '3.2.2',
+        'version': '3.2.3',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
         'elevenlabs_import_error': el_import_error,
         'elevenlabs_version': el_version,
         'openai_key_set': bool(oa_key),
-        'default_pw_set': bool(dpw),
-        'default_pw_len': len(dpw),
-    })
-
-
-@app.route('/admin/reset-password', methods=['POST'])
-def admin_reset_password():
-    """Reset seed user passwords. Requires ELEVENLABS_API_KEY as auth token."""
-    token = request.json.get('token', '')
-    expected = os.environ.get('ELEVENLABS_API_KEY', '')
-    if not expected or token != expected:
-        return jsonify({'error': 'unauthorized'}), 403
-    new_password = request.json.get('password', '')
-    if not new_password or len(new_password) < 8:
-        return jsonify({'error': 'password too short (min 8 chars)'}), 400
-    db = get_db()
-    new_hash = generate_password_hash(new_password)
-    emails = request.json.get('emails', ['admin@dajanarodriguez.com', 'raul@dajanarodriguez.com', 'dajana@dajanarodriguez.com'])
-    updated = []
-    for email in emails:
-        row = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
-        if row:
-            uid = row['id'] if isinstance(row, dict) else row[0]
-            db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, uid))
-            updated.append(email)
-    db.commit()
-    db.close()
-    return jsonify({'updated': updated})
-
-
-@app.route('/admin/pw-diag')
-def admin_pw_diag():
-    """Diagnose password issues (temporary)."""
-    dpw = os.environ.get('DEFAULT_USER_PASSWORD', '')
-    db = get_db()
-    admin = db.execute('SELECT id, email, password_hash, active FROM users WHERE email = ?', ('admin@dajanarodriguez.com',)).fetchone()
-    db.close()
-    if not admin:
-        return jsonify({'error': 'admin user not found'})
-    ph = admin['password_hash'] if isinstance(admin, dict) else admin[2]
-    active = admin['active'] if isinstance(admin, dict) else admin[3]
-    check_result = check_password_hash(ph, dpw) if dpw else None
-    return jsonify({
-        'admin_exists': True,
-        'active': active,
-        'hash_method': ph.split('$')[0] if '$' in ph else 'unknown',
-        'hash_len': len(ph),
-        'dpw_set': bool(dpw),
-        'dpw_len': len(dpw),
-        'dpw_matches_hash': check_result,
     })
 
 
@@ -2657,4 +2606,4 @@ with app.app_context():
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', '').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-# v3.2.2
+# v3.2.3
