@@ -2327,6 +2327,115 @@ def electron_recorder_page():
     return send_from_directory('electron-app', 'recorder.html')
 
 
+DOWNLOAD_HTML = '''<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridea &#8212; Stiahnut aplikaciu</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#512D6D">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#512D6D;color:#f0e6f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.wrap{max-width:400px;width:100%;text-align:center;}
+.logo{font-size:48px;margin-bottom:12px;}
+h1{font-size:24px;font-weight:700;margin-bottom:6px;}
+.sub{color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:32px;}
+.card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;margin-bottom:16px;text-align:left;}
+.card h2{font-size:16px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.card p{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;}
+.btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;}
+.btn-primary{background:#fff;color:#512D6D;}
+.btn-primary:hover{background:#f0e6f6;}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.25);margin-top:8px;}
+.btn-outline:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05);}
+.steps{font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.6;}
+.steps b{color:rgba(255,255,255,0.7);}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(52,211,153,0.2);color:#34d399;}
+.badge-blue{background:rgba(96,165,250,0.2);color:#60a5fa;}
+.back{margin-top:24px;}
+.back a{color:rgba(255,255,255,0.4);font-size:13px;text-decoration:none;}
+.back a:hover{color:#fff;}
+#pwa-prompt{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">&#128161;</div>
+  <h1>Ridea</h1>
+  <p class="sub">Interny nastroj pre zachytavanie napadov</p>
+
+  <div class="card" id="android-card">
+    <h2>&#128241; Android <span class="badge badge-green">Odporucane</span></h2>
+    <p>Nainstalovane priamo z prehliadaca &#8212; funguje ako nativna aplikacia</p>
+    <button class="btn btn-primary" id="pwa-install-btn" onclick="installPWA()">Nainstalovat na Android</button>
+    <div id="pwa-prompt" class="steps">
+      <b>Manualna instalacia:</b><br>
+      1. Otvorte <a href="/recorder" style="color:#a78bfa">ridea.onrender.com/recorder</a> v Chrome<br>
+      2. Kliknite na &#8942; (menu) v pravom hornom rohu<br>
+      3. Zvolte <b>"Pridat na plochu"</b> alebo <b>"Nainstalovat aplikaciu"</b><br>
+      4. Potvrdte a aplikacia sa objavi na ploche
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128187; Windows <span class="badge badge-blue">Desktop</span></h2>
+    <p>Samostatna desktopova aplikacia s nahravanim a auto-aktualizaciou</p>
+    <a class="btn btn-primary" href="https://github.com/rodriguez-bit/idea-capture/releases/latest" target="_blank">Stiahnut pre Windows</a>
+    <div class="steps">Stiahnite <b>Ridea-Setup-*.exe</b> a spustite installer</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127760; Web verzia</h2>
+    <p>Otvorte priamo v prehliadaci bez instalacie</p>
+    <a class="btn btn-outline" href="/recorder">Otvorit recorder</a>
+  </div>
+
+  <div class="back"><a href="/">&larr; Spat na hlavnu stranku</a></div>
+</div>
+<script>
+var deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  deferredPrompt=e;
+  document.getElementById('pwa-prompt').style.display='none';
+  document.getElementById('pwa-install-btn').textContent='Nainstalovat na Android';
+});
+function installPWA(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(r){
+      if(r.outcome==='accepted'){
+        document.getElementById('pwa-install-btn').textContent='Nainstalovane!';
+        document.getElementById('pwa-install-btn').disabled=true;
+      }
+      deferredPrompt=null;
+    });
+  } else {
+    document.getElementById('pwa-prompt').style.display='block';
+    document.getElementById('pwa-install-btn').textContent='Zobrazit navod';
+    document.getElementById('pwa-install-btn').onclick=function(){
+      document.getElementById('pwa-prompt').style.display=
+        document.getElementById('pwa-prompt').style.display==='block'?'none':'block';
+    };
+  }
+}
+if(window.matchMedia('(display-mode: standalone)').matches){
+  document.getElementById('pwa-install-btn').textContent='Uz nainstalovane';
+  document.getElementById('pwa-install-btn').disabled=true;
+}
+</script>
+</body>
+</html>'''
+
+
+@app.route('/download')
+def download_page():
+    return Response(DOWNLOAD_HTML, mimetype='text/html')
+
+
 @app.route('/sw.js')
 def service_worker():
     response = send_from_directory('static', 'sw.js')
