@@ -2604,6 +2604,52 @@ def debug_diagnose():
     return jsonify(result)
 
 
+@app.route('/debug/check-idea/<int:idea_id>')
+def debug_check_idea(idea_id):
+    """Check audio data and transcription state for a specific idea."""
+    result = {}
+    try:
+        db = get_db()
+        idea = db.execute('SELECT id, transcript, audio_data, audio_filename, duration_seconds, stt_engine, transcribed_at, created_at FROM ideas WHERE id = ?', (idea_id,)).fetchone()
+        db.close()
+        if not idea:
+            return jsonify({'error': 'Idea not found'}), 404
+        result['id'] = idea['id']
+        result['transcript_len'] = len(idea['transcript'] or '')
+        result['transcript_preview'] = (idea['transcript'] or '')[:200]
+        result['audio_filename'] = idea['audio_filename']
+        result['duration_seconds'] = idea['duration_seconds']
+        result['stt_engine'] = idea['stt_engine']
+        result['transcribed_at'] = idea['transcribed_at']
+        result['created_at'] = idea['created_at']
+        audio = idea['audio_data']
+        if audio:
+            result['has_audio'] = True
+            if isinstance(audio, str):
+                result['audio_type'] = 'base64_string'
+                result['audio_data_len'] = len(audio)
+                # Try to decode and check
+                try:
+                    decoded = base64.b64decode(audio)
+                    result['audio_bytes_len'] = len(decoded)
+                    result['audio_header'] = decoded[:20].hex()
+                except Exception as de:
+                    result['decode_error'] = str(de)[:200]
+            elif isinstance(audio, (bytes, memoryview)):
+                raw = bytes(audio)
+                result['audio_type'] = 'bytes'
+                result['audio_bytes_len'] = len(raw)
+                result['audio_header'] = raw[:20].hex()
+            else:
+                result['audio_type'] = str(type(audio))
+                result['audio_data_len'] = len(audio) if hasattr(audio, '__len__') else 'unknown'
+        else:
+            result['has_audio'] = False
+    except Exception as e:
+        result['error'] = f'{type(e).__name__}: {str(e)[:300]}'
+    return jsonify(result)
+
+
 # ─── Start ────────────────────────────────────────────────────────────────────
 with app.app_context():
     init_db()
