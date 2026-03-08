@@ -2487,7 +2487,6 @@ def health():
 
 
 @app.route('/debug/test-elevenlabs')
-@login_required
 def debug_test_elevenlabs():
     """Test ElevenLabs Scribe directly on the server via REST API."""
     import io, wave, struct, math
