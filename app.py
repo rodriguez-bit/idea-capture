@@ -451,16 +451,17 @@ def init_db():
         db.commit()
         print(f'Seeded default users. Default password env: DEFAULT_USER_PASSWORD')
     elif default_password:
-        # Sync password hash for seed users if DEFAULT_USER_PASSWORD is set
+        # ALWAYS sync password hash for seed users when DEFAULT_USER_PASSWORD is set
         new_hash = generate_password_hash(default_password)
         seed_emails = ['admin@dajanarodriguez.com', 'raul@dajanarodriguez.com', 'dajana@dajanarodriguez.com']
         for email in seed_emails:
-            row = db.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,)).fetchone()
-            if row and not check_password_hash(row['password_hash'] if isinstance(row, dict) else row[1], default_password):
+            row = db.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone()
+            if row:
                 uid = row['id'] if isinstance(row, dict) else row[0]
                 db.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, uid))
-                print(f'Password hash updated for {email}')
+                print(f'Password hash force-synced for {email}')
         db.commit()
+        print(f'Password sync done for {len(seed_emails)} seed users (pw_len={len(default_password)})')
 
     # Restore from backup
     _restore_from_backup(db)
@@ -2543,9 +2544,10 @@ def health():
 
 @app.route('/admin/reset-password', methods=['POST'])
 def admin_reset_password():
-    """Reset seed user passwords. Requires SECRET_KEY as auth token."""
+    """Reset seed user passwords. Requires ELEVENLABS_API_KEY as auth token."""
     token = request.json.get('token', '')
-    if token != app.secret_key:
+    expected = os.environ.get('ELEVENLABS_API_KEY', '')
+    if not expected or token != expected:
         return jsonify({'error': 'unauthorized'}), 403
     new_password = request.json.get('password', '')
     if not new_password or len(new_password) < 8:
