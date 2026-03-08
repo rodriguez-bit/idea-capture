@@ -1,11 +1,11 @@
 {
-  "name": "Ridea — Nahrať nápad",
+  "name": "Ridea — Nahrat napad",
   "short_name": "Ridea",
-  "description": "Zachyť hlasový nápad za 2 kliky",
+  "description": "Zachyt hlasovy napad za 2 kliky",
   "start_url": "/recorder",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#512D6D",
+  "theme_color": "#512D6D",
   "orientation": "portrait",
   "icons": [
     {
