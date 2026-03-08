@@ -2545,6 +2545,66 @@ def debug_test_elevenlabs():
     return jsonify(result)
 
 
+@app.route('/debug/diagnose')
+def debug_diagnose():
+    """Temporary diagnostic endpoint (no auth) to check DB and transcription health."""
+    result = {'db': {}, 'elevenlabs': {}, 'login_test': {}}
+    # ── DB check ──
+    try:
+        db = get_db()
+        user = db.execute('SELECT id, email, display_name, role, password_hash FROM users WHERE email = ?', ('admin@dajanarodriguez.com',)).fetchone()
+        if user:
+            result['db']['admin_found'] = True
+            result['db']['admin_id'] = user['id']
+            result['db']['admin_email'] = user['email']
+            result['db']['admin_name'] = user['display_name']
+            ph = user['password_hash'] or ''
+            result['db']['password_hash_len'] = len(ph)
+            result['db']['password_hash_prefix'] = ph[:30] + '...' if len(ph) > 30 else ph
+            result['db']['password_hash_method'] = ph.split('$')[0] if '$' in ph else 'unknown'
+            # Test check_password_hash
+            try:
+                ok = check_password_hash(ph, 'Rusovce23692396####')
+                result['login_test']['password_valid'] = ok
+            except Exception as pe:
+                result['login_test']['password_error'] = f'{type(pe).__name__}: {str(pe)[:200]}'
+        else:
+            result['db']['admin_found'] = False
+        # Count users
+        count = db.execute('SELECT COUNT(*) FROM users').fetchone()
+        result['db']['total_users'] = count[0] if count else 0
+        # Count ideas
+        ideas_count = db.execute('SELECT COUNT(*) FROM ideas').fetchone()
+        result['db']['total_ideas'] = ideas_count[0] if ideas_count else 0
+        # Check last few ideas
+        recent = db.execute('SELECT id, transcript, stt_engine, transcribed_at FROM ideas ORDER BY id DESC LIMIT 3').fetchall()
+        result['db']['recent_ideas'] = [{'id': r['id'], 'transcript_len': len(r['transcript'] or ''), 'transcript_preview': (r['transcript'] or '')[:100], 'stt_engine': r['stt_engine'], 'transcribed_at': r['transcribed_at']} for r in recent]
+        db.close()
+    except Exception as e:
+        result['db']['error'] = f'{type(e).__name__}: {str(e)[:300]}'
+    # ── ElevenLabs check ──
+    try:
+        api_key = os.environ.get('ELEVENLABS_API_KEY', '')
+        result['elevenlabs']['key_set'] = bool(api_key)
+        result['elevenlabs']['key_prefix'] = api_key[:10] + '...' if api_key else 'NONE'
+        # Quick API test - get user info
+        import requests as _req
+        r = _req.get('https://api.elevenlabs.io/v1/user', headers={'xi-api-key': api_key}, timeout=10)
+        result['elevenlabs']['user_status'] = r.status_code
+        if r.status_code == 200:
+            udata = r.json()
+            sub = udata.get('subscription', {})
+            result['elevenlabs']['tier'] = sub.get('tier', 'unknown')
+            result['elevenlabs']['character_count'] = sub.get('character_count', 0)
+            result['elevenlabs']['character_limit'] = sub.get('character_limit', 0)
+            result['elevenlabs']['status'] = sub.get('status', 'unknown')
+        else:
+            result['elevenlabs']['error_body'] = r.text[:300]
+    except Exception as e:
+        result['elevenlabs']['error'] = f'{type(e).__name__}: {str(e)[:200]}'
+    return jsonify(result)
+
+
 # ─── Start ────────────────────────────────────────────────────────────────────
 with app.app_context():
     init_db()
