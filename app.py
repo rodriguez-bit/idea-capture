@@ -2567,6 +2567,29 @@ def admin_reset_password():
     return jsonify({'updated': updated})
 
 
+@app.route('/admin/pw-diag')
+def admin_pw_diag():
+    """Diagnose password issues (temporary)."""
+    dpw = os.environ.get('DEFAULT_USER_PASSWORD', '')
+    db = get_db()
+    admin = db.execute('SELECT id, email, password_hash, active FROM users WHERE email = ?', ('admin@dajanarodriguez.com',)).fetchone()
+    db.close()
+    if not admin:
+        return jsonify({'error': 'admin user not found'})
+    ph = admin['password_hash'] if isinstance(admin, dict) else admin[2]
+    active = admin['active'] if isinstance(admin, dict) else admin[3]
+    check_result = check_password_hash(ph, dpw) if dpw else None
+    return jsonify({
+        'admin_exists': True,
+        'active': active,
+        'hash_method': ph.split('$')[0] if '$' in ph else 'unknown',
+        'hash_len': len(ph),
+        'dpw_set': bool(dpw),
+        'dpw_len': len(dpw),
+        'dpw_matches_hash': check_result,
+    })
+
+
 @app.route('/debug/test-elevenlabs')
 @login_required
 def debug_test_elevenlabs():
