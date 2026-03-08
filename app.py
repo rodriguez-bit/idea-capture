@@ -2333,7 +2333,6 @@ DOWNLOAD_HTML = '''<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ridea &#8212; Stiahnut aplikaciu</title>
-<link rel="manifest" href="/static/manifest.json">
 <meta name="theme-color" content="#512D6D">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2348,20 +2347,15 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
 .btn{display:block;width:100%;padding:13px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center;}
 .btn-primary{background:#fff;color:#512D6D;}
 .btn-primary:hover{background:#f0e6f6;}
-.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.25);margin-top:8px;}
-.btn-outline:hover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05);}
 .steps{font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;line-height:1.6;}
 .steps b{color:rgba(255,255,255,0.7);}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
 .badge-green{background:rgba(52,211,153,0.2);color:#34d399;}
 .badge-blue{background:rgba(96,165,250,0.2);color:#60a5fa;}
 .badge-purple{background:rgba(167,139,250,0.2);color:#a78bfa;}
-.badge-orange{background:rgba(251,146,60,0.2);color:#fb923c;}
 .file-size{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;text-align:center;}
-.back{margin-top:24px;}
-.back a{color:rgba(255,255,255,0.4);font-size:13px;text-decoration:none;}
-.back a:hover{color:#fff;}
-.version{margin-top:16px;font-size:11px;color:rgba(255,255,255,0.25);}
+.version{margin-top:24px;font-size:11px;color:rgba(255,255,255,0.25);}
+.note{margin-top:20px;font-size:12px;color:rgba(255,255,255,0.35);line-height:1.5;}
 </style>
 </head>
 <body>
@@ -2400,13 +2394,7 @@ h1{font-size:24px;font-weight:700;margin-bottom:6px;}
     </div>
   </div>
 
-  <div class="card">
-    <h2>&#127760; Web verzia <span class="badge badge-orange">Prehliadac</span></h2>
-    <p>Otvorte priamo v prehliadaci bez instalacie</p>
-    <a class="btn btn-outline" href="/recorder">Otvorit recorder</a>
-  </div>
-
-  <div class="back"><a href="/">&larr; Spat na hlavnu stranku</a></div>
+  <p class="note">Po nainstalovani sa prihlasite priamo v aplikacii.<br>Prihlasovaci udaj dostanete od administratora.</p>
   <div class="version">v2.5.0</div>
 </div>
 </body>
