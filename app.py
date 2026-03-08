@@ -1117,7 +1117,11 @@ def _process_upload(job_id, tmp_path, ext, user_id, user_name, department, role,
         audio_filename, audio_data = _save_audio_backup(tmp_path, ext, job_id)
 
         file_size = os.path.getsize(tmp_path)
-        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB — saving immediately')
+        print(f'Upload job {job_id}: file size {file_size / 1024 / 1024:.1f}MB ({file_size} bytes) — saving immediately')
+
+        # Check minimum audio size - files under 5KB are typically empty WebM headers
+        if file_size < 5000:
+            print(f'Upload job {job_id}: WARNING - audio file too small ({file_size} bytes), likely empty recording')
 
         # Save idea to DB with placeholder transcript — audio is SAFE on server
         idea_id = None
@@ -1169,12 +1173,28 @@ def _process_transcription_background(job_id, idea_id, tmp_path, ext, api_key):
 
     try:
         file_size = os.path.getsize(tmp_path)
-        print(f'Background transcription job {job_id} (idea #{idea_id}): {file_size / 1024 / 1024:.1f}MB')
+        print(f'Background transcription job {job_id} (idea #{idea_id}): {file_size / 1024 / 1024:.1f}MB ({file_size} bytes)')
 
         transcript_text = ''
         total_duration = 0
         stt_engine = 'none'
         stt_warning = None
+
+        # Skip transcription for very small files (< 5KB = empty WebM header only)
+        if file_size < 5000:
+            print(f'Background job {job_id}: Audio too small ({file_size} bytes) — skipping transcription')
+            transcript_text = '[Nahravka je prilis kratka alebo prazdna. Skuste nahrat znova dlhsiu nahravku.]'
+            stt_engine = 'skipped'
+            with app.app_context():
+                db = get_db()
+                db.execute('''
+                    UPDATE ideas SET transcript = ?, duration_seconds = 0, stt_engine = ?, transcribed_at = ?
+                    WHERE id = ?
+                ''', (transcript_text, stt_engine, datetime.now().isoformat(), idea_id))
+                db.commit()
+                db.close()
+            print(f'Background job {job_id}: Marked as too short for idea #{idea_id}')
+            return
 
         # ── PRIMARY: Try ElevenLabs Scribe v2 ──
         el_text, el_duration, el_warning = _transcribe_with_elevenlabs(tmp_path)
@@ -2476,7 +2496,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'time': datetime.now().isoformat(),
-        'version': '3.2.0',
+        'version': '3.2.1',
         'elevenlabs_key_set': bool(el_key),
         'elevenlabs_key_prefix': el_key[:8] + '...' if el_key else 'NOT SET',
         'elevenlabs_import_ok': el_import_ok,
@@ -2487,6 +2507,7 @@ def health():
 
 
 @app.route('/debug/test-elevenlabs')
+@login_required
 def debug_test_elevenlabs():
     """Test ElevenLabs Scribe directly on the server via REST API."""
     import io, wave, struct, math
@@ -2544,111 +2565,6 @@ def debug_test_elevenlabs():
     return jsonify(result)
 
 
-@app.route('/debug/diagnose')
-def debug_diagnose():
-    """Temporary diagnostic endpoint (no auth) to check DB and transcription health."""
-    result = {'db': {}, 'elevenlabs': {}, 'login_test': {}}
-    # ── DB check ──
-    try:
-        db = get_db()
-        user = db.execute('SELECT id, email, display_name, role, password_hash FROM users WHERE email = ?', ('admin@dajanarodriguez.com',)).fetchone()
-        if user:
-            result['db']['admin_found'] = True
-            result['db']['admin_id'] = user['id']
-            result['db']['admin_email'] = user['email']
-            result['db']['admin_name'] = user['display_name']
-            ph = user['password_hash'] or ''
-            result['db']['password_hash_len'] = len(ph)
-            result['db']['password_hash_prefix'] = ph[:30] + '...' if len(ph) > 30 else ph
-            result['db']['password_hash_method'] = ph.split('$')[0] if '$' in ph else 'unknown'
-            # Test check_password_hash
-            try:
-                ok = check_password_hash(ph, 'Rusovce23692396####')
-                result['login_test']['password_valid'] = ok
-            except Exception as pe:
-                result['login_test']['password_error'] = f'{type(pe).__name__}: {str(pe)[:200]}'
-        else:
-            result['db']['admin_found'] = False
-        # Count users
-        count = db.execute('SELECT COUNT(*) FROM users').fetchone()
-        result['db']['total_users'] = count[0] if count else 0
-        # Count ideas
-        ideas_count = db.execute('SELECT COUNT(*) FROM ideas').fetchone()
-        result['db']['total_ideas'] = ideas_count[0] if ideas_count else 0
-        # Check last few ideas
-        recent = db.execute('SELECT id, transcript, stt_engine, transcribed_at FROM ideas ORDER BY id DESC LIMIT 3').fetchall()
-        result['db']['recent_ideas'] = [{'id': r['id'], 'transcript_len': len(r['transcript'] or ''), 'transcript_preview': (r['transcript'] or '')[:100], 'stt_engine': r['stt_engine'], 'transcribed_at': r['transcribed_at']} for r in recent]
-        db.close()
-    except Exception as e:
-        result['db']['error'] = f'{type(e).__name__}: {str(e)[:300]}'
-    # ── ElevenLabs check ──
-    try:
-        api_key = os.environ.get('ELEVENLABS_API_KEY', '')
-        result['elevenlabs']['key_set'] = bool(api_key)
-        result['elevenlabs']['key_prefix'] = api_key[:10] + '...' if api_key else 'NONE'
-        # Quick API test - get user info
-        import requests as _req
-        r = _req.get('https://api.elevenlabs.io/v1/user', headers={'xi-api-key': api_key}, timeout=10)
-        result['elevenlabs']['user_status'] = r.status_code
-        if r.status_code == 200:
-            udata = r.json()
-            sub = udata.get('subscription', {})
-            result['elevenlabs']['tier'] = sub.get('tier', 'unknown')
-            result['elevenlabs']['character_count'] = sub.get('character_count', 0)
-            result['elevenlabs']['character_limit'] = sub.get('character_limit', 0)
-            result['elevenlabs']['status'] = sub.get('status', 'unknown')
-        else:
-            result['elevenlabs']['error_body'] = r.text[:300]
-    except Exception as e:
-        result['elevenlabs']['error'] = f'{type(e).__name__}: {str(e)[:200]}'
-    return jsonify(result)
-
-
-@app.route('/debug/check-idea/<int:idea_id>')
-def debug_check_idea(idea_id):
-    """Check audio data and transcription state for a specific idea."""
-    result = {}
-    try:
-        db = get_db()
-        idea = db.execute('SELECT id, transcript, audio_data, audio_filename, duration_seconds, stt_engine, transcribed_at, created_at FROM ideas WHERE id = ?', (idea_id,)).fetchone()
-        db.close()
-        if not idea:
-            return jsonify({'error': 'Idea not found'}), 404
-        result['id'] = idea['id']
-        result['transcript_len'] = len(idea['transcript'] or '')
-        result['transcript_preview'] = (idea['transcript'] or '')[:200]
-        result['audio_filename'] = idea['audio_filename']
-        result['duration_seconds'] = idea['duration_seconds']
-        result['stt_engine'] = idea['stt_engine']
-        result['transcribed_at'] = idea['transcribed_at']
-        result['created_at'] = idea['created_at']
-        audio = idea['audio_data']
-        if audio:
-            result['has_audio'] = True
-            if isinstance(audio, str):
-                result['audio_type'] = 'base64_string'
-                result['audio_data_len'] = len(audio)
-                # Try to decode and check
-                try:
-                    decoded = base64.b64decode(audio)
-                    result['audio_bytes_len'] = len(decoded)
-                    result['audio_header'] = decoded[:20].hex()
-                except Exception as de:
-                    result['decode_error'] = str(de)[:200]
-            elif isinstance(audio, (bytes, memoryview)):
-                raw = bytes(audio)
-                result['audio_type'] = 'bytes'
-                result['audio_bytes_len'] = len(raw)
-                result['audio_header'] = raw[:20].hex()
-            else:
-                result['audio_type'] = str(type(audio))
-                result['audio_data_len'] = len(audio) if hasattr(audio, '__len__') else 'unknown'
-        else:
-            result['has_audio'] = False
-    except Exception as e:
-        result['error'] = f'{type(e).__name__}: {str(e)[:300]}'
-    return jsonify(result)
-
 
 # ─── Start ────────────────────────────────────────────────────────────────────
 with app.app_context():
@@ -2657,4 +2573,4 @@ with app.app_context():
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', '').lower() == 'true'
     app.run(debug=debug, host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
-# v2.9.0
+# v3.2.1
