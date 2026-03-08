@@ -188,19 +188,23 @@ def _github_push_file(file_path, content_bytes, commit_message):
 def save_ideas_backup():
     try:
         db = get_db()
-        rows = db.execute('SELECT * FROM ideas ORDER BY id').fetchall()
+        # Exclude audio_data from backup to save memory and bandwidth
+        cols = 'author_id, author_name, department, role, audio_filename, '\
+               'duration_seconds, transcript, status, ai_score, ai_analysis, '\
+               'reviewer_note, reviewed_by, reviewed_at, created_at, visibility, '\
+               'tags, assigned_to, deadline, campaign_id, transcribed_at, stt_engine, idea_type'
+        rows = db.execute(f'SELECT {cols} FROM ideas ORDER BY id').fetchall()
+        db.close()
         data = []
         for r in rows:
             d = dict(r)
-            d.pop('id', None)
             data.append(d)
-        content = json.dumps(data, ensure_ascii=False, indent=2)
+        content = json.dumps(data, ensure_ascii=False, indent=2, default=str)
         with open('ideas_backup.json', 'w', encoding='utf-8') as f:
             f.write(content)
         threading.Thread(target=_github_push_file,
                          args=('ideas_backup.json', content.encode('utf-8'), 'Auto-backup ideas'),
                          daemon=True).start()
-        db.close()
     except Exception as e:
         print(f'Backup error: {e}')
 
@@ -1589,12 +1593,20 @@ Pre tags použi max 5 tagov z tohto zoznamu (alebo vlastné slovenské/anglické
 @app.route('/api/ideas/<int:idea_id>', methods=['DELETE'])
 @admin_required
 def api_idea_delete(idea_id):
-    db = get_db()
-    db.execute('DELETE FROM ideas WHERE id = ?', (idea_id,))
-    db.commit()
-    db.close()
-    save_ideas_backup()
-    return jsonify({'ok': True})
+    try:
+        db = get_db()
+        # Delete related records first (comments, votes, meeting assignments)
+        db.execute('DELETE FROM comments WHERE idea_id = ?', (idea_id,))
+        db.execute('DELETE FROM votes WHERE idea_id = ?', (idea_id,))
+        db.execute('DELETE FROM meeting_ideas WHERE idea_id = ?', (idea_id,))
+        db.execute('DELETE FROM ideas WHERE id = ?', (idea_id,))
+        db.commit()
+        db.close()
+        save_ideas_backup()
+        return jsonify({'ok': True})
+    except Exception as e:
+        print(f'Delete idea {idea_id} error: {e}')
+        return jsonify({'error': f'Chyba pri mazani: {str(e)[:200]}'}), 500
 
 
 @app.route('/api/ideas/text', methods=['POST'])
@@ -1729,13 +1741,20 @@ def api_ideas_bulk_delete():
     ids = data.get('ids', [])
     if not ids or not isinstance(ids, list):
         return jsonify({'error': 'Žiadne nápady na vymazanie'}), 400
-    db = get_db()
-    placeholders = ','.join(['?'] * len(ids))
-    db.execute(f'DELETE FROM ideas WHERE id IN ({placeholders})', ids)
-    db.commit()
-    db.close()
-    save_ideas_backup()
-    return jsonify({'ok': True, 'deleted': len(ids)})
+    try:
+        db = get_db()
+        placeholders = ','.join(['?'] * len(ids))
+        db.execute(f'DELETE FROM comments WHERE idea_id IN ({placeholders})', ids)
+        db.execute(f'DELETE FROM votes WHERE idea_id IN ({placeholders})', ids)
+        db.execute(f'DELETE FROM meeting_ideas WHERE idea_id IN ({placeholders})', ids)
+        db.execute(f'DELETE FROM ideas WHERE id IN ({placeholders})', ids)
+        db.commit()
+        db.close()
+        save_ideas_backup()
+        return jsonify({'ok': True, 'deleted': len(ids)})
+    except Exception as e:
+        print(f'Bulk delete error: {e}')
+        return jsonify({'error': f'Chyba pri mazani: {str(e)[:200]}'}), 500
 
 
 @app.route('/api/ideas/bulk-update', methods=['POST'])
