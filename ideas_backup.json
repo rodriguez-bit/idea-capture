@@ -622,5 +622,29 @@
     "transcribed_at": "2026-03-08T08:22:01.017999",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "development",
+    "role": "manager",
+    "audio_filename": "d52756b7-a1a2-4239-a767-741356ef1ac0.webm",
+    "duration_seconds": 22,
+    "transcript": "Prosím ťa, potrebujem spraviť aplikáciu, kde idem optimalizovať výrobu. Dám tam všetkých ľudí, ktorí sú z výroby, zadám im všetky ich úlohy, čo robia, kde robia, ako robia a na základe toho potom budem optimalizovať, é, výrobu a zároveň sa pozrieme aj kto je zbytočný.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-09 11:35:39.788541+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-09T11:35:43.656322",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
