@@ -646,5 +646,29 @@
     "transcribed_at": "2026-03-09T11:35:43.656322",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "c-level",
+    "audio_filename": "e6e1c0a7-a529-4f6a-b322-cf48af226c95.webm",
+    "duration_seconds": 10,
+    "transcript": "Čau, mám taký nápad, že rád by som s Vrťom išiel, é, na konci marca na plochú dráhu a dal si nejaké pivečká.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-09 18:26:16.097353+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-09T18:26:18.041753",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
