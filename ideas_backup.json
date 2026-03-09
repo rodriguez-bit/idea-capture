@@ -718,5 +718,29 @@
     "transcribed_at": "2026-03-08T10:31:08.648645",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "c-level",
+    "audio_filename": "68963654-4fda-4a1f-a0ba-f15e65f0b1d9.webm",
+    "duration_seconds": 2,
+    "transcript": "Bla bla bla bla bla bla bla",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-09 02:03:34.188975+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-09T02:03:36.598530",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
