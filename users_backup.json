@@ -250,5 +250,14 @@
     "department": "other",
     "active": 1,
     "created_at": "2026-03-09 15:20:07.471564+00"
+  },
+  {
+    "email": "angelovicova@dajanarodriguez.com",
+    "display_name": "Kristína Angelovičová",
+    "password_hash": "scrypt:32768:8:1$zbTOodnLilomOFcN$6c54eda0a20811303bee3f5a9ec1680b0105a6266a695001302120b863b0bc5d0e7c7f8c84f09d86387c8ce8cd58d2d296da28216cf12efb94e4c15f80d8e831",
+    "role": "submitter",
+    "department": "other",
+    "active": 1,
+    "created_at": "2026-03-09 15:21:45.451586+00"
   }
 ]
