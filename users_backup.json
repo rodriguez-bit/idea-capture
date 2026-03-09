@@ -2,7 +2,7 @@
   {
     "email": "admin@dajanarodriguez.com",
     "display_name": "Admin",
-    "password_hash": "scrypt:32768:8:1$2oauhBC0Ul4gjql1$89ed4fb5d366c8ab127eafe4a90928190901a53eb41387d9333db9de6e68397c0a53ffe8a96ce1a4a4950f3361d9daee16d54cd9a93d93354ffe684e0ee1dbd7",
+    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
     "role": "admin",
     "department": "",
     "active": 1,
@@ -11,7 +11,7 @@
   {
     "email": "raul@dajanarodriguez.com",
     "display_name": "Raul",
-    "password_hash": "scrypt:32768:8:1$nFF6fY6ui2fU19Ah$1fa1d20f7827c8d514bdcd29eab95de934f4e17b6f08414f62018c0954e3e8ed399c4d328dbb373eafe3475fa0c0c172ba4af1cea044e525ba18f6e07af81895",
+    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
     "role": "reviewer",
     "department": "management",
     "active": 1,
@@ -20,7 +20,7 @@
   {
     "email": "dajana@dajanarodriguez.com",
     "display_name": "Dajana",
-    "password_hash": "scrypt:32768:8:1$W4BSgL38lazv8eTj$5e38e5276922c671310aa34527e60b666b8e2a0c7481ba165c368ab685700fb14ace2d3c746091eafe854b740775e449aa182ca518a416a91d942e8b085b7315",
+    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
     "role": "reviewer",
     "department": "management",
     "active": 1,
@@ -241,5 +241,14 @@
     "department": "production",
     "active": 1,
     "created_at": "2026-03-07 07:13:54.115533+00"
+  },
+  {
+    "email": "rehorovic@dajanarodriguez.com",
+    "display_name": "Alena Anamarija Rehorovič",
+    "password_hash": "scrypt:32768:8:1$9Xxtg858iN7cMXdi$3f421aa60006348cad8ea98518fba76a8b766ff2c0dc1f20fc43f39c2e8e1cf2ef884b294cee7d0b2c822742db27c47cf6633a58a16794352269b1010387830b",
+    "role": "submitter",
+    "department": "other",
+    "active": 1,
+    "created_at": "2026-03-09 15:20:07.471564+00"
   }
 ]
