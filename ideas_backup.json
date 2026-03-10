@@ -718,5 +718,29 @@
     "transcribed_at": "2026-03-10T09:05:36.826203",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7675,
+    "author_name": "Silvia Martisova",
+    "department": "production",
+    "role": "manager",
+    "audio_filename": "f1cddf85-3704-4a61-8698-6632bbe40b99.webm",
+    "duration_seconds": 7,
+    "transcript": "To hovoril, hovoril kľudne papa. Žiadny. Môžem to zastaviť? Jo.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-10 10:21:17.81328+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-10T10:21:18.642272",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
