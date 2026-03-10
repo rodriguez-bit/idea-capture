@@ -694,5 +694,29 @@
     "transcribed_at": "2026-03-10T09:05:06.696658",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "development",
+    "role": "manager",
+    "audio_filename": "3c41fed0-1c62-4cfa-b40b-f52cd90c085c.webm",
+    "duration_seconds": 3,
+    "transcript": "Androide a aj na iPhonu, aj vlastne všade som skúšal",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-10 09:05:36.268474+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-10T09:05:36.826203",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
