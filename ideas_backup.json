@@ -670,5 +670,29 @@
     "transcribed_at": "2026-03-09T18:26:18.041753",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "c-level",
+    "audio_filename": "cd79a197-4cad-48ad-b2d8-cc55bcf703ca.webm",
+    "duration_seconds": 10,
+    "transcript": "Čau, ja mám nápad, é, že by sme, é, mohli vo výrobe, é, zmeniť usporiadanie stanovísk, aby sme zefektívnili tok materiálu",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-10 09:05:05.782794+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-10T09:05:06.696658",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
