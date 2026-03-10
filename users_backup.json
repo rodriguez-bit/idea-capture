@@ -259,5 +259,14 @@
     "department": "other",
     "active": 1,
     "created_at": "2026-03-09 15:21:45.451586+00"
+  },
+  {
+    "email": "martisova@dajanarodriguez.com",
+    "display_name": "Silvia Martisova",
+    "password_hash": "scrypt:32768:8:1$TxDPTV5x8heuFJNt$56fa915fecec22a3a902a3902bfe18c91a9e527aeff76d1761fc97dd95cbdd39e02c6f3722da90d0762957d60acf51617903edb67adb69c94e506630e233e40e",
+    "role": "submitter",
+    "department": "production",
+    "active": 1,
+    "created_at": "2026-03-10 10:18:16.786237+00"
   }
 ]
