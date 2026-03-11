@@ -766,5 +766,29 @@
     "transcribed_at": "2026-03-11T07:24:58.421870",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 5,
+    "author_name": "Lucia Štoffová",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "d1edced2-405d-4fcc-a6e4-30d2b1f2ba8e.webm",
+    "duration_seconds": 175,
+    "transcript": "Chce aplikáciu a chce, lebo ako mám veľký záujem firiem. Vlastne ja by som že si to chcel robiť sám. Normálne mám, že Unicredit, že či môžeme kúpiť tú paličku, paličku s tým zvončekom. Áno. Takže normálne má ako ideu, že ti to normálne natrénujem tvojho Elžára, tam mu vysvetlím, on stage bude mať dve dve nalepiť, jak sme nalepili pásku, zvonček, paličku a že budem ako appku, že keď nahrá otázku, tak stlačí gombík a ono to vypne tú hru. A tí ľudia- To by si ma napadlo. Tí ľudia si to zahrajú. Čo ťa teraz napadlo? Už to kodovať. Nie, nie, že normálne ľudia sa radi hrajú normálne alebo idú naspäť radi naspäť normálne že k tebe. No. A ty ten čarodej, nie? A teraz toto dôkladne ako myšlienku, že si to nikdy nepohral si, že pre toho normálne že hru jak gosty? Áno, to máme, ale ja toto. Ty si bytostný človek. Ja nie som bytostný človek, pretože ja vlastne robím z B2B. Takže ja vlastne pre mňa mentálne sa posunúť k tomu, že mám ako zrazu robiť nie s kráľmi, ale aj s poddanými, tak pre mňa je ako ťažká mentálna disciplína, lebo pre mňa to je akože a ty vidíš, ale ty vidíš tie masy. Takže ja- Lebo toto je, lebo ja som tiež nad tým rozmýšľal, že ja minule, že a však sme niečo robili a však pome si, chcem ukázať tú hru, že pome si zahrať. A ja že no však ja by som vedel toto nejak spraviť, že sám ten váš klub je úplne iný, to prostredie a toto proste, ale že ty akože ono sa to vlastne vie zahrať v nejakej forme. Vieš. A a teraz a teraz je to o tom normálne, že keby bola vytvorená hra, jak je normálne, že normálne máš kartičky, máš niečo toto, tak to budeš predávať ako normálne a jak fast food, nie fast food, jak proste basovku, že proste- Ty ma teraz nainšpiroval, lebo ja skúsim pre tých Slovákov urobiť tu play making appku, lebo to by tak naj, naj, naj ako najfast foodovejšia tá čarodejnická vec na marse je to, že niekto cudzí ti vytvorí hru z ničoho nic. Áno. A to je zároveň aj najväčší bottleneck. Áno. Pretože to je vlastne divné, bizarné. Deväťdesiat percent populácie sa toho bojí. Áno. Takže ja som teraz skúšal normálne v jednom takom pokročí som normálne, to ste vy zažili. Tak ja som teraz sadol si a vystaval som menu jak v reštaurácii. Dáme, že led potenciálu, kóprava bottlenecku. To ale čo si povedal, chcem kópravu. A že si to pred predvyrobil a som zistil, že tých ľudí to baví ešte viacej niektorých. Áno. Pretože neni tam ten faktor, že ako toho divného, to to tá mágia je divná vec. Hej? A ty keď nemáš človeka, ktorý je v tom, ako to urobil dvadsaťkrát, alebo má na to nejaký cit. Áno. Tak vlastne- Tak to na vieš. Tak ja mám variantu menu a určite je varianta, že že spravíš s Klodom appku a ty keď tam napíšeš otázku, ja neviem, či mám predávať aj šampóny, no tak stlačíš gombík a vypne ti to proste postavy, obrázky, čo máš zložiť, akú hudbu k tomu máš pustiť. Takže toto sa dá ako- Vieš, to len akože mimo mimo toho, čo ma napadlo, ja si to-",
+    "status": "new",
+    "ai_score": 2,
+    "ai_analysis": "{\"score\": 2, \"clarity\": 1, \"feasibility\": 3, \"relevance\": 2, \"summary\": \"Nápada sa týka vytvorenia interaktívnej hry alebo aplikácie s prvkami gamifikácie, ktorá by mala zábavným spôsobom zapojiť používateľov. Konceptu však chýba jasná artikulácia, prepojenie s firemným modelom a jasný prípadový použitia pre značku Dajana Rodriguez.\", \"strengths\": [\"Myšlienka gamifikácie je relevantná pre budovanie komunity a zvyšovanie engagement-u\", \"Potenciál pre virálne šírenie prostredníctvom hry/aplikácie\", \"Autor demonštruje záujem o inovačný prístup\"], \"weaknesses\": [\"Nápada je inartikuľovaný a ťažko zrozumiteľný - transcripcia je zmatená a bez jasného smeru\", \"Žiadna jasná súvislosť s prioritami firmy (retencie, LTV, produktový ekosystém, expanzia)\", \"Nedefínuje sa, ako by sa hra vzťahovala k značke Dajana Rodriguez alebo jej komunite Silných Žien\", \"Neexistuje finančné či obchodné zdôvodnenie - bez odhadu CAC, LTV prínosu alebo ROI\", \"Technické požiadavky nie sú jasné - nejde o app, gamifikáciu, webový portál alebo fyzickú aktiváciu\", \"Potenciálne vysoké CAPEX bez jasného výstupného cieľa, čo odporuje firmenným kritériám\", \"Posúva fokus mimo základnej DNA značky (kabelky, módne doplnky) bez konkrečného propojenia\"], \"next_steps\": [\"Autor by mal nápada preformulovať v písomnej forme s jasným storytellingom: Čo? Prečo? Pre koho? Ako sa to predá?\", \"Špecifikovať konkrétny use case: ide o prostriedok na retenciu zákazníčok, akvizíciu cez komunitu, alebo spustenie pod značkou Raul del Fuego?\", \"Prepájať nápada s firemný métriky: aký bude dopad na LTV/CAC pomer, retenciu, frekvenciu nákupov?\", \"Konzultovať s CMO (David Varga) a CTO (Samuel Patrón) - či sú zdroje a kapacity na vývoj aplikácie\", \"Ak je idea stále relevantná po jasnejšom zformulovaní, posúdiť, či ide o quick win alebo dlhodobý projekt\"], \"category\": \"other\", \"tags\": [\"innovation\", \"marketing\", \"customer\", \"product\"]}",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-11 07:50:24.826594+00",
+    "visibility": "personal",
+    "tags": "[\"innovation\", \"marketing\", \"customer\", \"product\"]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-11T07:50:46.587920",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
