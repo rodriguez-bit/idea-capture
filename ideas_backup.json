@@ -742,5 +742,29 @@
     "transcribed_at": "2026-03-10T10:21:18.642272",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "development",
+    "role": "manager",
+    "audio_filename": "636ea1fd-d077-437f-ae6d-03d69d645fdc.webm",
+    "duration_seconds": 41,
+    "transcript": "Nahrávanie napríklad tohoto stretnutia. Áno. A je to napríklad, že na nápady, ktoré vlastne máme a tá aplikácia vyhodnocuje, ono ju prepíše a ju vyhodnotí, že či sa to zhoduje alebo nezhoduje s firemnými, é, tými nastaveniami, že čo chceme ísť ako značka robiť a napríklad ona bude mať nápad, tak ona ho nahrá a vlastne ten nápad sa normálne zapíše a za-- nápady sa zapisujú a z toho to bude vyhodnocovať, že ktoré nápady sú dobré na kreatívu, na toto, na výrobu, na hento, bla, bla, bla, bla. Okej. Tak to si dáva do toho, hej? Áno. A teda to je to. Teraz mi dáte, bude to vlastne softvérová firma, to myslíte?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-11 07:24:53.89735+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-11T07:24:58.421870",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
