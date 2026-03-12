@@ -958,5 +958,29 @@
     "transcribed_at": "",
     "stt_engine": "",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "development",
+    "role": "manager",
+    "audio_filename": "dcefaeb3-e6e3-45ad-bf82-e3bb9701eb02.webm",
+    "duration_seconds": 7,
+    "transcript": "Čau, chcel by som, ja neviem, spraviť mám nápad na aplikáciu, ktorá bude robiť bla bla bla bla bla bla bla.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-12 10:27:37.927913+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-12T10:27:38.671884",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
