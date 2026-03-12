@@ -910,5 +910,29 @@
     "transcribed_at": "2026-03-12T09:49:48.219480",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7675,
+    "author_name": "Silvia Martisova",
+    "department": "production",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "vychystavane kovanie je zle. je to pomiesane...je tam aj vazene aj vychystavane v kope",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-12 10:00:34.46079+00",
+    "visibility": "personal",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "",
+    "stt_engine": "",
+    "idea_type": "napad"
   }
 ]
