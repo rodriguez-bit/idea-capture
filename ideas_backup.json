@@ -862,5 +862,29 @@
     "transcribed_at": "2026-03-11T13:03:27.644771",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "c-level",
+    "audio_filename": "8abbcddd-f745-4c8d-941a-1a715f3396b3.webm",
+    "duration_seconds": 26,
+    "transcript": "Treba ešte veľmi dodať, že to nebol len ponákupný proces na dlhopisoch, ale to svietilo aj hore, keď sa človek prihlásil, keď mal svoju objednávku, keď bol vo vernostnom programe, treba ľudí pridať do vernostného programu, treba im povedať, že sme ho upgradli, treba tam dať tieto informácie a je to možné len pre nich, ktorí sú normálne že v Diamonde a takéto informácie tam treba dať o dlhopisoch.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-12 05:38:08.478275+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-12T05:38:10.947328",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
