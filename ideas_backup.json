@@ -982,5 +982,29 @@
     "transcribed_at": "2026-03-12T10:27:38.671884",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "development",
+    "role": "manager",
+    "audio_filename": "4a1571e1-4d33-40d3-997b-1f664d1a66f2.webm",
+    "duration_seconds": 230,
+    "transcript": "No takže ideme vytvoriť aplikáciu, ktorá bude slúžiť na to, že ja ako Raul Rodriguez, CEO značky Diana Rodriguez alebo D&Sno vstupujem do nového odvetvia a to je, že ideme vyrábať pánske veci pod značkou Raul del Fuego. No, môj momentálny problém je, že mám veľmi nekonzistentný obsah na LinkedIn aj na Instagrame, lebo proste tam nepridávam, a to isté na TikToku. Ja potrebujem vytvoriť nástroj alebo aplikáciu, stránku, proste čokoľvek dáva zmysel na to, že ja tam budem vkladať, ehm, alebo že ja napíšem proste normálne, že informácie o mne, o značke, čo chcem dosiahnuť. Budem tam dávať nejaké takéto veci, ktoré návrh, proste navrhnem. No a ja chcem aplikáciu, ktorá sa napojí na LinkedIn, napojí sa na Instagram, na Facebook, na TikTok a za mňa tam bude dávať tie posty vo formátoch akých treba, s článkami akými treba, ako s postami napísané v mojom slovníku. To znamená, ja by som ti mal nahrať minimálne desať, pätnásť mojich konverzácií, aby si si načítal, ako ja píšem. No a toto celé by malo byť teda navrhnuté v spôsobu Raul del Fuego. Čo chceme, aká by to bola sila muža Fuego momenty. To znamená, že ehm, všetko informácie, ktoré ja ti tam budem dávať, ty budeš spracovávať a budeš mi navrhovať posty na každý jeden deň, ehm, aké by som mal dávať, aké výstupy a tak ďalej a tak ďalej. Potrebujeme toto napojiť na NanoBanana, ktorý bude vytvárať aj botky. Potrebujeme to napojiť na akékoľvek modely alebo na čokoľvek, čo my potrebujeme. Aby sme vo finále dostali ten obsah. No a toto všetko keď spravíš, tak prihlásenie by malo byť cez e-mail a Workplace od Googlu. Diana Rodriguez. Mal by som spraviť to, že je tam administrácia. Je tam tie API kľúče, proste štandardné veci, ktoré sú normálne, že má aplikácia, ktorú už len tvoríme posledné dva, tri týždne. No a, no a to je celé. Takže vo finále aplikácia na budovanie postov na sociálne siete, kde mi bude aj navrhovať, aké posty to majú byť a bude sledovať, či ten post bol alebo nebol daný na konkrétnu stránku. A už si to musíš",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-12 19:21:39.913873+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-12T19:21:54.970637",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
