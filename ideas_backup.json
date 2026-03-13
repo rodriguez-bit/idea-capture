@@ -1054,5 +1054,29 @@
     "transcribed_at": "2026-03-13T11:07:59.300780",
     "stt_engine": "whisper",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7675,
+    "author_name": "Silvia Martisova",
+    "department": "production",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "materialovu kartu mi tlaci pri kazdych 10 kabelkach . co je zbytocne . potrebujem to na serie.priklad ide 90x mia  tak 1.seria 50x a 2.seria 40x. \ntak som to netlacila lebo by to bolo cez 100 papierov navyse",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-13 11:43:06.937661+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "",
+    "stt_engine": "",
+    "idea_type": "napad"
   }
 ]
