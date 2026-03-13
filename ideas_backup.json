@@ -1006,5 +1006,29 @@
     "transcribed_at": "2026-03-12T19:21:54.970637",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7675,
+    "author_name": "Silvia Martisova",
+    "department": "production",
+    "role": "manager",
+    "audio_filename": "f86f90ec-f2c3-4c2c-a430-7d95346b1184.webm",
+    "duration_seconds": 14,
+    "transcript": "Materiálové karty rozdeľuje zle po sérii, robí sériu na desať kusov a nie napríklad na štyridsať alebo tak. To by som ti asi radšej osobne ukázala a vysvetlila.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-13 09:36:22.564319+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-13T09:36:23.648323",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
