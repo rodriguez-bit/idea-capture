@@ -1157,11 +1157,11 @@
     "department": "management",
     "role": "manager",
     "audio_filename": "e9bcd684-99d9-40bb-bbac-3065484e78c9.webm",
-    "duration_seconds": 0,
-    "transcript": "[Prebieha prepis nahravky...]",
+    "duration_seconds": 6,
+    "transcript": "No hovor niečo. No keby som chcel nahrať nejaký rozhovor, tak mám povedať nejakých zopár slov?",
     "status": "new",
-    "ai_score": 0,
-    "ai_analysis": "",
+    "ai_score": 1,
+    "ai_analysis": "{\"score\": 1, \"clarity\": 1, \"feasibility\": 2, \"relevance\": 1, \"summary\": \"Nápad nie je jasne artikulovaný a pozostáva len z fragmentárnych otázok o nahrávaní rozhovoru. Neobsahuje konkrétnu myšlienku, cieľ ani spôsob implementácie relevantný pre firmu.\", \"strengths\": [], \"weaknesses\": [\"Úplne nejasná formulácia nápadu - chýba konkrétny obsah, cieľ a kontexst\", \"Žiadna väzba na firemné ciele (retenciu, LTV, expanziu, produktový ekosystém)\", \"Bez strategického alebo operatívneho prínos pre značku Dajana Rodriguez\", \"Zdá sa byť nedokončeným zápisom alebo náhodným komentárom\", \"Nezodpovedá kritériám na hodnotenie - chýbajú údaje, logika a koncepcia\"], \"next_steps\": [\"Vyzvať autora na jasné preformuláciu nápadu s konkrétnym problémom, riešením a benefitom\", \"Upresniť, či ide o nápad na komunikáciu, obsah, proces alebo niečo iné\", \"Mapovať spojitosť s firemným kontextom (napr. ak ide o videokontent, aké konkrétne výsledky očakáva)\"], \"category\": \"other\", \"tags\": []}",
     "reviewer_note": "",
     "reviewed_by": "",
     "reviewed_at": "",
@@ -1171,8 +1171,8 @@
     "assigned_to": "",
     "deadline": "",
     "campaign_id": null,
-    "transcribed_at": "2026-03-14T13:02:37.736583",
-    "stt_engine": "pending",
+    "transcribed_at": "2026-03-14T13:02:38.518521",
+    "stt_engine": "elevenlabs",
     "idea_type": "napad"
   }
 ]
