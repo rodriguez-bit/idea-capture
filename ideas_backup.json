@@ -1126,5 +1126,29 @@
     "transcribed_at": "2026-03-14T09:18:16.791172",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "9073f4c5-2558-4df4-8058-9a8be1c9de7b.webm",
+    "duration_seconds": 6,
+    "transcript": "No hovor niečo. No keby som chcel nahrať nejaký rozhovor, tak mám povedať nejakých zopár slov?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-14 13:02:31.764809+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-14T13:02:32.670855",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
