@@ -1102,5 +1102,29 @@
     "transcribed_at": "2026-03-13T11:50:22.611202",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "c-level",
+    "audio_filename": "093ec88e-ea06-4693-95cb-ad6126c74f4c.webm",
+    "duration_seconds": 7,
+    "transcript": "Si spravil vlastný plug a ja vlastne teraz to rovno, že tuto hovorím, toto majú ľudia už na mobiloch",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-14 09:18:15.971211+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-14T09:18:16.791172",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
