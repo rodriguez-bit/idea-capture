@@ -1174,29 +1174,5 @@
     "transcribed_at": "2026-03-14T13:02:38.518521",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
-  },
-  {
-    "author_id": 8,
-    "author_name": "Raul Rodriguez",
-    "department": "management",
-    "role": "manager",
-    "audio_filename": "9f7d1a72-7ed1-4b58-8a4c-c0b242cae2ef.webm",
-    "duration_seconds": 20,
-    "transcript": "Hovor, aký máš nápad. Ja? Akože čo mám aký nápad? Nápad, nápad. Týmto? No. Dobre, hovor. Že chcem zlepšiť systém rezervácií? Dobre, dobre.",
-    "status": "new",
-    "ai_score": 3,
-    "ai_analysis": "{\"score\": 3, \"clarity\": 2, \"feasibility\": 5, \"relevance\": 6, \"summary\": \"Nápad sa týka zlepšenia systému rezervácií, avšak je prezentovaný veľmi nejasne a bez konkrétnych detailov. Nejde jasne z transkriptu, ako by zlepšenie rezervácií malo konkrétne riešiť problémy firmy.\", \"strengths\": [\"Téma rezervácií sa dotýka customer experience, čo môže ovplyvniť retenciu\", \"Process improvement v rezervačnom systéme by mohol byť relatívne rýchly win s potenciálom na zlepšenie konverzie\"], \"weaknesses\": [\"Nápad je vyjadrený velmi nejasne a bez konkrétneho plánu riešenia\", \"Chýba analýza problému - koľko zákazníčok používa rezervácie, aké sú pain pointy?\", \"Nejasné, ako by zlepšenie rezervácií konkrétne zvýšilo retenciu (primárny cieľ firmy)\", \"Bez odhadu nákladov, časovej náročnosti alebo očakávaného ROI\", \"Autorka/autor nápadu sa javí ako nepripraven a bez hlbšieho zamyslenia\"], \"next_steps\": [\"Požiadať autora o konkretizáciu: aké presne problémy s rezerváciami identifikuje?\", \"Zistiť, koľko % nákupov v e-shope zahrnuje rezervácie a aká je ich konverzná miera\", \"Definovať konkrétny cieľ zlepšenia (napr. skrátenie času rezervácie, zvýšenie počtu rezervácií o X%)\", \"Odhad vplyvu na LTV a frekvenciu nákupov - ako to súvisí s cieľom skrátiť interval návratu zákazníčok?\"], \"category\": \"process_improvement\", \"tags\": [\"process\", \"customer\", \"quick_win\"]}",
-    "reviewer_note": "",
-    "reviewed_by": "",
-    "reviewed_at": "",
-    "created_at": "2026-03-14 21:30:24.436386+00",
-    "visibility": "company",
-    "tags": "[\"process\", \"customer\", \"quick_win\"]",
-    "assigned_to": "",
-    "deadline": "",
-    "campaign_id": null,
-    "transcribed_at": "2026-03-14T21:30:25.685674",
-    "stt_engine": "elevenlabs",
-    "idea_type": "napad"
   }
 ]
