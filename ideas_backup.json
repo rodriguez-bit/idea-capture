@@ -1174,5 +1174,29 @@
     "transcribed_at": "2026-03-14T13:02:38.518521",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "2f4e988e-9bf0-41e5-9ddb-3f569143045c.webm",
+    "duration_seconds": 669,
+    "transcript": "No. Moja predstava je nasledovná. Eh, tým, ako sa tvorila aplikácia postupne, tak som pridával každú jednu časť, ktorú som potreboval a to boli, že najskôr materiály, potom nože, potom, eh, komponenty, iné informácie. Proste normálne, že, eh, som potreboval rôzne ako keby, eh, informácie z nášho ERP systému. A jak som to tvoril, tvoril, tvoril, tak zrazu sa to začalo nabaľovať, nabaľovať, nabaľovať a jedno bolo prepojené s druhým, s tretím, so štvrtým, s piatym a tak ďalej a tak ďalej. No. Až sme prišli do stavu, kedy mám duplicitné, eh, ako kebyže pozeranie na materiálov alebo aké materiály ťaháme. Eh, a ja by som to, eh, alebo nože alebo proste takéto veci, ja by som to najradšej zjednotil tak, že základné údaje mi budú tvoriť normálne veci, ktoré mám z ERP systému. Modely kabeliek, výrobné produkty, výrobné procesy, zoznam kovaní, zoznam komponentov, zoznam materiálov a zoznam nožov. Toto by boli základné údaje, z ktorých-- ktoré by boli úplne, že totálny základ. Že vlastne, že vždy všetko, čo budem a z čoho sa budú ťahať tieto, eh, údaje, tak pôjdu odtiaľto. A tieto, tieto základné údaje budú napojené na ERP systém. To znamená, že tu vždy bude prebiehať tá aktualizácia na nejakej úrovni, že, eh, neviem, ra-- dvakrát za deň sa automaticky zaktualizujú údaje, eh, či nepribudlo alebo či sa niečo proste nez-, eh, nezmenilo v týchto veciach. Tá logika má platiť, že mám tu aj nejaké veci, ktoré z ERP neťaháme a dopisovali sme ich len sem, ako napríklad je pri materiáloch, eh, šírka materiálu alebo koľko má jedna rolka. No a to sú veci, kedy, eh, príde napríklad ten upgrade, eh, alebo sync, eh, z ERP systému. Áno, áno. No, takže kde sme, é, skončili? É, potrebujem, aby, é, toto bol ako keby taký základný kameň, ktorý sa bude upgradovať, é, dvakrát za deň, kde budú aktuálne informácie. To znamená, že, é, poprípade sa aj pozrieť, aké iné informácie ja viem ťahať z toho nášho ERP systému o týchto veciach, o konkrétnych modeloch, o konkrétnych výrobných produktoch, výrobných procesoch, dátových, teda zoznamkovaní, komponentoch a tak ďalej a tak ďalej. A následne ja by som tu už mal mať potom len, é, sekcie, že, é, presne jak mám teraz, že komponenty. Mám tu napojené nože, é, a tie nože budú napojené na tie základné údaje, ale v týchto komponentoch, ktorých bude len ako keby na zobrazovanie a aj na dopisovanie samozrejme, ale že tie nože v komponentoch budú už preddefinované len na komponenty. Materiály v komponentoch budú preddefinované len na materi-- len na komponenty. É, potom je tu kalkulačka a potom je tu tento import. No. É, a import ako keby tej objednávky. No a sprav mi prosím ťa taký základný audit, é, toho, ako to je teraz. Toho, ako to ty chápeš, é, ako by si to prerobil, ako by si sa na to pozrel, či táto moja logika je správna alebo nesprávna. Či by si to robil úplne inak. Proste pre mňa je základ, že potrebujem dostať funkčný systém, ľahko ovládateľný, ktorý bude mať aktualizované dáta zo, z ERP systému a doplnené o naše informácie a potrebujem, é, aby, é, medzi sebou nevznikali, é, prepojenia, é, typu, že jedno niekde zmením a druhé niekde mi to odjebe alebo sa mi to pokazí. Proste čo najjednoduchšie prepojenie. No a, é, takto mám takýto ako keby pohľad na to.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-15 11:07:55.774809+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-15T11:08:09.723538",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
