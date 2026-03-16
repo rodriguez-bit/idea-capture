@@ -1198,5 +1198,29 @@
     "transcribed_at": "2026-03-15T11:08:09.723538",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7675,
+    "author_name": "Silvia Martisova",
+    "department": "production",
+    "role": "manager",
+    "audio_filename": "a360ce11-81d3-4404-b834-9992590f672e.webm",
+    "duration_seconds": 26,
+    "transcript": "A neprehodilo nám do CNC stroja všetky kabelky. É, napríklad Car Holder mi dalo-- síce mi ich dalo štyridsať, ale nerozdelilo to na dva. Miyu mi tiež, tam som si už musela zmeniť počet. Elizabethy mi tiež nedalo, é, oboje, aj zlaté, aj strieborné. Nesedí mi počet. Neviem, jak to mám upraviť.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-16 10:28:29.218392+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-16T10:28:31.405493",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
