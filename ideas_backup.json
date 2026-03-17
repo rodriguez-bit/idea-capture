@@ -1318,5 +1318,29 @@
     "transcribed_at": "2026-03-17T12:52:27.751653",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "fb617085-0f71-49f6-9846-226f805feb23.webm",
+    "duration_seconds": 114,
+    "transcript": "Takže ešte raz. Kabelka pre Baťu na šestnásteho potrebujeme spraviť, to znamená šestnásteho apríla do Prahy. Potrebujem tam dostať Dajanu. Budeme to odovzdávať. Bude tam nejaká súťaž pre tých, é, ľudí, é, ženy, chlapi. Ideálne, keby sme tam odprezentovali aj pánsku tašku, by to bolo úplne ideálne odprezentovanie. É, ďalej potrebujem, é, v septembri do Zlína, že sa pôjde, takže tam mám mať nejakú prednášku. Potrebujem toto odovzdať nejakej, é, holke od nás, ktorá si to zoberie na starosť, aby som to nemusel ja riešiť, aby ona všetky tieto veci dotiahla. É, a potrebujem si do kalendára všetko normálne hodiť na ideálne na tie dátumy, na tie, na tie časy. No a toto keď budeme mať normálne, že kompletne odladené a tento týždeň si zavoláme, tak, é, tá spolupráca s Baťom bude pomaly ale vhodná a zaujímavá, myslím si.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-17 12:55:29.329998+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-17T12:55:36.122962",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
