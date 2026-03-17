@@ -1390,5 +1390,29 @@
     "transcribed_at": "2026-03-17T14:21:03.247670",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "cda2778d-c22f-4063-afd2-1226a97b7ec6.webm",
+    "duration_seconds": 11,
+    "transcript": "No povedz mi, aký máš nápad. No povedz mi, aký máš nápad. No povedz niečo. Eh, čo ja te... Nie, daj, hoci čo, hoci čo, daj. Čo ćeš teraz ty?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-17 17:04:28.266439+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-17T17:04:29.607494",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
