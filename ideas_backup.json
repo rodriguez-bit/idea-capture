@@ -1294,5 +1294,29 @@
     "transcribed_at": "2026-03-17T12:03:55.726216",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "48ba5d08-f968-4847-b09b-9c1ca6d0a9a7.webm",
+    "duration_seconds": 0,
+    "transcript": "[Nahravka ulozena - transkript nedostupny. Audio: 48ba5d08-f968-4847-b09b-9c1ca6d0a9a7.webm]",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-17 12:52:27.406422+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-17T12:52:27.751653",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
