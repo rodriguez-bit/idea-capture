@@ -1438,5 +1438,29 @@
     "transcribed_at": "2026-03-17T20:23:08.920134",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "cc5d8b79-7e12-4e38-88cf-3c65bbf45988.webm",
+    "duration_seconds": 48,
+    "transcript": "No proste ja ma respektíve či by si ma zaujímal Georgea, že ho k sebe viem, že ti sekal, že si s ním bol spokojný. Nenútim ti ho, sa pýtam. No a to akože natrvalo alebo ako? Natrvalo. No a odkedy? To zatiaľ stopercentne neviem, ale povedzme, že ak by sa to muselo, scenár jedna môže byť, že už od prvého apríla by mu plynula doba. Scenár druhý, že od mája, ale v utorok mám veľký meeting s Talianmi, kde si poviem, že aký ma objem výroby a podľa toho ja sa budem musieť zaňať, vieš? No dobre, tak povedz si, že my tam máme to otvorené, tak kľudne mi daj potom vedieť. Dobre? Dobre a prosím ťa diskrétne, lebo toto zatiaľ len mám ako scenáre. Hej? Dobre. Ďakujem ti. Čau. Čau.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-18 10:53:50.382448+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-18T10:53:55.671494",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
