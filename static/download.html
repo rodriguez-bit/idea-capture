@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridea — Stiahnut aplikaciu</title>
+<meta name="theme-color" content="#111827">
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body {
+    background: #111827;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    margin: 0;
+  }
+  .dl-wrap { max-width: 26rem; width: 100%; text-align: center; }
+  .dl-logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 3.5rem; height: 3.5rem; background: #2563eb; border-radius: 0.875rem; margin-bottom: 0.75rem;
+  }
+  .dl-wrap h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .dl-sub { color: #9ca3af; font-size: 0.875rem; margin-bottom: 2rem; }
+  .dl-card {
+    background: #1f2937; border: 1px solid #374151; border-radius: 1rem;
+    padding: 1.5rem; margin-bottom: 1rem; text-align: left;
+  }
+  .dl-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+  .dl-card p { font-size: 0.8125rem; color: #9ca3af; margin-bottom: 1rem; }
+  .dl-btn {
+    display: block; width: 100%; padding: 0.75rem; background: #2563eb; color: #fff;
+    border: none; border-radius: 0.5rem; font-size: 0.9375rem; font-weight: 600;
+    cursor: pointer; text-decoration: none; text-align: center; transition: background 150ms;
+  }
+  .dl-btn:hover { background: #1d4ed8; }
+  .dl-size { font-size: 0.6875rem; color: #6b7280; margin-top: 0.375rem; text-align: center; }
+  .dl-steps { font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; line-height: 1.6; }
+  .dl-steps b { color: #9ca3af; }
+  .dl-badge {
+    display: inline-flex; align-items: center; padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem; font-size: 0.6875rem; font-weight: 600;
+  }
+  .dl-badge-green { background: rgba(22,163,74,0.2); color: #4ade80; }
+  .dl-badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .dl-badge-purple { background: rgba(147,51,234,0.2); color: #a78bfa; }
+  .dl-note { margin-top: 1.25rem; font-size: 0.75rem; color: #6b7280; line-height: 1.5; }
+  .dl-version { margin-top: 1.5rem; font-size: 0.6875rem; color: #4b5563; }
+</style>
+</head>
+<body>
+<div class="dl-wrap">
+  <div class="dl-logo">
+    <i data-lucide="lightbulb" style="width:1.75rem;height:1.75rem;color:white;"></i>
+  </div>
+  <h1>Ridea</h1>
+  <p class="dl-sub">Interny nastroj pre zachytavanie napadov</p>
+
+  <div class="dl-card">
+    <h2><i data-lucide="smartphone" style="width:18px;height:18px;"></i> Android <span class="dl-badge dl-badge-green">APK</span></h2>
+    <p>Nativna Android aplikacia — stiahnite a naintalujte priamo</p>
+    <a class="dl-btn" href="/dl/android">Stiahnut pre Android</a>
+    <div class="dl-size">Ridea-2.5.0.apk (3 MB)</div>
+    <div class="dl-steps">
+      <b>Instalacia:</b> Po stiahnut&#237; otvorte subor a povolte instalaciu z neznameho zdroja.
+      Pri prvom spusten&#237; povolte pristup k mikrofonu.
+    </div>
+  </div>
+
+  <div class="dl-card">
+    <h2><i data-lucide="monitor" style="width:18px;height:18px;"></i> Windows <span class="dl-badge dl-badge-blue">Desktop</span></h2>
+    <p>Desktopova aplikacia s nahravanim systemoveho zvuku</p>
+    <a class="dl-btn" href="/dl/windows">Stiahnut pre Windows</a>
+    <div class="dl-size">Ridea-Setup-2.5.0.exe (108 MB)</div>
+    <div class="dl-steps">Spustite installer a postupujte podla pokynov.</div>
+  </div>
+
+  <div class="dl-card">
+    <h2><i data-lucide="laptop" style="width:18px;height:18px;"></i> macOS <span class="dl-badge dl-badge-purple">Desktop</span></h2>
+    <p>Desktopova aplikacia pre Mac</p>
+    <a class="dl-btn" href="/dl/mac">Stiahnut pre macOS</a>
+    <div class="dl-size">Ridea-2.5.0-mac.zip (96 MB)</div>
+    <div class="dl-steps">
+      Rozbalte ZIP a presunte <b>Ridea.app</b> do priecinka Applications.<br>
+      Pri prvom spusten&#237;: Prave tlacidlo &rarr; Otvorit &rarr; Potvrdit.
+    </div>
+  </div>
+
+  <p class="dl-note">Po nainstalovani sa prihlasite priamo v aplikacii.<br>Prihlasovaci udaj dostanete od administratora.</p>
+  <div class="dl-version">v2.5.0</div>
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>
