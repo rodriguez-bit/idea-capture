@@ -1,469 +1,319 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ridea — Admin Konzola</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridea — Admin Konzola</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}:root{--bg:#512d6d;--surface:#3d1f54;--surface2:#462560;--border:rgba(255,255,255,0.12);--text:#f0e6f6;--muted:rgba(255,255,255,0.5);--primary:#d4a6f5;--primary-hover:#c084fc;--green:#4ade80;--yellow:#facc15;--red:#f87171;--blue:#93c5fd}body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column}nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:100}.nav-logo{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}.nav-logo span{color:var(--primary)}.nav-links{display:flex;gap:4px}.nav-link{padding:6px 14px;border-radius:8px;font-size:14px;cursor:pointer;color:var(--muted);border:0;background:transparent}.nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}.user-badge{font-size:13px;color:var(--muted)}.btn-sm{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:0}.btn-primary{background:var(--primary);color:white}.btn-primary:hover{background:var(--primary-hover)}.btn-ghost{background:var(--surface2);color:var(--text)}.btn-ghost:hover{background:var(--border)}main{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto}.page{display:none}.page.active{display:block}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}.stat-value{font-size:32px;font-weight:700}.stat-label{font-size:13px;color:var(--muted);margin-top:4px}.stat-card.green .stat-value{color:var(--green)}.stat-card.yellow .stat-value{color:var(--yellow)}.stat-card.red .stat-value{color:var(--red)}.stat-card.blue .stat-value{color:var(--blue)}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}.filter-select,.filter-input{padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:0}.filter-select:focus,.filter-input:focus{border-color:var(--primary)}.filter-input{flex:1;min-width:200px}#f-search[contenteditable]:empty::before{content:attr(data-placeholder);color:var(--muted);pointer-events:none}#f-search[contenteditable]{cursor:text;white-space:nowrap;overflow:hidden}.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}table{width:100%;border-collapse:collapse}th{padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);background:var(--surface2)}td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}tr:last-child td{border-bottom:0}tr:hover td{background:var(--surface2);cursor:pointer}.truncate{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}.badge-new{background:rgba(59,130,246,0.15);color:#60a5fa}.badge-in_review{background:rgba(234,179,8,0.15);color:#facc15}.badge-accepted{background:rgba(34,197,94,0.15);color:#4ade80}.badge-rejected{background:rgba(239,68,68,0.15);color:#f87171}.badge-v_realizacii{background:rgba(168,85,247,0.15);color:#c084fc}.badge-dept{background:var(--surface2);color:var(--muted)}.badge-score{background:rgba(212,166,245,0.15);color:#d4a6f5}.badge-tag{background:rgba(168,85,247,0.15);color:#c084fc;font-size:11px}.tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.tag-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:20px;font-size:12px;color:#c084fc;cursor:pointer;transition:all .15s}.tag-chip:hover,.tag-chip.selected{background:rgba(168,85,247,0.3);border-color:rgba(168,85,247,0.6)}.tag-chip .tag-x{opacity:.6;font-size:11px;margin-left:2px}.tag-chip .tag-x:hover{opacity:1}.tag-add-row{display:flex;gap:8px;margin-top:8px}.tag-add-input{flex:1;padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:0}.tag-add-input:focus{border-color:rgba(168,85,247,0.5)}.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center}.modal-overlay.open{display:flex}.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative}.modal h2{font-size:18px;font-weight:700;margin-bottom:20px}.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:0;color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}.modal-close:hover{color:var(--text)}.detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.detail-section{margin-bottom:20px}.detail-section label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px}.detail-section p,.detail-section .text-block{font-size:14px;line-height:1.6;color:var(--text);background:var(--surface2);border-radius:8px;padding:12px}.detail-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}.detail-actions select,.detail-actions textarea{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:0}.detail-actions select:focus,.detail-actions textarea:focus{border-color:var(--primary)}.detail-actions textarea{width:100%;resize:vertical;min-height:72px}.ai-analysis{background:var(--surface2);border-radius:8px;padding:16px}.ai-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px}.ai-list{padding-left:16px;font-size:14px;color:var(--muted)}.ai-list li{margin-bottom:4px}.users-grid{display:grid;gap:12px}.user-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px}.user-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0}.user-info{flex:1}.user-name{font-weight:600}.user-email{font-size:13px;color:var(--muted)}.user-actions{display:flex;gap:8px}.form-group{margin-bottom:16px}.form-group label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px}.form-group input,.form-group select{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:0}.form-group input:focus,.form-group select:focus{border-color:var(--primary)}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}.section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}.section-header h2{font-size:20px;font-weight:700}.section-header .ml-auto{margin-left:auto}.empty{text-align:center;padding:64px 24px;color:var(--muted)}.empty .icon{font-size:48px;margin-bottom:12px}.empty p{font-size:15px}.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:14px;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:340px}.toast.show{transform:translateY(0);opacity:1}.toast.success{border-color:var(--green);color:var(--green)}.toast.error{border-color:var(--red);color:var(--red)}.pagination{display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:flex-end}.pagination button{padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:14px}.pagination button:disabled{opacity:.4;cursor:default}.pagination button.active{background:var(--primary);border-color:var(--primary)}.pagination span{font-size:13px;color:var(--muted)}.bulk-bar{display:none;align-items:center;gap:12px;padding:10px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;margin-bottom:12px}.bulk-bar.visible{display:flex}.bulk-bar .bulk-count{font-size:14px;font-weight:600;color:var(--red)}.bulk-bar .btn-bulk-delete{padding:6px 16px;background:var(--red);color:white;border:0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer}.bulk-bar .btn-bulk-delete:hover{background:#dc2626}.bulk-bar .btn-bulk-cancel{padding:6px 14px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer}.bulk-bar .btn-bulk-cancel:hover{color:var(--text)}table input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary);cursor:pointer}.chart-container{position:relative;height:220px;width:100%}.kanban-col{min-width:240px;flex:1;background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;max-height:70vh}.kanban-col-header{padding:12px 16px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);color:var(--muted);display:flex;justify-content:space-between;align-items:center}.kanban-col-header .count{background:var(--surface2);padding:2px 8px;border-radius:12px;font-size:11px}.kanban-cards{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}.kanban-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color .15s}.kanban-card:hover{border-color:var(--primary)}.kanban-card .kc-title{font-size:13px;font-weight:500;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.kanban-card .kc-meta{font-size:11px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}</style>
+<!-- Chart.js lazy-loaded when stats page is opened -->
+<script id="chartjs-placeholder" data-src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
-<div class="app-shell">
-
-  <!-- Mobile header (hidden on desktop) -->
-  <div class="mobile-header">
-    <button class="mobile-menu-btn" onclick="toggleSidebar()">
-      <i data-lucide="menu" style="width:24px;height:24px;"></i>
-    </button>
-    <span style="font-weight:700;">Ridea</span>
+<nav>
+  <div class="nav-logo">💡 <span>Ri</span>dea</div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showPage('ideas')">Nápady</button>
+    <button class="nav-link" onclick="showPage('stats')">Štatistiky</button>
+    <button class="nav-link" id="nav-users" style="display:none" onclick="showPage('users')">Používatelia</button>
+    <button class="nav-link" id="nav-meetings" style="display:none" onclick="showPage('meetings')">Porady</button>
+    <button class="nav-link" id="nav-campaigns" style="display:none" onclick="showPage('campaigns')">Kampane</button>
+    <button class="nav-link" id="nav-kanban" style="display:none" onclick="showPage('kanban')">Kanban</button>
+    <button class="nav-link" id="nav-settings" style="display:none" onclick="showPage('settings')">Nastavenia</button>
   </div>
-  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="nav-right">
+    <span class="user-badge" id="user-badge"></span>
+    <a href="/recorder" target="_blank"><button class="btn-sm btn-primary">🎤 Nahrať</button></a>
+    <button class="btn-sm btn-primary" style="background:#22c55e" onclick="openAddIdeaModal()">+ Pridať</button>
+    <button class="btn-sm btn-ghost" onclick="openPasswordModal()">🔒</button>
+    <button class="btn-sm btn-ghost" onclick="doLogout()">Odhlásiť</button>
+  </div>
+</nav>
 
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo-icon">
-        <i data-lucide="lightbulb" style="width:22px;height:22px;color:white;"></i>
+<main>
+  <!-- IDEAS PAGE -->
+  <div class="page active" id="page-ideas">
+    <div class="filters">
+      <select class="filter-select" id="f-status" onchange="loadIdeas()">
+        <option value="">Všetky statusy</option>
+        <option value="new">Nové</option>
+        <option value="in_review">V prehliadke</option>
+        <option value="accepted">Prijaté</option>
+        <option value="v_realizacii">V realizácii</option>
+        <option value="rejected">Zamietnuté</option>
+      </select>
+      <select class="filter-select" id="f-type" onchange="loadIdeas()">
+        <option value="">Všetky typy</option>
+        <option value="napad">💡 Nápady</option>
+        <option value="porada">🎙️ Porady</option>
+      </select>
+      <select class="filter-select" id="f-dept" onchange="loadIdeas()">
+        <option value="">Všetky oddelenia</option>
+        <option value="development">Vývoj</option>
+        <option value="marketing">Marketing</option>
+        <option value="production">Produkcia</option>
+        <option value="management">Manažment</option>
+        <option value="other">Iné</option>
+      </select>
+      <select class="filter-select" id="f-role" onchange="loadIdeas()">
+        <option value="">Všetky roly</option>
+        <option value="c-level">C-level</option>
+        <option value="manager">Manažér</option>
+        <option value="employee">Zamestnanec</option>
+      </select>
+      <input type="email" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" aria-hidden="true" autocomplete="email">
+      <input class="filter-input" id="f-search" type="search" placeholder="Hľadať v transkripte..." autocomplete="off" data-lpignore="true">
+      <button class="btn-sm btn-ghost" onclick="exportCSV()" title="Export CSV">📥 CSV</button>
+    </div>
+
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-count" id="bulk-count">0 označených</span>
+      <button class="btn-sm" style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)" onclick="bulkSetType('napad')">💡 Označiť ako Nápad</button>
+      <button class="btn-sm" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3)" onclick="bulkSetType('porada')">🎙️ Označiť ako Porada</button>
+      <button class="btn-bulk-delete" onclick="bulkDelete()">🗑 Vymazať označené</button>
+      <button class="btn-bulk-cancel" onclick="clearSelection()">Zrušiť výber</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;display:none" id="th-select-all"><input type="checkbox" id="select-all" onclick="toggleSelectAll()" title="Označiť všetky"></th>
+            <th>#</th>
+            <th>Typ</th>
+            <th>Autor</th>
+            <th>Oddelenie</th>
+            <th>Rola</th>
+            <th>Transkript</th>
+            <th>AI</th>
+            <th>Tagy</th>
+            <th>Status</th>
+            <th>Viditeľnosť</th>
+            <th>Dátum</th>
+            <th>Audio</th>
+          </tr>
+        </thead>
+        <tbody id="ideas-tbody">
+          <tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- STATS PAGE -->
+  <div class="page" id="page-stats">
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-value" id="s-total">—</div><div class="stat-label">Celkovo nápadov</div></div>
+      <div class="stat-card green"><div class="stat-value" id="s-accepted">—</div><div class="stat-label">Prijaté</div></div>
+      <div class="stat-card yellow"><div class="stat-value" id="s-review">—</div><div class="stat-label">V prehliadke</div></div>
+      <div class="stat-card blue"><div class="stat-value" id="s-new">—</div><div class="stat-label">Nové</div></div>
+      <div class="stat-card red"><div class="stat-value" id="s-rejected">—</div><div class="stat-label">Zamietnuté</div></div>
+      <div class="stat-card" style="border-color:var(--primary)"><div class="stat-value" id="s-v_realizacii" style="color:var(--primary)">—</div><div class="stat-label">V realizácii</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+      <div class="table-wrap" style="padding:20px">
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Nápady podľa statusu</h3>
+        <div class="chart-container"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="table-wrap" style="padding:20px">
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Priemerné AI skóre podľa oddelenia</h3>
+        <div class="chart-container"><canvas id="chart-dept-score"></canvas></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div class="table-wrap" style="padding:20px">
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Trend nápadov (posledných 30 dní)</h3>
+        <div class="chart-container"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div class="table-wrap" style="padding:20px">
+        <h3 style="font-size:15px;font-weight:600;margin-bottom:14px">Posledné nápady</h3>
+        <div id="recent-ideas" style="max-height:220px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS PAGE -->
+  <div class="page" id="page-users">
+    <div class="section-header">
+      <h2>Používatelia</h2>
+      <div class="ml-auto">
+        <button class="btn-sm btn-primary" onclick="openUserModal()">+ Pridať používateľa</button>
+      </div>
+    </div>
+    <div class="users-grid" id="users-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
+    </div>
+  </div>
+
+  <!-- KANBAN PAGE -->
+  <div class="page" id="page-kanban">
+    <div class="section-header">
+      <h2>Kanban Board</h2>
+    </div>
+    <div id="kanban-board" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:16px;min-height:400px"></div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="section-header">
+      <h2>⚙ Nastavenia firmy</h2>
+    </div>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Tieto informácie používa AI pri analýze nápadov. Čím lepšie opíšete firmu, tým presnejšie bude hodnotenie.</p>
+
+    <div style="display:grid;gap:20px;max-width:720px">
+      <div class="form-group">
+        <label>O firme</label>
+        <textarea id="ctx-company" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Dajana Rodriguez je firma zameraná na výrobu luxusných kabeliek a módnych doplnkov. Pôsobíme v Česku a Španielsku..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ciele a priority</label>
+        <textarea id="ctx-goals" rows="4" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Expandovať do 3 nových krajov, znížiť náklady výroby o 15%, spustiť nový e-shop..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Hodnoty značky</label>
+        <textarea id="ctx-brand" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Kvalita, udržateľnosť, originálny dizajn, osobný prístup k zákazníkom..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Čo hľadáme v nápadoch</label>
+        <textarea id="ctx-criteria" rows="3" style="width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napr. Uprednostňujeme nápady na zníženie nákladov, zlepšenie zákazníckej skúsenosti a inovácie v produkte..."></textarea>
       </div>
       <div>
-        <div class="sidebar-title">Ridea</div>
-        <div class="sidebar-subtitle">Napady</div>
+        <button class="btn-sm btn-primary" style="padding:12px 32px" onclick="saveCompanyContext()">Uložiť nastavenia</button>
       </div>
     </div>
+  </div>
 
-    <nav class="sidebar-nav">
-      <!-- SECTION: Napady -->
-      <div class="nav-section-header">Napady</div>
-      <div class="nav-group">
-        <button class="nav-item active" data-page="ideas" onclick="showPage('ideas')">
-          <i data-lucide="lightbulb"></i> Napady
-        </button>
-        <button class="nav-item" data-page="kanban" onclick="showPage('kanban')">
-          <i data-lucide="columns-3"></i> Kanban
-        </button>
-        <button class="nav-item" data-page="stats" onclick="showPage('stats')">
-          <i data-lucide="bar-chart-3"></i> Statistiky
-        </button>
+  <!-- MEETINGS PAGE -->
+  <div class="page" id="page-meetings">
+    <div class="section-header">
+      <h2>Porady</h2>
+      <div class="ml-auto" id="meetings-add-btn" style="display:none">
+        <button class="btn-sm btn-primary" onclick="openMeetingModal()">+ Nová porada</button>
       </div>
-
-      <!-- SECTION: Organizacia -->
-      <div class="nav-section-header">Organizacia</div>
-      <div class="nav-group">
-        <button class="nav-item" data-page="meetings" onclick="showPage('meetings')">
-          <i data-lucide="calendar"></i> Porady
-        </button>
-        <button class="nav-item" data-page="campaigns" onclick="showPage('campaigns')">
-          <i data-lucide="target"></i> Kampane
-        </button>
-      </div>
-
-      <!-- SECTION: Admin (role-gated) -->
-      <div class="nav-section-header" id="nav-admin-header" style="display:none">Admin</div>
-      <div class="nav-group" id="nav-admin-group" style="display:none">
-        <button class="nav-item" data-page="users" onclick="showPage('users')">
-          <i data-lucide="users"></i> Pouzivatelia
-        </button>
-        <button class="nav-item" data-page="settings" onclick="showPage('settings')">
-          <i data-lucide="settings"></i> Nastavenia
-        </button>
-      </div>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <div class="sidebar-user-label">Prihlaseny</div>
-        <div class="sidebar-user-name" id="user-name">&mdash;</div>
-        <div class="sidebar-user-role" id="user-role-badge"></div>
-      </div>
-      <a href="/recorder" class="btn btn-primary btn-sm w-full" style="justify-content:center;margin-bottom:0.5rem;">
-        <i data-lucide="mic"></i> Nahrat
-      </a>
-      <button class="nav-item" onclick="openAddIdeaModal()">
-        <i data-lucide="plus-circle"></i> Pridat napad
-      </button>
-      <button class="nav-item" onclick="openPasswordModal()">
-        <i data-lucide="lock"></i> Zmenit heslo
-      </button>
-      <button class="nav-item" onclick="doLogout()">
-        <i data-lucide="log-out"></i> Odhlasit sa
-      </button>
     </div>
-  </aside>
-
-  <!-- Main content -->
-  <main class="main-content">
-    <div class="main-inner">
-
-      <!-- ═══════════════════════════════════════ IDEAS PAGE ═══════════════════════════════════════ -->
-      <div class="page active" id="page-ideas">
-        <div class="section-header">
-          <h2>Napady</h2>
-          <div class="ml-auto" style="display:flex;gap:8px;">
-            <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
-              <i data-lucide="download"></i> CSV
-            </button>
-          </div>
-        </div>
-
-        <div class="filters">
-          <select class="select" id="f-status" onchange="loadIdeas()">
-            <option value="">Vsetky statusy</option>
-            <option value="new">Nove</option>
-            <option value="in_review">V prehliadke</option>
-            <option value="accepted">Prijate</option>
-            <option value="v_realizacii">V realizacii</option>
-            <option value="rejected">Zamietnute</option>
-          </select>
-          <select class="select" id="f-type" onchange="loadIdeas()">
-            <option value="">Vsetky typy</option>
-            <option value="napad">Napady</option>
-            <option value="porada">Porady</option>
-          </select>
-          <select class="select" id="f-dept" onchange="loadIdeas()">
-            <option value="">Vsetky oddelenia</option>
-            <option value="development">Vyvoj</option>
-            <option value="marketing">Marketing</option>
-            <option value="production">Produkcia</option>
-            <option value="management">Manazment</option>
-            <option value="other">Ine</option>
-          </select>
-          <select class="select" id="f-role" onchange="loadIdeas()">
-            <option value="">Vsetky roly</option>
-            <option value="c-level">C-level</option>
-            <option value="manager">Manazer</option>
-            <option value="employee">Zamestnanec</option>
-          </select>
-          <!-- Honeypot for autocomplete -->
-          <input type="email" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" tabindex="-1" aria-hidden="true" autocomplete="email">
-          <input class="input" id="f-search" type="search" placeholder="Hladat v transkripte..." autocomplete="off" data-lpignore="true" style="flex:1;min-width:200px;">
-        </div>
-
-        <div class="bulk-bar" id="bulk-bar">
-          <span class="bulk-count" id="bulk-count">0 oznacenych</span>
-          <button class="btn btn-sm" style="background:rgba(250,204,21,0.15);color:var(--yellow);border:1px solid rgba(250,204,21,0.3)" onclick="bulkSetType('napad')">
-            <i data-lucide="lightbulb" style="width:14px;height:14px;"></i> Oznacit ako Napad
-          </button>
-          <button class="btn btn-sm" style="background:rgba(59,130,246,0.15);color:var(--blue);border:1px solid rgba(59,130,246,0.3)" onclick="bulkSetType('porada')">
-            <i data-lucide="mic" style="width:14px;height:14px;"></i> Oznacit ako Porada
-          </button>
-          <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
-            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Vymazat oznacene
-          </button>
-          <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Zrusit vyber</button>
-        </div>
-
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th style="width:40px;display:none" id="th-select-all">
-                  <input type="checkbox" id="select-all" onclick="toggleSelectAll()" title="Oznacit vsetky">
-                </th>
-                <th>#</th>
-                <th>Typ</th>
-                <th>Autor</th>
-                <th>Oddelenie</th>
-                <th>Rola</th>
-                <th>Transkript</th>
-                <th>AI</th>
-                <th>Tagy</th>
-                <th>Status</th>
-                <th>Viditelnost</th>
-                <th>Datum</th>
-                <th>Audio</th>
-              </tr>
-            </thead>
-            <tbody id="ideas-tbody">
-              <tr><td colspan="13" style="text-align:center;padding:40px;color:var(--muted)">Nacitavanie...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="pagination" id="pagination"></div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ STATS PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-stats">
-        <div class="section-header">
-          <h2>Statistiky</h2>
-        </div>
-
-        <div class="stats-grid" id="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="s-total">&mdash;</div>
-            <div class="stat-label">Celkovo napadov</div>
-          </div>
-          <div class="stat-card green">
-            <div class="stat-value" id="s-accepted">&mdash;</div>
-            <div class="stat-label">Prijate</div>
-          </div>
-          <div class="stat-card yellow">
-            <div class="stat-value" id="s-review">&mdash;</div>
-            <div class="stat-label">V prehliadke</div>
-          </div>
-          <div class="stat-card blue">
-            <div class="stat-value" id="s-new">&mdash;</div>
-            <div class="stat-label">Nove</div>
-          </div>
-          <div class="stat-card red">
-            <div class="stat-value" id="s-rejected">&mdash;</div>
-            <div class="stat-label">Zamietnute</div>
-          </div>
-          <div class="stat-card purple">
-            <div class="stat-value" id="s-v_realizacii">&mdash;</div>
-            <div class="stat-label">V realizacii</div>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
-          <div class="card">
-            <div class="card-header">Napady podla statusu</div>
-            <div class="card-body">
-              <div class="chart-container"><canvas id="chart-status"></canvas></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header">Priemerne AI skore podla oddelenia</div>
-            <div class="card-body">
-              <div class="chart-container"><canvas id="chart-dept-score"></canvas></div>
-            </div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
-          <div class="card">
-            <div class="card-header">Trend napadov (poslednych 30 dni)</div>
-            <div class="card-body">
-              <div class="chart-container"><canvas id="chart-trend"></canvas></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header">Posledne napady</div>
-            <div class="card-body">
-              <div id="recent-ideas" style="max-height:220px;overflow-y:auto;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ USERS PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-users">
-        <div class="section-header">
-          <h2>Pouzivatelia</h2>
-          <div class="ml-auto">
-            <button class="btn btn-primary btn-sm" onclick="openUserModal()">
-              <i data-lucide="plus"></i> Pridat pouzivatela
-            </button>
-          </div>
-        </div>
-        <div class="users-grid" id="users-grid">
-          <div style="text-align:center;padding:40px;color:var(--muted)">Nacitavanie...</div>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ MEETINGS PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-meetings">
-        <div class="section-header">
-          <h2>Porady</h2>
-          <div class="ml-auto" id="meetings-add-btn" style="display:none">
-            <button class="btn btn-primary btn-sm" onclick="openMeetingModal()">
-              <i data-lucide="plus"></i> Nova porada
-            </button>
-          </div>
-        </div>
-        <div class="users-grid" id="meetings-grid">
-          <div style="text-align:center;padding:40px;color:var(--muted)">Nacitavanie...</div>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ CAMPAIGNS PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-campaigns">
-        <div class="section-header">
-          <h2>Kampane</h2>
-          <div class="ml-auto" id="campaigns-add-btn" style="display:none">
-            <button class="btn btn-primary btn-sm" onclick="openCampaignModal()">
-              <i data-lucide="plus"></i> Nova kampan
-            </button>
-          </div>
-        </div>
-        <div class="users-grid" id="campaigns-grid">
-          <div style="text-align:center;padding:40px;color:var(--muted)">Nacitavanie...</div>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ KANBAN PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-kanban">
-        <div class="section-header">
-          <h2>Kanban Board</h2>
-        </div>
-        <div class="kanban-board" id="kanban-board">
-          <div style="text-align:center;padding:40px;color:var(--muted);width:100%">Nacitavanie...</div>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════ SETTINGS PAGE ═══════════════════════════════════════ -->
-      <div class="page" id="page-settings">
-        <div class="section-header">
-          <h2>Nastavenia firmy</h2>
-        </div>
-        <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">
-          Tieto informacie pouziva AI pri analyze napadov. Cim lepsie opisete firmu, tym presnejsie bude hodnotenie.
-        </p>
-
-        <div style="display:grid;gap:20px;max-width:720px;">
-          <div class="form-group">
-            <label>O firme</label>
-            <textarea id="ctx-company" class="input" rows="4" placeholder="Napr. Dajana Rodriguez je firma zamerana na vyrobu luxusnych kabeliek..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Ciele a priority</label>
-            <textarea id="ctx-goals" class="input" rows="4" placeholder="Napr. Expandovat do 3 novych krajov, znizit naklady vyroby o 15%..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Hodnoty znacky</label>
-            <textarea id="ctx-brand" class="input" rows="3" placeholder="Napr. Kvalita, udrzatelnost, originalny dizajn..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>Co hladame v napadoch</label>
-            <textarea id="ctx-criteria" class="input" rows="3" placeholder="Napr. Uprednostnujeme napady na znizenie nakladov..."></textarea>
-          </div>
-          <div>
-            <button class="btn btn-primary" onclick="saveCompanyContext()">
-              <i data-lucide="save"></i> Ulozit nastavenia
-            </button>
-          </div>
-        </div>
-      </div>
-
+    <div class="users-grid" id="meetings-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
     </div>
-  </main>
-</div>
+  </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
-<!-- MODALS                                                                                        -->
-<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
+  <!-- CAMPAIGNS PAGE -->
+  <div class="page" id="page-campaigns">
+    <div class="section-header">
+      <h2>Kampane</h2>
+      <div class="ml-auto" id="campaigns-add-btn" style="display:none">
+        <button class="btn-sm btn-primary" onclick="openCampaignModal()">+ Nová kampaň</button>
+      </div>
+    </div>
+    <div class="users-grid" id="campaigns-grid">
+      <div style="text-align:center;padding:40px;color:var(--muted)">Načítavanie...</div>
+    </div>
+  </div>
+</main>
 
 <!-- IDEA DETAIL MODAL -->
 <div class="modal-overlay" id="idea-modal">
-  <div class="modal" style="max-width:720px;">
-    <div class="modal-header">
-      <h2 id="modal-title">Napad #</h2>
-      <button class="modal-close" onclick="closeModal('idea-modal')">&times;</button>
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('idea-modal')">×</button>
+    <h2 id="modal-title">Nápad #</h2>
+    <div class="detail-meta" id="modal-meta"></div>
+
+    <div class="detail-section" id="modal-audio-section" style="display:none">
+      <label>Nahrávka</label>
+      <audio id="modal-audio-player" controls style="width:100%;border-radius:8px;margin-top:4px"></audio>
     </div>
-    <div class="modal-body">
-      <div class="detail-meta" id="modal-meta"></div>
 
-      <div class="detail-section" id="modal-audio-section" style="display:none">
-        <label>Nahravka</label>
-        <audio id="modal-audio-player" controls style="width:100%;border-radius:8px;margin-top:4px;"></audio>
+    <div class="detail-section">
+      <label style="display:flex;align-items:center;justify-content:space-between">
+        <span>Transkript</span>
+        <button id="btn-retranscribe" onclick="retranscribeIdea()" style="display:none;background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12px">🔄 Prepísať znova</button>
+      </label>
+      <p id="modal-transcript"></p>
+      <div id="modal-transcribe-info" style="display:none;margin-top:8px;font-size:11px;color:var(--muted);opacity:0.7"></div>
+    </div>
+
+    <div class="detail-section" id="modal-ai-section" style="display:none">
+      <label>AI Analýza</label>
+      <div class="ai-analysis" id="modal-ai"></div>
+    </div>
+
+    <div class="detail-section">
+      <label style="display:flex;align-items:center;gap:8px">
+        <span>👍 Hlasovanie</span>
+        <button class="btn-sm btn-ghost" id="modal-vote-btn" onclick="toggleVote()" style="font-size:13px">—</button>
+        <span id="modal-vote-count" style="font-size:13px;color:var(--muted)"></span>
+      </label>
+    </div>
+
+    <div class="detail-section">
+      <label>Komentáre</label>
+      <div id="modal-comments" style="max-height:200px;overflow-y:auto;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="modal-comment-input" class="filter-input" style="flex:1;min-width:0" placeholder="Napíšte komentár..." onkeydown="if(event.key==='Enter'){event.preventDefault();addComment();}">
+        <button class="btn-sm btn-primary" onclick="addComment()">Odoslať</button>
       </div>
+    </div>
 
-      <div class="detail-section">
-        <label style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Transkript</span>
-          <button id="btn-retranscribe" class="btn btn-ghost btn-sm" onclick="retranscribeIdea()" style="display:none;">
-            <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Prepisat znova
-          </button>
-        </label>
-        <p id="modal-transcript" class="text-block"></p>
-        <div id="modal-transcribe-info" style="display:none;margin-top:8px;font-size:11px;color:var(--muted);opacity:0.7;"></div>
-      </div>
-
-      <div class="detail-section" id="modal-ai-section" style="display:none">
-        <label>AI Analyza</label>
-        <div class="ai-analysis" id="modal-ai"></div>
-      </div>
-
-      <div class="detail-section">
-        <label style="display:flex;align-items:center;gap:8px;">
-          <span>Hlasovanie</span>
-          <button class="btn btn-ghost btn-sm" id="modal-vote-btn" onclick="toggleVote()">
-            <i data-lucide="thumbs-up" style="width:14px;height:14px;"></i> &mdash;
-          </button>
-          <span id="modal-vote-count" style="font-size:13px;color:var(--muted);"></span>
-        </label>
-      </div>
-
-      <div class="detail-section">
-        <label>Komentare</label>
-        <div id="modal-comments" style="max-height:200px;overflow-y:auto;margin-bottom:8px;"></div>
-        <div style="display:flex;gap:8px;">
-          <input id="modal-comment-input" class="input" style="flex:1;min-width:0;" placeholder="Napisite komentar..." onkeydown="if(event.key==='Enter'){event.preventDefault();addComment();}">
-          <button class="btn btn-primary btn-sm" onclick="addComment()">Odoslat</button>
+    <div class="detail-actions" id="modal-actions" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%">
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Typ</label>
+          <select id="modal-type-select" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+            <option value="napad">💡 Nápad</option>
+            <option value="porada">🎙️ Porada</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Status</label>
+          <select id="modal-status-select" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+          <option value="new">Nový</option>
+          <option value="in_review">V prehliadke</option>
+          <option value="accepted">Prijatý</option>
+          <option value="v_realizacii">V realizácii</option>
+          <option value="rejected">Zamietnutý</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Viditeľnosť</label>
+          <select id="modal-visibility-select" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+          <option value="personal">🔒 Osobný</option>
+          <option value="company">🌐 Firemný</option>
+          </select>
         </div>
       </div>
-
-      <div class="detail-actions" id="modal-actions" style="display:none;">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%;">
-          <div class="form-group">
-            <label>Typ</label>
-            <select id="modal-type-select" class="select">
-              <option value="napad">Napad</option>
-              <option value="porada">Porada</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="modal-status-select" class="select">
-              <option value="new">Novy</option>
-              <option value="in_review">V prehliadke</option>
-              <option value="accepted">Prijaty</option>
-              <option value="v_realizacii">V realizacii</option>
-              <option value="rejected">Zamietnuty</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Viditelnost</label>
-            <select id="modal-visibility-select" class="select">
-              <option value="personal">Osobny</option>
-              <option value="company">Firemny</option>
-            </select>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Tagy</label>
+        <div class="tag-chips" id="modal-tag-chips"></div>
+        <div style="margin-top:8px">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="modal-tag-presets"></div>
+          <div class="tag-add-row">
+            <input class="tag-add-input" id="modal-tag-input" placeholder="Vlastný tag..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}">
+            <button class="btn-sm btn-ghost" onclick="addCustomTag()">Pridať</button>
           </div>
         </div>
-
-        <div style="width:100%;">
-          <label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;">Tagy</label>
-          <div class="tag-chips" id="modal-tag-chips"></div>
-          <div style="margin-top:8px;">
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;" id="modal-tag-presets"></div>
-            <div class="tag-add-row">
-              <input class="input" id="modal-tag-input" placeholder="Vlastny tag..." onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}">
-              <button class="btn btn-ghost btn-sm" onclick="addCustomTag()">Pridat</button>
-            </div>
-          </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%">
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Priradené komu</label>
+          <select id="modal-assigned" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
+            <option value="">— nepriradené —</option>
+          </select>
         </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;">
-          <div class="form-group">
-            <label>Priradene komu</label>
-            <select id="modal-assigned" class="select">
-              <option value="">&mdash; nepriradene &mdash;</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Deadline</label>
-            <input type="date" id="modal-deadline" class="input">
-          </div>
+        <div>
+          <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Deadline</label>
+          <input type="date" id="modal-deadline" style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none">
         </div>
-
-        <div style="width:100%;" class="form-group">
-          <label>Poznamka recenzenta</label>
-          <textarea id="modal-note" class="input" rows="3" placeholder="Volitelna poznamka..."></textarea>
+      </div>
+      <div style="width:100%">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px">Poznámka recenzenta</label>
+        <textarea id="modal-note" placeholder="Voliteľná poznámka..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;width:100%;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:10px">
+          <button class="btn-sm btn-primary" onclick="saveIdea()">Uložiť</button>
+          <button class="btn-sm btn-ghost" onclick="analyzeIdea()">🤖 AI Analýza</button>
         </div>
-
-        <div style="display:flex;gap:10px;width:100%;justify-content:space-between;align-items:center;">
-          <div style="display:flex;gap:10px;">
-            <button class="btn btn-primary btn-sm" onclick="saveIdea()">
-              <i data-lucide="save" style="width:14px;height:14px;"></i> Ulozit
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="analyzeIdea()">
-              <i data-lucide="brain" style="width:14px;height:14px;"></i> AI Analyza
-            </button>
-          </div>
-          <button class="btn btn-danger btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="display:none;">
-            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Vymazat
-          </button>
-        </div>
+        <button class="btn-sm" id="btn-delete-idea" onclick="deleteIdea()" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);display:none">🗑 Vymazať</button>
       </div>
     </div>
   </div>
@@ -471,1813 +321,389 @@
 
 <!-- USER MODAL -->
 <div class="modal-overlay" id="user-modal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-header">
-      <h2 id="u-modal-title">Novy pouzivatel</h2>
-      <button class="modal-close" onclick="closeModal('user-modal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Meno</label>
-          <input type="text" id="u-name" class="input" placeholder="Jan Novak">
-        </div>
-        <div class="form-group">
-          <label>E-mail</label>
-          <input type="email" id="u-email" class="input" placeholder="jan@firma.sk">
-        </div>
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeModal('user-modal')">×</button>
+    <h2 id="u-modal-title">Nový používateľ</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Meno</label>
+        <input type="text" id="u-name" placeholder="Ján Novák">
       </div>
-      <div class="form-group" id="u-pass-group">
-        <label id="u-pass-label">Heslo</label>
-        <input type="password" id="u-pass" class="input" placeholder="Docasne heslo">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Rola</label>
-          <select id="u-role" class="select">
-            <option value="submitter">Prispievatel</option>
-            <option value="reviewer">Recenzent</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Oddelenie</label>
-          <select id="u-dept" class="select">
-            <option value="">&mdash; vyber &mdash;</option>
-            <option value="development">Vyvoj</option>
-            <option value="marketing">Marketing</option>
-            <option value="production">Produkcia</option>
-            <option value="management">Manazment</option>
-            <option value="other">Ine</option>
-          </select>
-        </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="u-email" placeholder="jan@firma.sk">
       </div>
     </div>
-    <div class="modal-footer">
-      <button id="u-save-btn" class="btn btn-primary w-full" onclick="saveUser()">Vytvorit pouzivatela</button>
+    <div class="form-group" id="u-pass-group">
+      <label id="u-pass-label">Heslo</label>
+      <input type="password" id="u-pass" placeholder="Dočasné heslo">
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Rola</label>
+        <select id="u-role">
+          <option value="submitter">Prispievateľ</option>
+          <option value="reviewer">Recenzent</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Oddelenie</label>
+        <select id="u-dept">
+          <option value="">— vyber —</option>
+          <option value="development">Vývoj</option>
+          <option value="marketing">Marketing</option>
+          <option value="production">Produkcia</option>
+          <option value="management">Manažment</option>
+          <option value="other">Iné</option>
+        </select>
+      </div>
+    </div>
+    <button id="u-save-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="saveUser()">Vytvoriť používateľa</button>
   </div>
 </div>
 
 <!-- MEETING MODAL -->
 <div class="modal-overlay" id="meeting-modal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-header">
-      <h2 id="meeting-modal-title">Nova porada</h2>
-      <button class="modal-close" onclick="closeModal('meeting-modal')">&times;</button>
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeModal('meeting-modal')">×</button>
+    <h2 id="meeting-modal-title">Nová porada</h2>
+    <div class="form-group">
+      <label>Názov</label>
+      <input type="text" id="m-title" placeholder="Napr. Týždenný review nápadov">
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Nazov</label>
-        <input type="text" id="m-title" class="input" placeholder="Napr. Tyzdenny review napadov">
-      </div>
-      <div class="form-group">
-        <label>Datum porady</label>
-        <input type="date" id="m-date" class="input">
-      </div>
-      <div class="form-group">
-        <label>Popis</label>
-        <textarea id="m-desc" class="input" rows="3" placeholder="O com bude porada..."></textarea>
-      </div>
+    <div class="form-group">
+      <label>Dátum porady</label>
+      <input type="date" id="m-date">
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary w-full" onclick="saveMeeting()">Vytvorit poradu</button>
+    <div class="form-group">
+      <label>Popis</label>
+      <textarea id="m-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="O čom bude porada..."></textarea>
     </div>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveMeeting()">Vytvoriť poradu</button>
   </div>
 </div>
 
 <!-- CAMPAIGN MODAL -->
 <div class="modal-overlay" id="campaign-modal">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-header">
-      <h2 id="campaign-modal-title">Nova kampan</h2>
-      <button class="modal-close" onclick="closeModal('campaign-modal')">&times;</button>
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeModal('campaign-modal')">×</button>
+    <h2 id="campaign-modal-title">Nová kampaň</h2>
+    <div class="form-group">
+      <label>Názov</label>
+      <input type="text" id="c-title" placeholder="Napr. Inovácie Q1 2026">
     </div>
-    <div class="modal-body">
+    <div class="form-row">
       <div class="form-group">
-        <label>Nazov</label>
-        <input type="text" id="c-title" class="input" placeholder="Napr. Inovacie Q1 2026">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Zaciatok</label>
-          <input type="date" id="c-start" class="input">
-        </div>
-        <div class="form-group">
-          <label>Koniec</label>
-          <input type="date" id="c-end" class="input">
-        </div>
+        <label>Začiatok</label>
+        <input type="date" id="c-start">
       </div>
       <div class="form-group">
-        <label>Popis</label>
-        <textarea id="c-desc" class="input" rows="3" placeholder="Co je cielom kampane..."></textarea>
+        <label>Koniec</label>
+        <input type="date" id="c-end">
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary w-full" onclick="saveCampaign()">Vytvorit kampan</button>
+    <div class="form-group">
+      <label>Popis</label>
+      <textarea id="c-desc" rows="3" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Čo je cieľom kampane..."></textarea>
     </div>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="saveCampaign()">Vytvoriť kampaň</button>
   </div>
 </div>
 
 <!-- PASSWORD CHANGE MODAL -->
 <div class="modal-overlay" id="password-modal">
-  <div class="modal" style="max-width:400px;">
-    <div class="modal-header">
-      <h2>Zmena hesla</h2>
-      <button class="modal-close" onclick="closeModal('password-modal')">&times;</button>
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closeModal('password-modal')">×</button>
+    <h2>🔒 Zmena hesla</h2>
+    <div class="form-group">
+      <label>Aktuálne heslo</label>
+      <input type="password" id="pw-current" placeholder="Zadajte aktuálne heslo">
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Aktualne heslo</label>
-        <input type="password" id="pw-current" class="input" placeholder="Zadajte aktualne heslo">
-      </div>
-      <div class="form-group">
-        <label>Nove heslo</label>
-        <input type="password" id="pw-new" class="input" placeholder="Minimalne 6 znakov">
-      </div>
-      <div class="form-group">
-        <label>Potvrdenie noveho hesla</label>
-        <input type="password" id="pw-confirm" class="input" placeholder="Zopakujte nove heslo">
-      </div>
+    <div class="form-group">
+      <label>Nové heslo</label>
+      <input type="password" id="pw-new" placeholder="Minimálne 6 znakov">
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary w-full" onclick="changePassword()">Zmenit heslo</button>
+    <div class="form-group">
+      <label>Potvrdenie nového hesla</label>
+      <input type="password" id="pw-confirm" placeholder="Zopakujte nové heslo">
     </div>
+    <button class="btn-sm btn-primary" style="width:100%;padding:12px" onclick="changePassword()">Zmeniť heslo</button>
   </div>
 </div>
 
 <!-- ADD IDEA MODAL -->
 <div class="modal-overlay" id="add-idea-modal">
-  <div class="modal" style="max-width:560px;">
-    <div class="modal-header">
-      <h2>Pridat napad</h2>
-      <button class="modal-close" onclick="closeModal('add-idea-modal')">&times;</button>
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('add-idea-modal')">×</button>
+    <h2>Pridať nápad</h2>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn-sm" id="tab-text" style="padding:10px 20px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer" onclick="switchAddTab('text')">Textom</button>
+      <button class="btn-sm" id="tab-doc" style="padding:10px 20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:8px;cursor:pointer" onclick="switchAddTab('doc')">Dokument</button>
     </div>
-    <div class="modal-body">
-      <div style="display:flex;gap:8px;margin-bottom:20px;">
-        <button class="btn btn-primary btn-sm" id="tab-text" onclick="switchAddTab('text')">Textom</button>
-        <button class="btn btn-ghost btn-sm" id="tab-doc" onclick="switchAddTab('doc')">Dokument</button>
+    <div id="add-tab-text">
+      <div class="form-group">
+        <label>Váš nápad</label>
+        <textarea id="add-text" rows="6" style="width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;resize:vertical;font-family:inherit" placeholder="Napíšte váš nápad, poznámku, alebo vložte text z dokumentu..."></textarea>
       </div>
-
-      <div id="add-tab-text">
-        <div class="form-group">
-          <label>Vas napad</label>
-          <textarea id="add-text" class="input" rows="6" placeholder="Napisite vas napad, poznamku, alebo vlozte text z dokumentu..."></textarea>
+    </div>
+    <div id="add-tab-doc" style="display:none">
+      <div class="form-group">
+        <label>Nahrať súbor</label>
+        <div id="drop-zone" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s" onclick="document.getElementById('add-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--primary)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
+          <div style="font-size:32px;margin-bottom:8px">📎</div>
+          <div style="color:var(--muted);font-size:14px">Kliknite alebo pretiahnite súbor</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:4px">PDF, DOCX, TXT, obrázky</div>
         </div>
-      </div>
-
-      <div id="add-tab-doc" style="display:none;">
-        <div class="form-group">
-          <label>Nahrat subor</label>
-          <div id="drop-zone" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s;"
-               onclick="document.getElementById('add-file').click()"
-               ondragover="event.preventDefault();this.style.borderColor='var(--primary)'"
-               ondragleave="this.style.borderColor='var(--border)'"
-               ondrop="handleDrop(event)">
-            <div style="margin-bottom:8px;"><i data-lucide="paperclip" style="width:32px;height:32px;color:var(--muted);"></i></div>
-            <div style="color:var(--muted);font-size:14px;">Kliknite alebo pretiahnite subor</div>
-            <div style="color:var(--muted);font-size:12px;margin-top:4px;">PDF, DOCX, TXT, obrazky</div>
-          </div>
-          <input type="file" id="add-file" style="display:none" accept=".pdf,.docx,.doc,.txt,.md,.rtf,.png,.jpg,.jpeg,.gif,.webp" onchange="handleFileSelect(this)">
-          <div id="file-info" style="display:none;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;">
-            <span id="file-name"></span>
-            <span style="cursor:pointer;margin-left:8px;color:var(--red);" onclick="clearFile()">&times;</span>
-          </div>
+        <input type="file" id="add-file" style="display:none" accept=".pdf,.docx,.doc,.txt,.md,.rtf,.png,.jpg,.jpeg,.gif,.webp" onchange="handleFileSelect(this)">
+        <div id="file-info" style="display:none;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:13px;display:none">
+          <span id="file-name"></span>
+          <span style="cursor:pointer;margin-left:8px;color:var(--red)" onclick="clearFile()">✕</span>
         </div>
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Oddelenie</label>
-          <select id="add-dept" class="select">
-            <option value="development">Vyvoj</option>
-            <option value="marketing">Marketing</option>
-            <option value="production">Produkcia</option>
-            <option value="management">Manazment</option>
-            <option value="other">Ine</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Rola</label>
-          <select id="add-role" class="select">
-            <option value="c-level">C-level</option>
-            <option value="manager">Manazer</option>
-            <option value="employee">Zamestnanec</option>
-          </select>
-        </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Oddelenie</label>
+        <select id="add-dept">
+          <option value="development">Vývoj</option>
+          <option value="marketing">Marketing</option>
+          <option value="production">Produkcia</option>
+          <option value="management">Manažment</option>
+          <option value="other">Iné</option>
+        </select>
       </div>
       <div class="form-group">
-        <label>Viditelnost</label>
-        <select id="add-visibility" class="select">
-          <option value="company">Firemny (pre celu firmu)</option>
-          <option value="personal">Osobny (iba ja)</option>
+        <label>Rola</label>
+        <select id="add-role">
+          <option value="c-level">C-level</option>
+          <option value="manager">Manažér</option>
+          <option value="employee">Zamestnanec</option>
         </select>
       </div>
     </div>
-    <div class="modal-footer">
-      <button id="add-submit-btn" class="btn btn-primary w-full" onclick="submitIdea()">Pridat napad</button>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:10px">
+        <span>Viditelnosť</span>
+        <select id="add-visibility" style="flex:1">
+          <option value="company">Firemný (pre celú firmu)</option>
+          <option value="personal">Osobný (iba ja)</option>
+        </select>
+      </label>
     </div>
+    <button id="add-submit-btn" class="btn-sm btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="submitIdea()">
+      Pridať nápad
+    </button>
   </div>
 </div>
 
-<!-- Toast container -->
-<div class="toast-container" id="toast-container"></div>
+<div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
-<!-- JAVASCRIPT                                                                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════════════════════════════ -->
-<script>
-// ─── Config ─────────────────────────────────────────────────────────────────
-const API_BASE = '';  // same origin
-const PAGE_SIZE = 20;
-
-// ─── API Helper ─────────────────────────────────────────────────────────────
-async function api(url, options = {}) {
-  const res = await fetch(API_BASE + url, options);
-  if (res.status === 401) {
-    window.location.href = '/login';
-    throw new Error('Unauthorized');
-  }
-  return res;
-}
-
-function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-// Shorthand alias used throughout
-const esc = escapeHtml;
-
-// ─── Auth ───────────────────────────────────────────────────────────────────
-let currentUser = null;
-
-async function loadCurrentUser() {
-  try {
-    const r = await fetch('/api/current-user');
-    if (!r.ok) {
-      window.location.href = '/login';
-      return;
-    }
-    currentUser = await r.json();
-
-    // Update sidebar user info
-    document.getElementById('user-name').textContent = currentUser.name;
-    const roleBadge = document.getElementById('user-role-badge');
-    roleBadge.textContent = currentUser.role;
-    roleBadge.className = 'sidebar-user-role badge badge-' +
-      (currentUser.role === 'admin' ? 'purple' : currentUser.role === 'reviewer' ? 'blue' : 'gray');
-
-    // Role-based nav visibility
-    if (currentUser.role === 'admin') {
-      document.getElementById('nav-admin-header').style.display = '';
-      document.getElementById('nav-admin-group').style.display = '';
-      document.getElementById('th-select-all').style.display = '';
-    }
-
-    if (currentUser.role === 'admin' || currentUser.role === 'reviewer') {
-      document.getElementById('meetings-add-btn').style.display = '';
-      document.getElementById('campaigns-add-btn').style.display = '';
-    }
-  } catch (e) {
-    window.location.href = '/login';
-  }
-}
-
-function doLogout() {
-  fetch('/api/logout', { method: 'POST' }).then(() => {
-    window.location.href = '/login';
-  });
-}
-
-// ─── Navigation ─────────────────────────────────────────────────────────────
-let currentPage = 'ideas';
-
-function showPage(page) {
-  currentPage = page;
-
-  // Hide all pages, show selected
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const pageEl = document.getElementById('page-' + page);
-  if (pageEl) pageEl.classList.add('active');
-
-  // Update nav active states
-  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-page') === page);
-  });
-
-  // Load data for page
-  if (page === 'ideas') loadIdeas();
-  if (page === 'stats') loadStats();
-  if (page === 'users') loadUsers();
-  if (page === 'meetings') loadMeetings();
-  if (page === 'campaigns') loadCampaigns();
-  if (page === 'kanban') loadKanban();
-  if (page === 'settings') loadCompanyContext();
-
-  // Close mobile sidebar
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-
-  // Re-render icons
-  lucide.createIcons();
-}
-
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-
-// ─── Utility Functions ──────────────────────────────────────────────────────
-function statusLabel(s) {
-  return {
-    new: 'Novy',
-    in_review: 'V prehliadke',
-    accepted: 'Prijaty',
-    rejected: 'Zamietnuty',
-    v_realizacii: 'V realizacii'
-  }[s] || s;
-}
-
-function deptLabel(d) {
-  return {
-    development: 'Vyvoj',
-    marketing: 'Marketing',
-    production: 'Produkcia',
-    management: 'Manazment',
-    other: 'Ine'
-  }[d] || d || '\u2014';
-}
-
-function roleLabel(r) {
-  return {
-    'c-level': 'C-level',
-    manager: 'Manazer',
-    employee: 'Zamestnanec'
-  }[r] || r || '\u2014';
-}
-
-function formatDate(s) {
-  if (!s) return '\u2014';
-  try {
-    const d = new Date(s);
-    return d.toLocaleDateString('sk-SK', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch {
-    return s;
-  }
-}
-
-// ─── Ideas ──────────────────────────────────────────────────────────────────
-let ideasPage = 0;
-let searchTimer = null;
-
-function debounceSearch() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    ideasPage = 0;
-    loadIdeas();
-  }, 400);
-}
-
-// Attach search listener after DOM ready
-function initSearchField() {
-  const searchEl = document.getElementById('f-search');
-  if (searchEl) {
-    searchEl.addEventListener('input', debounceSearch);
-  }
-}
-
-async function loadIdeas() {
-  // Reset selection
-  const selectAllCb = document.getElementById('select-all');
-  if (selectAllCb) selectAllCb.checked = false;
-  const bulkBar = document.getElementById('bulk-bar');
-  if (bulkBar) bulkBar.classList.remove('visible');
-
-  const params = new URLSearchParams();
-  const status = document.getElementById('f-status').value;
-  const ideaType = document.getElementById('f-type').value;
-  const dept = document.getElementById('f-dept').value;
-  const role = document.getElementById('f-role').value;
-  const search = (document.getElementById('f-search').value || '').trim();
-
-  if (status) params.set('status', status);
-  if (ideaType) params.set('idea_type', ideaType);
-  if (dept) params.set('department', dept);
-  if (role) params.set('role', role);
-  if (search) params.set('search', search);
-  params.set('limit', PAGE_SIZE);
-  params.set('offset', ideasPage * PAGE_SIZE);
-
-  try {
-    const r = await api('/api/ideas?' + params);
-    if (!r.ok) return;
-    const data = await r.json();
-    renderIdeas(data.data);
-    renderPagination(data.total);
-  } catch (e) {
-    // 401 handled by api()
-  }
-}
-
-function renderTags(tagsJson) {
-  try {
-    const tags = JSON.parse(tagsJson || '[]');
-    if (!tags.length) return '<span style="color:var(--muted);font-size:12px;">\u2014</span>';
-    return tags.map(t => '<span class="badge badge-purple">' + esc(t) + '</span>').join(' ');
-  } catch {
-    return '\u2014';
-  }
-}
-
-// ─── Inline Audio Player ────────────────────────────────────────────────────
-let _audioPlayer = null;
-let _audioPlayingId = null;
-
-function toggleAudio(id, btn) {
-  if (_audioPlayer && _audioPlayingId === id && !_audioPlayer.paused) {
-    _audioPlayer.pause();
-    if (btn) btn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px;"></i>';
-    lucide.createIcons();
-    return;
-  }
-
-  if (_audioPlayer) {
-    _audioPlayer.pause();
-    _audioPlayer = null;
-    var prevBtn = document.getElementById('play-btn-' + _audioPlayingId);
-    if (prevBtn) {
-      prevBtn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px;"></i>';
-    }
-  }
-
-  _audioPlayingId = id;
-  _audioPlayer = new Audio('/api/ideas/' + id + '/audio');
-  _audioPlayer.play().catch(function (e) {
-    showToast('Chyba prehravania: ' + e.message, 'error');
-  });
-
-  if (btn) btn.innerHTML = '<i data-lucide="pause" style="width:14px;height:14px;"></i>';
-  lucide.createIcons();
-
-  _audioPlayer.onended = function () {
-    if (btn) btn.innerHTML = '<i data-lucide="play" style="width:14px;height:14px;"></i>';
-    lucide.createIcons();
-    _audioPlayingId = null;
-    _audioPlayer = null;
-  };
-}
-
-function playAudio(id) {
-  toggleAudio(id, document.getElementById('play-btn-' + id));
-}
-
-function renderIdeas(ideas) {
-  const isAdmin = currentUser && currentUser.role === 'admin';
-  const tbody = document.getElementById('ideas-tbody');
-
-  if (!ideas.length) {
-    tbody.innerHTML = '<tr><td colspan="13"><div class="empty"><p>Ziadne napady</p></div></td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = ideas.map(i => `
+<script>let currentUser=null;let currentIdea=null;let ideasPage=0;const PAGE_SIZE=20;let editingUserId=null;let usersData=[];let searchTimer=null;async function init(){const r=await fetch('/api/current-user');if(!r.ok){window.location.href='/login';return;}
+currentUser=await r.json();document.getElementById('user-badge').textContent=`${currentUser.name} (${currentUser.role})`;const _old=document.getElementById('f-search');const _fresh=document.createElement('div');_fresh.className=_old.className;_fresh.id='f-search';_fresh.contentEditable='true';_fresh.setAttribute('role','searchbox');_fresh.setAttribute('data-placeholder','Hľadať v transkripte...');_fresh.addEventListener('input',debounceSearch);_fresh.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});_old.replaceWith(_fresh);if(currentUser.role==='admin'){document.getElementById('nav-users').style.display='';document.getElementById('nav-settings').style.display='';}
+if(currentUser.role==='admin'||currentUser.role==='reviewer'){document.getElementById('nav-meetings').style.display='';document.getElementById('nav-campaigns').style.display='';document.getElementById('nav-kanban').style.display='';document.getElementById('meetings-add-btn').style.display='';document.getElementById('campaigns-add-btn').style.display='';}
+if(currentUser.role==='admin'){document.getElementById('th-select-all').style.display='';}
+loadIdeas();}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');event.target.classList.add('active');if(name==='stats')loadStats();if(name==='users')loadUsers();if(name==='settings')loadCompanyContext();if(name==='meetings')loadMeetings();if(name==='campaigns')loadCampaigns();if(name==='kanban')loadKanban();}
+function debounceSearch(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>{ideasPage=0;loadIdeas();},400);}
+async function loadIdeas(){const _sa=document.getElementById('select-all');if(_sa)_sa.checked=false;const _bb=document.getElementById('bulk-bar');if(_bb)_bb.classList.remove('visible');const params=new URLSearchParams();const status=document.getElementById('f-status').value;const ideaType=document.getElementById('f-type').value;const dept=document.getElementById('f-dept').value;const role=document.getElementById('f-role').value;const search=(document.getElementById('f-search').textContent||'').trim();if(status)params.set('status',status);if(ideaType)params.set('idea_type',ideaType);if(dept)params.set('department',dept);if(role)params.set('role',role);if(search)params.set('search',search);params.set('limit',PAGE_SIZE);params.set('offset',ideasPage*PAGE_SIZE);const r=await fetch('/api/ideas?'+params);if(!r.ok){if(r.status===401){window.location.href='/login?next=/';return;}return;}const data=await r.json();renderIdeas(data.data);renderPagination(data.total);}
+function renderTags(tagsJson){try{const tags=JSON.parse(tagsJson||'[]');if(!tags.length)return'<span style="color:var(--muted);font-size:12px">—</span>';return tags.map(t=>`<span class="badge badge-tag">${esc(t)}</span>`).join(' ');}catch{return'—';}}
+let _audioPlayer=null;let _audioPlayingId=null;function toggleAudio(id,btn){if(_audioPlayer&&_audioPlayingId===id&&!_audioPlayer.paused){_audioPlayer.pause();if(btn)btn.textContent='▶';return;}
+if(_audioPlayer){_audioPlayer.pause();_audioPlayer=null;var prevBtn=document.getElementById('play-btn-'+_audioPlayingId);if(prevBtn)prevBtn.textContent='▶';}
+_audioPlayingId=id;_audioPlayer=new Audio('/api/ideas/'+id+'/audio');_audioPlayer.play().catch(function(e){showToast('Chyba prehrávania: '+e.message,'error');});if(btn)btn.textContent='⏸';_audioPlayer.onended=function(){if(btn)btn.textContent='▶';_audioPlayingId=null;_audioPlayer=null;};}
+function playAudio(id){toggleAudio(id,document.getElementById('play-btn-'+id));}
+function renderIdeas(ideas){const isAdmin=currentUser&&currentUser.role==='admin';const tbody=document.getElementById('ideas-tbody');if(!ideas.length){tbody.innerHTML='<tr><td colspan="12"><div class="empty"><div class="icon">💭</div><p>Žiadne nápady</p></div></td></tr>';return;}
+tbody.innerHTML=ideas.map(i=>`
     <tr>
-      ${isAdmin ? '<td onclick="event.stopPropagation()"><input type="checkbox" class="idea-cb" value="' + i.id + '" onchange="updateBulkBar()"></td>' : ''}
+      ${isAdmin ? '<td onclick="event.stopPropagation()"><input type="checkbox" class="idea-cb" value="'+i.id+'" onchange="updateBulkBar()"></td>' : ''}
       <td style="color:var(--muted);cursor:pointer" onclick="openIdea(${i.id})">#${i.id}</td>
-      <td onclick="openIdea(${i.id})" style="cursor:pointer">
-        ${(i.idea_type || 'napad') === 'porada'
-          ? '<span class="badge badge-blue">Porada</span>'
-          : '<span class="badge badge-yellow">Napad</span>'}
-      </td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${(i.idea_type||'napad')==='porada' ? '<span class="badge" style="background:rgba(59,130,246,0.15);color:#60a5fa">🎙️ Porada</span>' : '<span class="badge" style="background:rgba(250,204,21,0.15);color:#facc15">💡 Nápad</span>'}</td>
       <td style="font-weight:500;cursor:pointer" onclick="openIdea(${i.id})">${esc(i.author_name)}</td>
-      <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-gray">${deptLabel(i.department)}</span></td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-dept">${deptLabel(i.department)}</span></td>
       <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:13px;cursor:pointer">${roleLabel(i.role)}</td>
-      <td onclick="openIdea(${i.id})" class="truncate" style="color:var(--muted);cursor:pointer">${esc(i.transcript) || '\u2014'}</td>
-      <td onclick="openIdea(${i.id})" style="cursor:pointer">
-        ${i.ai_score > 0
-          ? '<span class="badge badge-purple">' + i.ai_score + '/10</span>'
-          : '<span style="color:var(--muted);font-size:13px">\u2014</span>'}
-      </td>
+      <td onclick="openIdea(${i.id})" class="truncate" style="color:var(--muted);cursor:pointer">${esc(i.transcript) || '—'}</td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.ai_score > 0 ? `<span class="badge badge-score">⭐ ${i.ai_score}/10</span>` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
       <td onclick="openIdea(${i.id})" style="cursor:pointer">${renderTags(i.tags)}</td>
       <td onclick="openIdea(${i.id})" style="cursor:pointer"><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
-      <td onclick="openIdea(${i.id})" style="cursor:pointer">
-        ${i.visibility === 'company'
-          ? '<span class="badge badge-gray">Firemny</span>'
-          : '<span style="color:var(--muted);font-size:12px">Osobny</span>'}
-      </td>
+      <td onclick="openIdea(${i.id})" style="cursor:pointer">${i.visibility === 'company' ? '<span class="badge badge-dept">🌐 Firemný</span>' : '<span style="color:var(--muted);font-size:12px">🔒 Osobný</span>'}</td>
       <td onclick="openIdea(${i.id})" style="color:var(--muted);font-size:12px;cursor:pointer">${formatDate(i.created_at)}</td>
-      <td onclick="event.stopPropagation()">
-        ${(i.has_audio || i.audio_data)
-          ? '<button id="play-btn-' + i.id + '" class="btn btn-primary btn-sm" onclick="toggleAudio(' + i.id + ', this)" style="padding:3px 10px;"><i data-lucide="play" style="width:14px;height:14px;"></i></button>'
-            + (i.duration_seconds > 0
-              ? '<span style="color:var(--muted);font-size:12px;margin-left:6px">' + Math.floor(i.duration_seconds / 60) + ':' + ('0' + (i.duration_seconds % 60)).slice(-2) + '</span>'
-              : '')
-          : '<span style="color:var(--muted);font-size:13px">\u2014</span>'}
-      </td>
+      <td onclick="event.stopPropagation()">${(i.has_audio || i.audio_data) ? `<button id="play-btn-${i.id}"onclick="toggleAudio(${i.id}, this)"style="background:var(--primary);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px">▶</button>${i.duration_seconds > 0 ? `<span style="color:var(--muted);font-size:12px;margin-left:6px">${Math.floor(i.duration_seconds/60)}:${('0'+(i.duration_seconds%60)).slice(-2)}</span>` : ''}` : '<span style="color:var(--muted);font-size:13px">—</span>'}</td>
     </tr>
-  `).join('');
-
-  lucide.createIcons();
-}
-
-function renderPagination(total) {
-  const pages = Math.ceil(total / PAGE_SIZE);
-  const pg = document.getElementById('pagination');
-  if (pages <= 1) {
-    pg.innerHTML = '';
-    return;
-  }
-  pg.innerHTML = `
-    <button class="btn btn-ghost btn-sm" onclick="gotoPage(${ideasPage - 1})" ${ideasPage === 0 ? 'disabled' : ''}>&lsaquo;</button>
-    <span>${ideasPage + 1} / ${pages} (${total} celkovo)</span>
-    <button class="btn btn-ghost btn-sm" onclick="gotoPage(${ideasPage + 1})" ${ideasPage >= pages - 1 ? 'disabled' : ''}>&rsaquo;</button>
-  `;
-}
-
-function gotoPage(p) {
-  ideasPage = p;
-  loadIdeas();
-}
-
-// ─── Idea Detail ────────────────────────────────────────────────────────────
-let currentIdea = null;
-
-async function openIdea(id) {
-  try {
-    const r = await api('/api/ideas/' + id);
-    if (!r.ok) {
-      showToast('Chyba pri nacitani napadu', 'error');
-      return;
-    }
-    currentIdea = await r.json();
-  } catch (e) {
-    return;
-  }
-
-  const i = currentIdea;
-  document.getElementById('modal-title').textContent = 'Napad #' + i.id;
-
-  // Meta badges
-  document.getElementById('modal-meta').innerHTML = `
+  `).join('');}
+function renderPagination(total){const pages=Math.ceil(total/PAGE_SIZE);const pg=document.getElementById('pagination');if(pages<=1){pg.innerHTML='';return;}
+pg.innerHTML=`
+    <button onclick="gotoPage(${ideasPage-1})" ${ideasPage===0?'disabled':''}>‹</button>
+    <span>${ideasPage+1} / ${pages} (${total} celkovo)</span>
+    <button onclick="gotoPage(${ideasPage+1})" ${ideasPage>=pages-1?'disabled':''}>›</button>
+  `;}
+function gotoPage(p){ideasPage=p;loadIdeas();}
+async function openIdea(id){const r=await fetch(`/api/ideas/${id}`);if(!r.ok){if(r.status===401){window.location.href='/login?next=/';return;}showToast('Chyba pri nacitani napadu','error');return;}currentIdea=await r.json();const i=currentIdea;document.getElementById('modal-title').textContent=`Nápad #${i.id}`;document.getElementById('modal-meta').innerHTML=`
     <span class="badge badge-${i.status}">${statusLabel(i.status)}</span>
-    <span class="badge badge-gray">${deptLabel(i.department)}</span>
-    <span class="badge badge-gray">${roleLabel(i.role)}</span>
-    <span class="badge badge-gray">${esc(i.author_name)}</span>
-    ${i.duration_seconds > 0 ? '<span class="badge badge-gray">' + i.duration_seconds + 's</span>' : ''}
-    <span class="badge badge-gray">${i.visibility === 'company' ? 'Firemny' : 'Osobny'}</span>
-    ${i.assigned_to ? '<span class="badge badge-gray">' + esc(i.assigned_to) + '</span>' : ''}
-    ${i.deadline ? '<span class="badge badge-gray">' + i.deadline + '</span>' : ''}
-    ${(() => { try { const t = JSON.parse(i.tags || '[]'); return t.map(tag => '<span class="badge badge-purple">' + esc(tag) + '</span>').join(''); } catch { return ''; } })()}
-  `;
-
-  // Transcript
-  document.getElementById('modal-transcript').textContent = i.transcript || '(prazdny transkript)';
-
-  // Transcribe info
-  const tInfo = document.getElementById('modal-transcribe-info');
-  if (i.transcribed_at) {
-    const engineLabel = i.stt_engine === 'elevenlabs' ? 'ElevenLabs Scribe'
-      : i.stt_engine === 'whisper' ? 'Whisper'
-      : i.stt_engine || '';
-    const dt = new Date(i.transcribed_at);
-    const formatted = dt.toLocaleString('sk-SK', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-    tInfo.style.display = '';
-    tInfo.textContent = 'Prepisane: ' + formatted + (engineLabel ? ' \u00b7 ' + engineLabel : '');
-  } else {
-    tInfo.style.display = 'none';
-  }
-
-  // Audio section
-  const audioSection = document.getElementById('modal-audio-section');
-  if (i.audio_data) {
-    audioSection.style.display = '';
-    document.getElementById('modal-audio-player').src = '/api/ideas/' + i.id + '/audio';
-    document.getElementById('btn-retranscribe').style.display = '';
-  } else {
-    audioSection.style.display = 'none';
-    document.getElementById('btn-retranscribe').style.display = 'none';
-  }
-
-  // AI Analysis
-  const aiSection = document.getElementById('modal-ai-section');
-  if (i.ai_analysis) {
-    try {
-      const a = JSON.parse(i.ai_analysis);
-      aiSection.style.display = '';
-      document.getElementById('modal-ai').innerHTML = `
-        <div class="ai-row"><span>Celkove hodnotenie</span><strong>${a.score}/10</strong></div>
-        <div class="ai-row"><span>Jasnost</span><strong>${a.clarity}/10</strong></div>
-        <div class="ai-row"><span>Realizovatelnost</span><strong>${a.feasibility}/10</strong></div>
-        ${a.relevance ? '<div class="ai-row"><span>Relevancia pre firmu</span><strong>' + a.relevance + '/10</strong></div>' : ''}
-        ${a.summary ? '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">' + esc(a.summary) + '</div>' : ''}
-        ${a.strengths && a.strengths.length ? '<div style="margin-top:10px"><strong style="font-size:12px;color:var(--green)">Silne stranky</strong><ul class="ai-list" style="margin-top:6px">' + a.strengths.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul></div>' : ''}
-        ${a.next_steps && a.next_steps.length ? '<div style="margin-top:10px"><strong style="font-size:12px;color:var(--primary)">Dalsie kroky</strong><ul class="ai-list" style="margin-top:6px">' + a.next_steps.map(s => '<li>' + esc(s) + '</li>').join('') + '</ul></div>' : ''}
-      `;
-    } catch (e) {
-      aiSection.style.display = 'none';
-    }
-  } else {
-    aiSection.style.display = 'none';
-  }
-
-  // Actions (reviewer/admin only)
-  const actions = document.getElementById('modal-actions');
-  if (currentUser.role === 'reviewer' || currentUser.role === 'admin') {
-    actions.style.display = '';
-    document.getElementById('modal-type-select').value = i.idea_type || 'napad';
-    document.getElementById('modal-status-select').value = i.status;
-    document.getElementById('modal-visibility-select').value = i.visibility || 'personal';
-    document.getElementById('modal-note').value = i.reviewer_note || '';
-    document.getElementById('modal-deadline').value = i.deadline || '';
-    populateAssignedDropdown(i.assigned_to || '');
-    initTagEditor(i.tags);
-  } else {
-    actions.style.display = 'none';
-  }
-
-  // Delete button (admin only)
-  document.getElementById('btn-delete-idea').style.display = currentUser.role === 'admin' ? '' : 'none';
-
-  // Open modal
-  openModal('idea-modal');
-
-  // Load comments & votes
-  loadComments(i.id);
-  loadVotes(i.id);
-}
-
-async function saveIdea() {
-  if (!currentIdea) return;
-
-  const idea_type = document.getElementById('modal-type-select').value;
-  const status = document.getElementById('modal-status-select').value;
-  const visibility = document.getElementById('modal-visibility-select').value;
-  const note = document.getElementById('modal-note').value;
-  const assigned_to = document.getElementById('modal-assigned').value;
-  const deadline = document.getElementById('modal-deadline').value;
-
-  const r = await api('/api/ideas/' + currentIdea.id, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      idea_type,
-      status,
-      reviewer_note: note,
-      visibility,
-      tags: JSON.stringify(currentTags),
-      assigned_to,
-      deadline
-    })
-  });
-
-  if (r.ok) {
-    showToast('Ulozene', 'success');
-    closeModal('idea-modal');
-    loadIdeas();
-  } else {
-    showToast('Chyba pri ukladani', 'error');
-  }
-}
-
-async function deleteIdea() {
-  if (!currentIdea) return;
-  if (!confirm('Naozaj vymazat napad #' + currentIdea.id + '? Tato akcia je nevratna.')) return;
-
-  try {
-    const r = await api('/api/ideas/' + currentIdea.id, { method: 'DELETE' });
-    if (r.ok) {
-      closeModal('idea-modal');
-      loadIdeas();
-      showToast('Napad vymazany', 'success');
-    } else {
-      const d = await r.json().catch(() => ({}));
-      showToast(d.error || 'Chyba pri mazani', 'error');
-    }
-  } catch (e) {
-    showToast('Chyba: ' + e.message, 'error');
-  }
-}
-
-async function retranscribeIdea() {
-  if (!currentIdea) return;
-
-  const btn = document.getElementById('btn-retranscribe');
-  btn.disabled = true;
-  btn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px;"></i> Prepisujem...';
-  lucide.createIcons();
-  showToast('Spustam prepis...', '');
-
-  const r = await api('/api/ideas/' + currentIdea.id + '/retranscribe', { method: 'POST' });
-  const d = await r.json();
-
-  btn.disabled = false;
-  btn.innerHTML = '<i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Prepisat znova';
-  lucide.createIcons();
-
-  if (r.ok) {
-    document.getElementById('modal-transcript').textContent = d.transcript;
-
-    const tInfo = document.getElementById('modal-transcribe-info');
-    if (d.transcribed_at) {
-      const engineLabel = d.stt_engine === 'elevenlabs' ? 'ElevenLabs Scribe'
-        : d.stt_engine === 'whisper' ? 'Whisper'
-        : d.stt_engine || '';
-      const dt = new Date(d.transcribed_at);
-      const formatted = dt.toLocaleString('sk-SK', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      });
-      tInfo.style.display = '';
-      tInfo.textContent = 'Prepisane: ' + formatted + (engineLabel ? ' \u00b7 ' + engineLabel : '');
-    }
-
-    if (d.warning) {
-      showToast(d.warning, 'error');
-    } else {
-      showToast('Prepis dokonceny', 'success');
-    }
-    loadIdeas();
-  } else {
-    showToast(d.error || 'Prepis zlyhal', 'error');
-  }
-}
-
-async function analyzeIdea() {
-  if (!currentIdea) return;
-  showToast('Spustam AI analyzu...', '');
-
-  const r = await api('/api/ideas/' + currentIdea.id + '/analyze', { method: 'POST' });
-  if (r.ok) {
-    showToast('AI analyza dokoncena', 'success');
-    closeModal('idea-modal');
-    await openIdea(currentIdea.id);
-    loadIdeas();
-  } else {
-    const d = await r.json();
-    showToast(d.error || 'AI analyza zlyhala', 'error');
-  }
-}
-
-// ─── Tags Editor ────────────────────────────────────────────────────────────
-const PRESET_TAGS = [
-  'quick_win', 'cost_reduction', 'product', 'process',
-  'customer', 'technical', 'innovation', 'urgent',
-  'automation', 'hr', 'marketing', 'quality'
-];
-let currentTags = [];
-
-function initTagEditor(tagsJson) {
-  try {
-    currentTags = JSON.parse(tagsJson || '[]');
-  } catch {
-    currentTags = [];
-  }
-  renderTagEditor();
-}
-
-function renderTagEditor() {
-  const chips = document.getElementById('modal-tag-chips');
-  chips.innerHTML = currentTags.map((t, i) =>
-    '<span class="tag-chip">' + esc(t) + ' <span class="tag-x" onclick="removeTag(' + i + ')">&times;</span></span>'
-  ).join('');
-
-  const presets = document.getElementById('modal-tag-presets');
-  presets.innerHTML = PRESET_TAGS.map(t =>
-    '<button type="button" class="tag-chip' + (currentTags.includes(t) ? ' selected' : '') + '" onclick="togglePresetTag(\'' + t + '\')" style="font-size:11px;">' + t + '</button>'
-  ).join('');
-}
-
-function togglePresetTag(tag) {
-  const idx = currentTags.indexOf(tag);
-  if (idx >= 0) {
-    currentTags.splice(idx, 1);
-  } else if (currentTags.length < 10) {
-    currentTags.push(tag);
-  }
-  renderTagEditor();
-}
-
-function removeTag(idx) {
-  currentTags.splice(idx, 1);
-  renderTagEditor();
-}
-
-function addCustomTag() {
-  const input = document.getElementById('modal-tag-input');
-  const val = input.value.trim().toLowerCase().replace(/\s+/g, '_');
-  if (val && !currentTags.includes(val) && currentTags.length < 10) {
-    currentTags.push(val);
-    renderTagEditor();
-  }
-  input.value = '';
-}
-
-// ─── Assigned Dropdown ──────────────────────────────────────────────────────
-let allUsersCache = null;
-
-async function getAllUsers() {
-  if (allUsersCache) return allUsersCache;
-  try {
-    const r = await fetch('/api/users');
-    if (r.ok) {
-      allUsersCache = await r.json();
-    } else {
-      allUsersCache = [];
-    }
-  } catch {
-    allUsersCache = [];
-  }
-  return allUsersCache;
-}
-
-async function populateAssignedDropdown(selectedValue) {
-  const sel = document.getElementById('modal-assigned');
-  sel.innerHTML = '<option value="">\u2014 nepriradene \u2014</option>';
-  const users = await getAllUsers();
-  for (const u of users) {
-    if (!u.active) continue;
-    const opt = document.createElement('option');
-    opt.value = u.display_name;
-    opt.textContent = u.display_name + ' (' + u.email + ')';
-    sel.appendChild(opt);
-  }
-  sel.value = selectedValue || '';
-}
-
-// ─── Comments ───────────────────────────────────────────────────────────────
-async function loadComments(ideaId) {
-  const el = document.getElementById('modal-comments');
-  try {
-    const r = await fetch('/api/ideas/' + ideaId + '/comments');
-    const comments = await r.json();
-
-    if (!comments.length) {
-      el.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0;">Ziadne komentare</p>';
-      return;
-    }
-
-    el.innerHTML = comments.map(c => `
-      <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <strong style="color:var(--primary)">${esc(c.user_name)}</strong>
-          <span style="color:var(--muted);font-size:11px;">${formatDate(c.created_at)}
-            ${(c.user_id === currentUser.id || currentUser.role === 'admin')
-              ? '<span style="cursor:pointer;margin-left:4px;" onclick="deleteComment(' + c.id + ', ' + ideaId + ')">&times;</span>'
-              : ''}
-          </span>
-        </div>
-        <div style="color:var(--text);margin-top:4px;">${esc(c.text)}</div>
-      </div>
-    `).join('');
-  } catch {
-    el.innerHTML = '<p style="color:var(--red);font-size:13px;">Chyba pri nacitani komentarov</p>';
-  }
-}
-
-async function addComment() {
-  if (!currentIdea) return;
-  const input = document.getElementById('modal-comment-input');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const r = await api('/api/ideas/' + currentIdea.id + '/comments', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text })
-  });
-
-  if (r.ok) {
-    input.value = '';
-    loadComments(currentIdea.id);
-  } else {
-    const d = await r.json();
-    showToast(d.error || 'Chyba', 'error');
-  }
-}
-
-async function deleteComment(commentId, ideaId) {
-  const r = await api('/api/comments/' + commentId, { method: 'DELETE' });
-  if (r.ok) loadComments(ideaId);
-}
-
-// ─── Votes ──────────────────────────────────────────────────────────────────
-async function loadVotes(ideaId) {
-  try {
-    const r = await fetch('/api/ideas/' + ideaId + '/votes');
-    const data = await r.json();
-    const btn = document.getElementById('modal-vote-btn');
-    btn.innerHTML = data.user_voted
-      ? '<i data-lucide="thumbs-up" style="width:14px;height:14px;"></i> Odhlasovat'
-      : '<i data-lucide="thumbs-up" style="width:14px;height:14px;"></i> Hlasovat';
-    btn.style.background = data.user_voted ? 'rgba(212,166,245,0.2)' : '';
-    document.getElementById('modal-vote-count').textContent =
-      data.count + ' hlas' + (data.count === 1 ? '' : 'ov');
-    lucide.createIcons();
-  } catch {
-    // silent
-  }
-}
-
-async function toggleVote() {
-  if (!currentIdea) return;
-  const r = await api('/api/ideas/' + currentIdea.id + '/votes', { method: 'POST' });
-  if (r.ok) loadVotes(currentIdea.id);
-}
-
-// ─── Stats ──────────────────────────────────────────────────────────────────
-let chartInstances = {};
-
-function destroyChart(key) {
-  if (chartInstances[key]) {
-    chartInstances[key].destroy();
-    delete chartInstances[key];
-  }
-}
-
-const chartColors = {
-  new: '#3b82f6',
-  in_review: '#eab308',
-  accepted: '#22c55e',
-  v_realizacii: '#a855f7',
-  rejected: '#ef4444'
-};
-
-async function loadStats() {
-  try {
-    const r = await api('/api/stats');
-    const d = await r.json();
-
-    // Stat cards
-    document.getElementById('s-total').textContent = d.total;
-    document.getElementById('s-accepted').textContent = d.by_status?.accepted || 0;
-    document.getElementById('s-review').textContent = d.by_status?.in_review || 0;
-    document.getElementById('s-new').textContent = d.by_status?.new || 0;
-    document.getElementById('s-rejected').textContent = d.by_status?.rejected || 0;
-    document.getElementById('s-v_realizacii').textContent = d.by_status?.v_realizacii || 0;
-
-    // Chart.js defaults
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = '#334155';
-
-    // Status doughnut
-    const statusLabels = ['Novy', 'V prehliadke', 'Prijate', 'V realizacii', 'Zamietnute'];
-    const statusKeys = ['new', 'in_review', 'accepted', 'v_realizacii', 'rejected'];
-    const statusData = statusKeys.map(k => d.by_status?.[k] || 0);
-    const statusClrs = statusKeys.map(k => chartColors[k]);
-
-    destroyChart('status');
-    chartInstances['status'] = new Chart(document.getElementById('chart-status'), {
-      type: 'doughnut',
-      data: {
-        labels: statusLabels,
-        datasets: [{
-          data: statusData,
-          backgroundColor: statusClrs,
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { padding: 12, usePointStyle: true, pointStyle: 'circle' }
-          }
-        }
-      }
-    });
-
-    // Department average score bar
-    const deptKeys = Object.keys(d.avg_score_by_dept || {});
-    const deptLabelsArr = deptKeys.map(k => deptLabel(k));
-    const deptScores = deptKeys.map(k => d.avg_score_by_dept[k]);
-
-    destroyChart('deptScore');
-    chartInstances['deptScore'] = new Chart(document.getElementById('chart-dept-score'), {
-      type: 'bar',
-      data: {
-        labels: deptLabelsArr,
-        datasets: [{
-          label: 'Priemerne skore',
-          data: deptScores,
-          backgroundColor: 'rgba(212,166,245,0.6)',
-          borderColor: '#d4a6f5',
-          borderWidth: 1,
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.08)' } },
-          x: { grid: { display: false } }
-        },
-        plugins: { legend: { display: false } }
-      }
-    });
-
-    // Trend line chart
-    const trendData = (d.trend || []).reverse();
-    const trendLabels = trendData.map(t => {
-      const parts = (t.day || '').split('-');
-      return parts.length >= 3 ? parts[2] + '.' + parts[1] : t.day;
-    });
-    const trendCounts = trendData.map(t => t.count);
-
-    destroyChart('trend');
-    chartInstances['trend'] = new Chart(document.getElementById('chart-trend'), {
-      type: 'line',
-      data: {
-        labels: trendLabels,
-        datasets: [{
-          label: 'Napady',
-          data: trendCounts,
-          borderColor: '#d4a6f5',
-          backgroundColor: 'rgba(212,166,245,0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 3,
-          pointBackgroundColor: '#d4a6f5'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.08)' } },
-          x: { grid: { display: false } }
-        },
-        plugins: { legend: { display: false } }
-      }
-    });
-
-    // Recent ideas
-    const recentEl = document.getElementById('recent-ideas');
-    if (d.recent?.length) {
-      recentEl.innerHTML = d.recent.map(i => `
-        <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;" onclick="openIdea(${i.id})">
-          <div style="font-weight:500;">${esc(i.author_name)} <span style="color:var(--muted);">\u00b7 ${deptLabel(i.department)}</span></div>
-          <div style="color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;">${esc(i.transcript) || '\u2014'}</div>
-        </div>
-      `).join('');
-    } else {
-      recentEl.innerHTML = '<p style="color:var(--muted);font-size:14px;">Ziadne napady</p>';
-    }
-  } catch (e) {
-    showToast('Chyba pri nacitani statistik', 'error');
-  }
-}
-
-// ─── Users ──────────────────────────────────────────────────────────────────
-let editingUserId = null;
-let usersData = [];
-
-async function loadUsers() {
-  try {
-    const r = await api('/api/users');
-    if (!r.ok) return;
-    const users = await r.json();
-    usersData = users;
-
-    const grid = document.getElementById('users-grid');
-    if (!users.length) {
-      grid.innerHTML = '<div class="empty"><p>Ziadni pouzivatelia</p></div>';
-      return;
-    }
-
-    grid.innerHTML = users.map(u => `
-      <div class="user-card">
-        <div class="user-avatar">${u.display_name[0].toUpperCase()}</div>
-        <div class="user-info">
-          <div class="user-name">${esc(u.display_name)} ${u.active ? '' : '<span style="color:var(--red);font-size:12px;">(neaktivny)</span>'}</div>
-          <div class="user-email">${esc(u.email)} \u00b7 <span class="badge badge-gray" style="font-size:11px;">${u.role}</span> ${u.department ? '\u00b7 ' + deptLabel(u.department) : ''}</div>
-        </div>
-        <div class="user-actions">
-          <button class="btn btn-ghost btn-sm" onclick="openEditUserModal(${u.id})">Upravit</button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleUser(${u.id}, ${u.active})">${u.active ? 'Deaktivovat' : 'Aktivovat'}</button>
-        </div>
-      </div>
-    `).join('');
-  } catch (e) {
-    // 401 handled by api()
-  }
-}
-
-function openUserModal() {
-  editingUserId = null;
-  ['u-name', 'u-email', 'u-pass'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('u-email').removeAttribute('readonly');
-  document.getElementById('u-modal-title').textContent = 'Novy pouzivatel';
-  document.getElementById('u-pass-label').textContent = 'Heslo';
-  document.getElementById('u-pass').placeholder = 'Docasne heslo';
-  document.getElementById('u-save-btn').textContent = 'Vytvorit pouzivatela';
-  openModal('user-modal');
-}
-
-function openEditUserModal(id) {
-  const u = usersData.find(x => x.id === id);
-  if (!u) return;
-  editingUserId = id;
-  document.getElementById('u-name').value = u.display_name;
-  document.getElementById('u-email').value = u.email;
-  document.getElementById('u-email').setAttribute('readonly', true);
-  document.getElementById('u-pass').value = '';
-  document.getElementById('u-role').value = u.role;
-  document.getElementById('u-dept').value = u.department || '';
-  document.getElementById('u-modal-title').textContent = 'Upravit pouzivatela';
-  document.getElementById('u-pass-label').textContent = 'Nove heslo (nepovinne)';
-  document.getElementById('u-pass').placeholder = 'Nechajte prazdne \u2014 heslo sa nezmeni';
-  document.getElementById('u-save-btn').textContent = 'Ulozit zmeny';
-  openModal('user-modal');
-}
-
-async function saveUser() {
-  const name = document.getElementById('u-name').value.trim();
-  const email = document.getElementById('u-email').value.trim();
-  const pass = document.getElementById('u-pass').value;
-  const role = document.getElementById('u-role').value;
-  const dept = document.getElementById('u-dept').value;
-
-  if (editingUserId) {
-    if (!name) { showToast('Zadajte meno', 'error'); return; }
-    const body = { display_name: name, role, department: dept };
-    if (pass) body.password = pass;
-
-    const r = await api('/api/users/' + editingUserId, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (r.ok) {
-      showToast('Pouzivatel ulozeny', 'success');
-      closeModal('user-modal');
-      loadUsers();
-    } else {
-      const d = await r.json();
-      showToast(d.error || 'Chyba', 'error');
-    }
-  } else {
-    if (!name || !email || !pass) { showToast('Vyplnte vsetky polia', 'error'); return; }
-
-    const r = await api('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ display_name: name, email, password: pass, role, department: dept })
-    });
-
-    if (r.ok) {
-      showToast('Pouzivatel vytvoreny', 'success');
-      closeModal('user-modal');
-      loadUsers();
-    } else {
-      const d = await r.json();
-      showToast(d.error || 'Chyba', 'error');
-    }
-  }
-}
-
-async function toggleUser(id, active) {
-  await api('/api/users/' + id, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ active: active ? 0 : 1 })
-  });
-  loadUsers();
-}
-
-// ─── Meetings ───────────────────────────────────────────────────────────────
-async function loadMeetings() {
-  try {
-    const r = await api('/api/meetings');
-    if (!r.ok) return;
-    const meetings = await r.json();
-
-    const grid = document.getElementById('meetings-grid');
-    if (!meetings.length) {
-      grid.innerHTML = '<div class="empty"><p>Ziadne porady</p></div>';
-      return;
-    }
-
-    grid.innerHTML = meetings.map(m => `
-      <div class="user-card">
-        <div class="user-avatar" style="background:var(--blue);">
-          <i data-lucide="calendar" style="width:20px;height:20px;color:white;"></i>
-        </div>
-        <div class="user-info">
-          <div class="user-name">${esc(m.title)}</div>
-          <div class="user-email">
-            ${m.meeting_date || 'Bez datumu'} \u00b7 ${esc(m.created_by_name)} \u00b7
-            <span class="badge badge-${m.status === 'completed' ? 'green' : 'blue'}" style="font-size:11px;">
-              ${m.status === 'completed' ? 'Ukoncena' : 'Planovana'}
-            </span> \u00b7 ${m.ideas_count} napadov
-          </div>
-          ${m.description ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">' + esc(m.description).substring(0, 100) + '</div>' : ''}
-        </div>
-        <div class="user-actions">
-          ${currentUser.role === 'admin'
-            ? '<button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="deleteMeeting(' + m.id + ')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>'
-            : ''}
-        </div>
-      </div>
-    `).join('');
-
-    lucide.createIcons();
-  } catch (e) {
-    // 401 handled by api()
-  }
-}
-
-function openMeetingModal() {
-  document.getElementById('m-title').value = '';
-  document.getElementById('m-date').value = '';
-  document.getElementById('m-desc').value = '';
-  openModal('meeting-modal');
-}
-
-async function saveMeeting() {
-  const title = document.getElementById('m-title').value.trim();
-  if (!title) { showToast('Zadajte nazov', 'error'); return; }
-
-  const r = await api('/api/meetings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title,
-      meeting_date: document.getElementById('m-date').value,
-      description: document.getElementById('m-desc').value
-    })
-  });
-
-  if (r.ok) {
-    showToast('Porada vytvorena', 'success');
-    closeModal('meeting-modal');
-    loadMeetings();
-  } else {
-    const d = await r.json();
-    showToast(d.error || 'Chyba', 'error');
-  }
-}
-
-async function deleteMeeting(id) {
-  if (!confirm('Naozaj vymazat poradu?')) return;
-  const r = await api('/api/meetings/' + id, { method: 'DELETE' });
-  if (r.ok) {
-    loadMeetings();
-    showToast('Porada vymazana', 'success');
-  }
-}
-
-// ─── Campaigns ──────────────────────────────────────────────────────────────
-async function loadCampaigns() {
-  try {
-    const r = await api('/api/campaigns');
-    if (!r.ok) return;
-    const campaigns = await r.json();
-
-    const grid = document.getElementById('campaigns-grid');
-    if (!campaigns.length) {
-      grid.innerHTML = '<div class="empty"><p>Ziadne kampane</p></div>';
-      return;
-    }
-
-    grid.innerHTML = campaigns.map(c => `
-      <div class="user-card">
-        <div class="user-avatar" style="background:var(--green);">
-          <i data-lucide="target" style="width:20px;height:20px;color:white;"></i>
-        </div>
-        <div class="user-info">
-          <div class="user-name">${esc(c.title)}</div>
-          <div class="user-email">
-            ${c.start_date || '?'} \u2192 ${c.end_date || '?'} \u00b7
-            <span class="badge badge-${c.status === 'active' ? 'green' : 'red'}" style="font-size:11px;">
-              ${c.status === 'active' ? 'Aktivna' : 'Ukoncena'}
-            </span> \u00b7 ${c.ideas_count} napadov
-          </div>
-          ${c.description ? '<div style="font-size:12px;color:var(--muted);margin-top:4px;">' + esc(c.description).substring(0, 100) + '</div>' : ''}
-        </div>
-        <div class="user-actions">
-          ${c.status === 'active'
-            ? '<button class="btn btn-ghost btn-sm" onclick="endCampaign(' + c.id + ')">Ukoncit</button>'
-            : ''}
-          ${currentUser.role === 'admin'
-            ? '<button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="deleteCampaign(' + c.id + ')"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>'
-            : ''}
-        </div>
-      </div>
-    `).join('');
-
-    lucide.createIcons();
-  } catch (e) {
-    // 401 handled by api()
-  }
-}
-
-function openCampaignModal() {
-  document.getElementById('c-title').value = '';
-  document.getElementById('c-start').value = '';
-  document.getElementById('c-end').value = '';
-  document.getElementById('c-desc').value = '';
-  openModal('campaign-modal');
-}
-
-async function saveCampaign() {
-  const title = document.getElementById('c-title').value.trim();
-  if (!title) { showToast('Zadajte nazov', 'error'); return; }
-
-  const r = await api('/api/campaigns', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title,
-      start_date: document.getElementById('c-start').value,
-      end_date: document.getElementById('c-end').value,
-      description: document.getElementById('c-desc').value
-    })
-  });
-
-  if (r.ok) {
-    showToast('Kampan vytvorena', 'success');
-    closeModal('campaign-modal');
-    loadCampaigns();
-  } else {
-    const d = await r.json();
-    showToast(d.error || 'Chyba', 'error');
-  }
-}
-
-async function endCampaign(id) {
-  const r = await api('/api/campaigns/' + id, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'ended' })
-  });
-  if (r.ok) {
-    loadCampaigns();
-    showToast('Kampan ukoncena', 'success');
-  }
-}
-
-async function deleteCampaign(id) {
-  if (!confirm('Naozaj vymazat kampan?')) return;
-  const r = await api('/api/campaigns/' + id, { method: 'DELETE' });
-  if (r.ok) {
-    loadCampaigns();
-    showToast('Kampan vymazana', 'success');
-  }
-}
-
-// ─── Kanban ─────────────────────────────────────────────────────────────────
-const kanbanStatusLabels = {
-  new: 'Novy',
-  in_review: 'V prehliadke',
-  accepted: 'Prijate',
-  v_realizacii: 'V realizacii',
-  rejected: 'Zamietnute'
-};
-
-const kanbanStatusColors = {
-  new: 'var(--blue)',
-  in_review: 'var(--yellow)',
-  accepted: 'var(--green)',
-  v_realizacii: 'var(--purple, #a855f7)',
-  rejected: 'var(--red)'
-};
-
-async function loadKanban() {
-  const board = document.getElementById('kanban-board');
-  board.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);width:100%;">Nacitavanie...</div>';
-
-  try {
-    const r = await api('/api/kanban');
-    const data = await r.json();
-    const statuses = ['new', 'in_review', 'accepted', 'v_realizacii', 'rejected'];
-
-    board.innerHTML = statuses.map(s => {
-      const items = data[s] || [];
-      return `
+    <span class="badge badge-dept">${deptLabel(i.department)}</span>
+    <span class="badge badge-dept">${roleLabel(i.role)}</span>
+    <span class="badge badge-dept">👤 ${esc(i.author_name)}</span>
+    ${i.duration_seconds > 0 ? `<span class="badge badge-dept">⏱ ${i.duration_seconds}s</span>` : ''}
+    <span class="badge badge-dept">${i.visibility === 'company' ? '🌐 Firemný' : '🔒 Osobný'}</span>
+    ${i.assigned_to ? `<span class="badge badge-dept">👤 ${esc(i.assigned_to)}</span>` : ''}
+    ${i.deadline ? `<span class="badge badge-dept">📅 ${i.deadline}</span>` : ''}
+    ${(() => { try { const t = JSON.parse(i.tags||'[]'); return t.map(tag=>`<span class="badge badge-tag">${esc(tag)}</span>`).join(''); } catch{return '';} })()}
+  `;document.getElementById('modal-transcript').textContent=i.transcript||'(prázdny transkript)';const tInfo=document.getElementById('modal-transcribe-info');if(i.transcribed_at){const engineLabel=i.stt_engine==='elevenlabs'?'ElevenLabs Scribe':i.stt_engine==='whisper'?'Whisper':i.stt_engine||'';const dt=new Date(i.transcribed_at);const formatted=dt.toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});tInfo.style.display='';tInfo.textContent=`Prepísané: ${formatted}`+(engineLabel?` · ${engineLabel}`:'');}else{tInfo.style.display='none';}
+const audioSection=document.getElementById('modal-audio-section');if(i.audio_data){audioSection.style.display='';document.getElementById('modal-audio-player').src=`/api/ideas/${i.id}/audio`;document.getElementById('btn-retranscribe').style.display='';}else{audioSection.style.display='none';document.getElementById('btn-retranscribe').style.display='none';}
+const aiSection=document.getElementById('modal-ai-section');if(i.ai_analysis){try{const a=JSON.parse(i.ai_analysis);aiSection.style.display='';document.getElementById('modal-ai').innerHTML=`
+        <div class="ai-row"><span>Celkové hodnotenie</span><strong>⭐ ${a.score}/10</strong></div>
+        <div class="ai-row"><span>Jasnosť</span><strong>${a.clarity}/10</strong></div>
+        <div class="ai-row"><span>Realizovateľnosť</span><strong>${a.feasibility}/10</strong></div>
+        ${a.relevance ? `<div class="ai-row"><span>Relevancia pre firmu</span><strong>${a.relevance}/10</strong></div>` : ''}
+        ${a.summary ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">${esc(a.summary)}</div>` : ''}
+        ${a.strengths?.length ? `<div style="margin-top:10px"><strong style="font-size:12px;color:var(--green)">✓ Silné stránky</strong><ul class="ai-list"style="margin-top:6px">${a.strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
+        ${a.next_steps?.length ? `<div style="margin-top:10px"><strong style="font-size:12px;color:var(--primary)">→ Ďalšie kroky</strong><ul class="ai-list"style="margin-top:6px">${a.next_steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>` : ''}
+      `;}catch(e){aiSection.style.display='none';}}else{aiSection.style.display='none';}
+const actions=document.getElementById('modal-actions');if(currentUser.role==='reviewer'||currentUser.role==='admin'){actions.style.display='';document.getElementById('modal-type-select').value=i.idea_type||'napad';document.getElementById('modal-status-select').value=i.status;document.getElementById('modal-visibility-select').value=i.visibility||'personal';document.getElementById('modal-note').value=i.reviewer_note||'';document.getElementById('modal-deadline').value=i.deadline||'';populateAssignedDropdown(i.assigned_to||'');initTagEditor(i.tags);}else{actions.style.display='none';}
+document.getElementById('btn-delete-idea').style.display=currentUser.role==='admin'?'':'none';document.getElementById('idea-modal').classList.add('open');loadComments(i.id);loadVotes(i.id);}
+async function deleteIdea(){if(!currentIdea)return;if(!confirm(`Naozaj vymazať nápad #${currentIdea.id}? Táto akcia je nevratná.`))return;try{const r=await fetch(`/api/ideas/${currentIdea.id}`,{method:'DELETE'});if(r.ok){closeModal('idea-modal');loadIdeas();showToast('Nápad vymazaný','success');}else{if(r.status===401){window.location.href='/login?next=/';return;}const d=await r.json().catch(()=>({}));showToast(d.error||'Chyba pri mazaní','error');}}catch(e){showToast('Chyba: '+e.message,'error');}}
+const PRESET_TAGS=['quick_win','cost_reduction','product','process','customer','technical','innovation','urgent','automation','hr','marketing','quality'];let currentTags=[];function initTagEditor(tagsJson){try{currentTags=JSON.parse(tagsJson||'[]');}catch{currentTags=[];}
+renderTagEditor();}
+function renderTagEditor(){const chips=document.getElementById('modal-tag-chips');chips.innerHTML=currentTags.map((t,i)=>`<span class="tag-chip">${esc(t)} <span class="tag-x" onclick="removeTag(${i})">×</span></span>`).join('');const presets=document.getElementById('modal-tag-presets');presets.innerHTML=PRESET_TAGS.map(t=>`<button type="button" class="tag-chip${currentTags.includes(t) ? ' selected' : ''}" onclick="togglePresetTag('${t}')" style="font-size:11px">${t}</button>`).join('');}
+function togglePresetTag(tag){const idx=currentTags.indexOf(tag);if(idx>=0)currentTags.splice(idx,1);else if(currentTags.length<10)currentTags.push(tag);renderTagEditor();}
+function removeTag(idx){currentTags.splice(idx,1);renderTagEditor();}
+function addCustomTag(){const input=document.getElementById('modal-tag-input');const val=input.value.trim().toLowerCase().replace(/\s+/g,'_');if(val&&!currentTags.includes(val)&&currentTags.length<10){currentTags.push(val);renderTagEditor();}
+input.value='';}
+async function saveIdea(){if(!currentIdea)return;const idea_type=document.getElementById('modal-type-select').value;const status=document.getElementById('modal-status-select').value;const visibility=document.getElementById('modal-visibility-select').value;const note=document.getElementById('modal-note').value;const assigned_to=document.getElementById('modal-assigned').value;const deadline=document.getElementById('modal-deadline').value;const r=await fetch(`/api/ideas/${currentIdea.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea_type,status,reviewer_note:note,visibility,tags:JSON.stringify(currentTags),assigned_to,deadline})});if(r.ok){showToast('Uložené','success');closeModal('idea-modal');loadIdeas();}else{showToast('Chyba pri ukladaní','error');}}
+async function retranscribeIdea(){if(!currentIdea)return;const btn=document.getElementById('btn-retranscribe');const orig=btn.textContent;btn.textContent='⏳ Prepisu..';btn.disabled=true;showToast('Spúšťam prepis...','');const r=await fetch(`/api/ideas/${currentIdea.id}/retranscribe`,{method:'POST'});const d=await r.json();btn.textContent=orig;btn.disabled=false;if(r.ok){document.getElementById('modal-transcript').textContent=d.transcript;const tInfo=document.getElementById('modal-transcribe-info');if(d.transcribed_at){const engineLabel=d.stt_engine==='elevenlabs'?'ElevenLabs Scribe':d.stt_engine==='whisper'?'Whisper':d.stt_engine||'';const dt=new Date(d.transcribed_at);const formatted=dt.toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});tInfo.style.display='';tInfo.textContent='Prep\xedsane: '+formatted+(engineLabel?' \xb7 '+engineLabel:'');}
+if(d.warning){showToast(d.warning,'error');}else{showToast('Prepis dokon\u010den\xfd','success');}
+loadIdeas();}else{showToast(d.error||'Prepis zlyhal','error');}}
+async function analyzeIdea(){if(!currentIdea)return;showToast('Spúšťam AI analýzu...','');const r=await fetch(`/api/ideas/${currentIdea.id}/analyze`,{method:'POST'});if(r.ok){showToast('AI analýza dokončená','success');closeModal('idea-modal');await openIdea(currentIdea.id);loadIdeas();}else{const d=await r.json();showToast(d.error||'AI analýza zlyhala','error');}}
+let chartInstances={};function destroyChart(key){if(chartInstances[key]){chartInstances[key].destroy();delete chartInstances[key];}}
+const chartColors={new:'#3b82f6',in_review:'#eab308',accepted:'#22c55e',v_realizacii:'#a855f7',rejected:'#ef4444'};let _chartJsLoaded=false;function _ensureChartJs(){if(_chartJsLoaded)return Promise.resolve();return new Promise((resolve,reject)=>{if(typeof Chart!=='undefined'){_chartJsLoaded=true;resolve();return;}
+const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js';s.onload=()=>{_chartJsLoaded=true;resolve();};s.onerror=reject;document.head.appendChild(s);});}
+async function loadStats(){const[r]=await Promise.all([fetch('/api/stats'),_ensureChartJs()]);const d=await r.json();document.getElementById('s-total').textContent=d.total;document.getElementById('s-accepted').textContent=d.by_status?.accepted||0;document.getElementById('s-review').textContent=d.by_status?.in_review||0;document.getElementById('s-new').textContent=d.by_status?.new||0;document.getElementById('s-rejected').textContent=d.by_status?.rejected||0;document.getElementById('s-v_realizacii').textContent=d.by_status?.v_realizacii||0;Chart.defaults.color='#94a3b8';Chart.defaults.borderColor='#334155';const statusLabels=['Nový','V prehliadke','Prijaté','V realizácii','Zamietnuté'];const statusKeys=['new','in_review','accepted','v_realizacii','rejected'];const statusData=statusKeys.map(k=>d.by_status?.[k]||0);const statusColors=statusKeys.map(k=>chartColors[k]);destroyChart('status');chartInstances['status']=new Chart(document.getElementById('chart-status'),{type:'doughnut',data:{labels:statusLabels,datasets:[{data:statusData,backgroundColor:statusColors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}}}}});const deptKeys=Object.keys(d.avg_score_by_dept||{});const deptLabelsArr=deptKeys.map(k=>deptLabel(k));const deptScores=deptKeys.map(k=>d.avg_score_by_dept[k]);destroyChart('deptScore');chartInstances['deptScore']=new Chart(document.getElementById('chart-dept-score'),{type:'bar',data:{labels:deptLabelsArr,datasets:[{label:'Priemerné skóre',data:deptScores,backgroundColor:'rgba(212,166,245,0.6)',borderColor:'#d4a6f5',borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:10,grid:{color:'rgba(255,255,255,0.08)'}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});const trendData=(d.trend||[]).reverse();const trendLabels=trendData.map(t=>{const parts=(t.day||'').split('-');return parts.length>=3?`${parts[2]}.${parts[1]}`:t.day;});const trendCounts=trendData.map(t=>t.count);destroyChart('trend');chartInstances['trend']=new Chart(document.getElementById('chart-trend'),{type:'line',data:{labels:trendLabels,datasets:[{label:'Nápady',data:trendCounts,borderColor:'#d4a6f5',backgroundColor:'rgba(212,166,245,0.1)',fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:'#d4a6f5'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(255,255,255,0.08)'}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}});const recentEl=document.getElementById('recent-ideas');if(d.recent?.length){recentEl.innerHTML=d.recent.map(i=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer" onclick="openIdea(${i.id})">
+        <div style="font-weight:500">${esc(i.author_name)} <span style="color:var(--muted)">· ${deptLabel(i.department)}</span></div>
+        <div style="color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px">${esc(i.transcript) || '—'}</div>
+      </div>`).join('');}else{recentEl.innerHTML='<p style="color:var(--muted);font-size:14px">Žiadne nápady</p>';}}
+const kanbanStatusLabels={new:'Nový',in_review:'V prehliadke',accepted:'Prijaté',v_realizacii:'V realizácii',rejected:'Zamietnuté'};const kanbanStatusColors={new:'var(--blue)',in_review:'var(--yellow)',accepted:'var(--green)',v_realizacii:'#a855f7',rejected:'var(--red)'};async function loadKanban(){const board=document.getElementById('kanban-board');board.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);width:100%">Načítavanie...</div>';try{const r=await fetch('/api/kanban');const data=await r.json();const statuses=['new','in_review','accepted','v_realizacii','rejected'];board.innerHTML=statuses.map(s=>{const items=data[s]||[];return`
         <div class="kanban-col">
-          <div class="kanban-col-header" style="border-top:3px solid ${kanbanStatusColors[s]};">
+          <div class="kanban-col-header" style="border-top:3px solid ${kanbanStatusColors[s]}">
             <span>${kanbanStatusLabels[s]}</span>
             <span class="count">${items.length}</span>
           </div>
           <div class="kanban-cards" data-status="${s}">
-            ${items.length
-              ? items.map(i => `
-                <div class="kanban-card" onclick="openIdea(${i.id})">
-                  <div class="kc-title">${esc((i.transcript || '').substring(0, 80) || 'Bez textu')}</div>
-                  <div class="kc-meta">
-                    <span>${esc(i.author_name)}</span>
-                    ${i.ai_score > 0 ? '<span>' + i.ai_score + '/10</span>' : ''}
-                    ${i.assigned_to ? '<span>' + esc(i.assigned_to) + '</span>' : ''}
-                    ${i.deadline ? '<span>' + i.deadline + '</span>' : ''}
-                  </div>
-                </div>
-              `).join('')
-              : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Prazdne</div>'}
+            ${items.length ? items.map(i => `<div class="kanban-card"onclick="openIdea(${i.id})"><div class="kc-title">${esc((i.transcript||'').substring(0,80)||'Bez textu')}</div><div class="kc-meta"><span>👤 ${esc(i.author_name)}</span>${i.ai_score>0?`<span>⭐ ${i.ai_score}/10</span>`:''}
+${i.assigned_to?`<span>→ ${esc(i.assigned_to)}</span>`:''}
+${i.deadline?`<span>📅 ${i.deadline}</span>`:''}</div></div>`).join('') : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Prázdne</div>'}
           </div>
         </div>
-      `;
-    }).join('');
-  } catch (e) {
-    board.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red);width:100%;">Chyba pri nacitani kanban boardu</div>';
-  }
-}
-
-// ─── Settings ───────────────────────────────────────────────────────────────
-async function loadCompanyContext() {
-  try {
-    const r = await api('/api/company-context');
-    if (!r.ok) return;
-    const data = await r.json();
-    document.getElementById('ctx-company').value = data.company_description || '';
-    document.getElementById('ctx-goals').value = data.goals_priorities || '';
-    document.getElementById('ctx-brand').value = data.brand_values || '';
-    document.getElementById('ctx-criteria').value = data.idea_criteria || '';
-  } catch (e) {
-    showToast('Chyba pri nacitani nastaveni', 'error');
-  }
-}
-
-async function saveCompanyContext() {
-  try {
-    const body = {
-      company_description: document.getElementById('ctx-company').value,
-      goals_priorities: document.getElementById('ctx-goals').value,
-      brand_values: document.getElementById('ctx-brand').value,
-      idea_criteria: document.getElementById('ctx-criteria').value
-    };
-
-    const r = await api('/api/company-context', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (r.ok) {
-      showToast('Nastavenia ulozene', 'success');
-    } else {
-      showToast('Chyba pri ukladani', 'error');
-    }
-  } catch (e) {
-    showToast('Chyba: ' + e.message, 'error');
-  }
-}
-
-// ─── Bulk Operations ────────────────────────────────────────────────────────
-function getSelectedIds() {
-  return [...document.querySelectorAll('.idea-cb:checked')].map(cb => parseInt(cb.value));
-}
-
-function updateBulkBar() {
-  const ids = getSelectedIds();
-  const bar = document.getElementById('bulk-bar');
-  const allCb = document.getElementById('select-all');
-  const total = document.querySelectorAll('.idea-cb').length;
-
-  if (ids.length > 0) {
-    bar.classList.add('visible');
-    document.getElementById('bulk-count').textContent = ids.length + ' oznacenych';
-  } else {
-    bar.classList.remove('visible');
-  }
-
-  allCb.checked = total > 0 && ids.length === total;
-  allCb.indeterminate = ids.length > 0 && ids.length < total;
-}
-
-function toggleSelectAll() {
-  const allCb = document.getElementById('select-all');
-  document.querySelectorAll('.idea-cb').forEach(cb => cb.checked = allCb.checked);
-  updateBulkBar();
-}
-
-function clearSelection() {
-  document.querySelectorAll('.idea-cb').forEach(cb => cb.checked = false);
-  document.getElementById('select-all').checked = false;
-  updateBulkBar();
-}
-
-async function bulkDelete() {
-  const ids = getSelectedIds();
-  if (!ids.length) return;
-
-  if (!confirm('Naozaj vymazat ' + ids.length + ' napad' + (ids.length === 1 ? '' : ids.length < 5 ? 'y' : 'ov') + '? Tato akcia je nevratna.')) return;
-
-  try {
-    const r = await api('/api/ideas/bulk-delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids })
-    });
-
-    if (r.ok) {
-      const d = await r.json();
-      showToast('Vymazanych ' + d.deleted + ' napadov', 'success');
-      clearSelection();
-      loadIdeas();
-    } else {
-      const d = await r.json();
-      showToast(d.error || 'Chyba pri mazani', 'error');
-    }
-  } catch (e) {
-    showToast('Chyba: ' + e.message, 'error');
-  }
-}
-
-async function bulkSetType(newType) {
-  const ids = getSelectedIds();
-  if (!ids.length) return;
-
-  const label = newType === 'porada' ? 'Porada' : 'Napad';
-  if (!confirm('Zmenit typ pre ' + ids.length + ' zaznam' + (ids.length === 1 ? '' : ids.length < 5 ? 'y' : 'ov') + ' na "' + label + '"?')) return;
-
-  try {
-    const r = await api('/api/ideas/bulk-update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, updates: { idea_type: newType } })
-    });
-
-    if (r.ok) {
-      const d = await r.json();
-      showToast('Typ zmeneny pre ' + d.updated + ' zaznamov', 'success');
-      clearSelection();
-      loadIdeas();
-    } else {
-      const d = await r.json();
-      showToast(d.error || 'Chyba', 'error');
-    }
-  } catch (e) {
-    showToast('Chyba: ' + e.message, 'error');
-  }
-}
-
-// ─── CSV Export ─────────────────────────────────────────────────────────────
-function exportCSV() {
-  const params = new URLSearchParams();
-  const status = document.getElementById('f-status').value;
-  const dept = document.getElementById('f-dept').value;
-  const role = document.getElementById('f-role').value;
-  const search = (document.getElementById('f-search').value || '').trim();
-
-  if (status) params.set('status', status);
-  if (dept) params.set('department', dept);
-  if (role) params.set('role', role);
-  if (search) params.set('search', search);
-
-  window.location.href = '/api/ideas/export-csv?' + params;
-}
-
-// ─── Password Change ────────────────────────────────────────────────────────
-function openPasswordModal() {
-  document.getElementById('pw-current').value = '';
-  document.getElementById('pw-new').value = '';
-  document.getElementById('pw-confirm').value = '';
-  openModal('password-modal');
-}
-
-async function changePassword() {
-  const current = document.getElementById('pw-current').value;
-  const newPw = document.getElementById('pw-new').value;
-  const confirmPw = document.getElementById('pw-confirm').value;
-
-  if (!current || !newPw) {
-    showToast('Vyplnte vsetky polia', 'error');
-    return;
-  }
-  if (newPw.length < 6) {
-    showToast('Nove heslo musi mat aspon 6 znakov', 'error');
-    return;
-  }
-  if (newPw !== confirmPw) {
-    showToast('Hesla sa nezhoduju', 'error');
-    return;
-  }
-
-  const r = await api('/api/change-password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ current_password: current, new_password: newPw })
-  });
-
-  if (r.ok) {
-    showToast('Heslo uspesne zmenene', 'success');
-    closeModal('password-modal');
-  } else {
-    const d = await r.json();
-    showToast(d.error || 'Chyba pri zmene hesla', 'error');
-  }
-}
-
-// ─── Add Idea Modal ─────────────────────────────────────────────────────────
-let addIdeaTab = 'text';
-let selectedFile = null;
-
-function openAddIdeaModal() {
-  addIdeaTab = 'text';
-  selectedFile = null;
-  document.getElementById('add-text').value = '';
-  document.getElementById('add-file').value = '';
-  const fi = document.getElementById('file-info');
-  if (fi) fi.style.display = 'none';
-  switchAddTab('text');
-
-  // Restore last used dept/role
-  const deptSel = document.getElementById('add-dept');
-  const roleSel = document.getElementById('add-role');
-  const savedDept = localStorage.getItem('ridea_last_dept');
-  const savedRole = localStorage.getItem('ridea_last_role');
-
-  if (savedDept && deptSel) deptSel.value = savedDept;
-  else if (currentUser && currentUser.department && deptSel) deptSel.value = currentUser.department;
-
-  if (savedRole && roleSel) roleSel.value = savedRole;
-
-  openModal('add-idea-modal');
-}
-
-function switchAddTab(tab) {
-  addIdeaTab = tab;
-  document.getElementById('add-tab-text').style.display = tab === 'text' ? '' : 'none';
-  document.getElementById('add-tab-doc').style.display = tab === 'doc' ? '' : 'none';
-
-  const tabTextBtn = document.getElementById('tab-text');
-  const tabDocBtn = document.getElementById('tab-doc');
-
-  tabTextBtn.className = tab === 'text' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-  tabDocBtn.className = tab === 'doc' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
-
-  document.getElementById('add-submit-btn').textContent =
-    tab === 'text' ? 'Pridat napad' : 'Importovat dokument';
-}
-
-function handleFileSelect(input) {
-  if (input.files && input.files[0]) {
-    selectedFile = input.files[0];
-    document.getElementById('file-name').textContent =
-      selectedFile.name + ' (' + (selectedFile.size / 1024).toFixed(1) + ' KB)';
-    document.getElementById('file-info').style.display = 'block';
-  }
-}
-
-function handleDrop(event) {
-  event.preventDefault();
-  event.currentTarget.style.borderColor = 'var(--border)';
-  const files = event.dataTransfer.files;
-  if (files && files[0]) {
-    selectedFile = files[0];
-    document.getElementById('add-file').files = files;
-    document.getElementById('file-name').textContent =
-      selectedFile.name + ' (' + (selectedFile.size / 1024).toFixed(1) + ' KB)';
-    document.getElementById('file-info').style.display = 'block';
-  }
-}
-
-function clearFile() {
-  selectedFile = null;
-  document.getElementById('add-file').value = '';
-  document.getElementById('file-info').style.display = 'none';
-}
-
-async function submitIdea() {
-  const dept = document.getElementById('add-dept').value;
-  const role = document.getElementById('add-role').value;
-  const visibility = document.getElementById('add-visibility').value;
-  const btn = document.getElementById('add-submit-btn');
-
-  // Remember last used values
-  localStorage.setItem('ridea_last_dept', dept);
-  localStorage.setItem('ridea_last_role', role);
-
-  if (addIdeaTab === 'text') {
-    const text = document.getElementById('add-text').value.trim();
-    if (!text) { showToast('Napisite text napadu', 'error'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Ukladam...';
-
-    try {
-      const r = await api('/api/ideas/text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, department: dept, role, visibility })
-      });
-
-      if (r.ok) {
-        showToast('Napad pridany', 'success');
-        closeModal('add-idea-modal');
-        loadIdeas();
-      } else {
-        const d = await r.json();
-        showToast(d.error || 'Chyba', 'error');
-      }
-    } catch (e) {
-      showToast('Chyba: ' + e.message, 'error');
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Pridat napad';
-  } else {
-    if (!selectedFile) { showToast('Vyberte subor', 'error'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Importujem...';
-
-    try {
-      const fd = new FormData();
-      fd.append('document', selectedFile);
-      fd.append('department', dept);
-      fd.append('role', role);
-      fd.append('visibility', visibility);
-
-      const r = await api('/api/ideas/upload-document', {
-        method: 'POST',
-        body: fd
-      });
-
-      if (r.ok) {
-        showToast('Dokument importovany ako napad', 'success');
-        closeModal('add-idea-modal');
-        loadIdeas();
-      } else {
-        const d = await r.json();
-        showToast(d.error || 'Chyba pri importe', 'error');
-      }
-    } catch (e) {
-      showToast('Chyba: ' + e.message, 'error');
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Importovat dokument';
-  }
-}
-
-// ─── Modals ─────────────────────────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// Close modals on overlay click
-document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('open')) {
-    e.target.classList.remove('open');
-  }
-});
-
-// Close modals on Escape
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-  }
-});
-
-// ─── Toast ──────────────────────────────────────────────────────────────────
-function showToast(message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast ' + (type || 'success');
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  // Trigger animation
-  requestAnimationFrame(() => {
-    toast.classList.add('show');
-  });
-
-  // Auto-dismiss after 3s
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
-// ─── Init ───────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadCurrentUser();
-  initSearchField();
-  showPage('ideas');
-  lucide.createIcons();
-});
-</script>
-
+      `;}).join('');}catch(e){board.innerHTML='<div style="text-align:center;padding:40px;color:var(--red);width:100%">Chyba pri načítaní kanban boardu</div>';}}
+async function loadUsers(){const r=await fetch('/api/users');if(!r.ok)return;const users=await r.json();usersData=users;const grid=document.getElementById('users-grid');if(!users.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Žiadni používatelia</div>';return;}
+grid.innerHTML=users.map(u=>`
+    <div class="user-card">
+      <div class="user-avatar">${u.display_name[0].toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${esc(u.display_name)} ${u.active ? '' : '<span style="color:var(--red);font-size:12px">(neaktívny)</span>'}</div>
+        <div class="user-email">${esc(u.email)} · <span class="badge badge-dept" style="font-size:11px">${u.role}</span> ${u.department ? `· ${deptLabel(u.department)}` : ''}</div>
+      </div>
+      <div class="user-actions">
+        <button class="btn-sm btn-ghost" onclick="openEditUserModal(${u.id})">Upraviť</button>
+        <button class="btn-sm btn-ghost" onclick="toggleUser(${u.id}, ${u.active})">${u.active ? 'Deaktivovať' : 'Aktivovať'}</button>
+      </div>
+    </div>
+  `).join('');}
+function openUserModal(){editingUserId=null;['u-name','u-email','u-pass'].forEach(id=>document.getElementById(id).value='');document.getElementById('u-email').removeAttribute('readonly');document.getElementById('u-modal-title').textContent='Nový používateľ';document.getElementById('u-pass-label').textContent='Heslo';document.getElementById('u-pass').placeholder='Dočasné heslo';document.getElementById('u-save-btn').textContent='Vytvoriť používateľa';document.getElementById('user-modal').classList.add('open');}
+function openEditUserModal(id){const u=usersData.find(x=>x.id===id);if(!u)return;editingUserId=id;document.getElementById('u-name').value=u.display_name;document.getElementById('u-email').value=u.email;document.getElementById('u-email').setAttribute('readonly',true);document.getElementById('u-pass').value='';document.getElementById('u-role').value=u.role;document.getElementById('u-dept').value=u.department||'';document.getElementById('u-modal-title').textContent='Upraviť používateľa';document.getElementById('u-pass-label').textContent='Nové heslo (nepovinné)';document.getElementById('u-pass').placeholder='Nechajte prázdne — heslo sa nezmení';document.getElementById('u-save-btn').textContent='Uložiť zmeny';document.getElementById('user-modal').classList.add('open');}
+async function saveUser(){const name=document.getElementById('u-name').value.trim();const email=document.getElementById('u-email').value.trim();const pass=document.getElementById('u-pass').value;const role=document.getElementById('u-role').value;const dept=document.getElementById('u-dept').value;if(editingUserId){if(!name){showToast('Zadajte meno','error');return;}
+const body={display_name:name,role,department:dept};if(pass)body.password=pass;const r=await fetch(`/api/users/${editingUserId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.ok){showToast('Používateľ uložený','success');closeModal('user-modal');loadUsers();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}else{if(!name||!email||!pass){showToast('Vyplňte všetky polia','error');return;}
+const r=await fetch('/api/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({display_name:name,email,password:pass,role,department:dept})});if(r.ok){showToast('Používateľ vytvorený','success');closeModal('user-modal');loadUsers();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}}
+async function toggleUser(id,active){await fetch(`/api/users/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({active:active?0:1})});loadUsers();}
+async function doLogout(){await fetch('/api/logout',{method:'POST'});window.location.href='/login';}
+function closeModal(id){document.getElementById(id).classList.remove('open');const s=document.getElementById('f-search');if(s){s.textContent='';setTimeout(()=>{s.textContent='';},300);}}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3000);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function statusLabel(s){return{new:'Nový',in_review:'V prehliadke',accepted:'Prijatý',rejected:'Zamietnutý',v_realizacii:'V realizácii'}[s]||s;}
+function deptLabel(d){return{development:'Vývoj',marketing:'Marketing',production:'Produkcia',management:'Manažment',other:'Iné'}[d]||d||'—';}
+function roleLabel(r){return{'c-level':'C-level',manager:'Manažér',employee:'Zamestnanec'}[r]||r||'—';}
+function formatDate(s){if(!s)return'—';try{const d=new Date(s);return d.toLocaleDateString('sk-SK',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}catch{return s;}}
+async function loadCompanyContext(){try{const r=await fetch('/api/company-context');if(!r.ok)return;const data=await r.json();document.getElementById('ctx-company').value=data.company_description||'';document.getElementById('ctx-goals').value=data.goals_priorities||'';document.getElementById('ctx-brand').value=data.brand_values||'';document.getElementById('ctx-criteria').value=data.idea_criteria||'';}catch(e){showToast('Chyba pri načítaní nastaveni','error');}}
+async function saveCompanyContext(){try{const body={company_description:document.getElementById('ctx-company').value,goals_priorities:document.getElementById('ctx-goals').value,brand_values:document.getElementById('ctx-brand').value,idea_criteria:document.getElementById('ctx-criteria').value,};const r=await fetch('/api/company-context',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(r.ok){showToast('Nastavenia uložené','success');}else{showToast('Chyba pri ukladaní','error');}}catch(e){showToast('Chyba: '+e.message,'error');}}
+async function loadComments(ideaId){const el=document.getElementById('modal-comments');try{const r=await fetch(`/api/ideas/${ideaId}/comments`);const comments=await r.json();if(!comments.length){el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">Žiadne komentáre</p>';return;}
+el.innerHTML=comments.map(c=>`
+      <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--primary)">${esc(c.user_name)}</strong>
+          <span style="color:var(--muted);font-size:11px">${formatDate(c.created_at)}
+            ${(c.user_id === currentUser.id || currentUser.role === 'admin') ? `<span style="cursor:pointer;margin-left:4px"onclick="deleteComment(${c.id}, ${ideaId})">✕</span>` : ''}
+          </span>
+        </div>
+        <div style="color:var(--text);margin-top:4px">${esc(c.text)}</div>
+      </div>
+    `).join('');}catch{el.innerHTML='<p style="color:var(--red);font-size:13px">Chyba pri načítaní komentárov</p>';}}
+async function addComment(){if(!currentIdea)return;const input=document.getElementById('modal-comment-input');const text=input.value.trim();if(!text)return;const r=await fetch(`/api/ideas/${currentIdea.id}/comments`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});if(r.ok){input.value='';loadComments(currentIdea.id);}else{const d=await r.json();showToast(d.error||'Chyba','error');}}
+async function deleteComment(commentId,ideaId){const r=await fetch(`/api/comments/${commentId}`,{method:'DELETE'});if(r.ok)loadComments(ideaId);}
+async function loadVotes(ideaId){try{const r=await fetch(`/api/ideas/${ideaId}/votes`);const data=await r.json();document.getElementById('modal-vote-btn').textContent=data.user_voted?'👍 Odhlasovať':'👍 Hlasovať';document.getElementById('modal-vote-btn').style.background=data.user_voted?'rgba(212,166,245,0.2)':'';document.getElementById('modal-vote-count').textContent=`${data.count} hlas${data.count === 1 ? '' : 'ov'}`;}catch{}}
+async function toggleVote(){if(!currentIdea)return;const r=await fetch(`/api/ideas/${currentIdea.id}/votes`,{method:'POST'});if(r.ok)loadVotes(currentIdea.id);}
+async function loadMeetings(){const r=await fetch('/api/meetings');if(!r.ok)return;const meetings=await r.json();const grid=document.getElementById('meetings-grid');if(!meetings.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne porady</div>';return;}
+grid.innerHTML=meetings.map(m=>`
+    <div class="user-card">
+      <div class="user-avatar" style="background:var(--blue)">📅</div>
+      <div class="user-info">
+        <div class="user-name">${esc(m.title)}</div>
+        <div class="user-email">${m.meeting_date || 'Bez dátumu'} · ${esc(m.created_by_name)} · <span class="badge badge-${m.status === 'completed' ? 'accepted' : 'new'}" style="font-size:11px">${m.status === 'completed' ? 'Ukončená' : 'Plánovaná'}</span> · ${m.ideas_count} nápadov</div>
+        ${m.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(m.description).substring(0,100)}</div>` : ''}
+      </div>
+      <div class="user-actions">
+        ${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost"style="color:var(--red)"onclick="deleteMeeting(${m.id})">🗑</button>` : ''}
+      </div>
+    </div>
+  `).join('');}
+function openMeetingModal(){document.getElementById('m-title').value='';document.getElementById('m-date').value='';document.getElementById('m-desc').value='';document.getElementById('meeting-modal').classList.add('open');}
+async function saveMeeting(){const title=document.getElementById('m-title').value.trim();if(!title){showToast('Zadajte názov','error');return;}
+const r=await fetch('/api/meetings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,meeting_date:document.getElementById('m-date').value,description:document.getElementById('m-desc').value})});if(r.ok){showToast('Porada vytvorená','success');closeModal('meeting-modal');loadMeetings();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}
+async function deleteMeeting(id){if(!confirm('Naozaj vymazať poradu?'))return;const r=await fetch(`/api/meetings/${id}`,{method:'DELETE'});if(r.ok){loadMeetings();showToast('Porada vymazaná','success');}}
+async function loadCampaigns(){const r=await fetch('/api/campaigns');if(!r.ok)return;const campaigns=await r.json();const grid=document.getElementById('campaigns-grid');if(!campaigns.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Žiadne kampane</div>';return;}
+grid.innerHTML=campaigns.map(c=>`
+    <div class="user-card">
+      <div class="user-avatar" style="background:var(--green)">🎯</div>
+      <div class="user-info">
+        <div class="user-name">${esc(c.title)}</div>
+        <div class="user-email">${c.start_date || '?'} → ${c.end_date || '?'} · <span class="badge badge-${c.status === 'active' ? 'accepted' : 'rejected'}" style="font-size:11px">${c.status === 'active' ? 'Aktívna' : 'Ukončená'}</span> · ${c.ideas_count} nápadov</div>
+        ${c.description ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(c.description).substring(0,100)}</div>` : ''}
+      </div>
+      <div class="user-actions">
+        ${c.status === 'active' ? `<button class="btn-sm btn-ghost"onclick="endCampaign(${c.id})">Ukončiť</button>` : ''}
+        ${currentUser.role === 'admin' ? `<button class="btn-sm btn-ghost"style="color:var(--red)"onclick="deleteCampaign(${c.id})">🗑</button>` : ''}
+      </div>
+    </div>
+  `).join('');}
+function openCampaignModal(){document.getElementById('c-title').value='';document.getElementById('c-start').value='';document.getElementById('c-end').value='';document.getElementById('c-desc').value='';document.getElementById('campaign-modal').classList.add('open');}
+async function saveCampaign(){const title=document.getElementById('c-title').value.trim();if(!title){showToast('Zadajte názov','error');return;}
+const r=await fetch('/api/campaigns',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,start_date:document.getElementById('c-start').value,end_date:document.getElementById('c-end').value,description:document.getElementById('c-desc').value})});if(r.ok){showToast('Kampaň vytvorená','success');closeModal('campaign-modal');loadCampaigns();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}
+async function endCampaign(id){const r=await fetch(`/api/campaigns/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'ended'})});if(r.ok){loadCampaigns();showToast('Kampaň ukončená','success');}}
+async function deleteCampaign(id){if(!confirm('Naozaj vymazať kampaň?'))return;const r=await fetch(`/api/campaigns/${id}`,{method:'DELETE'});if(r.ok){loadCampaigns();showToast('Kampaň vymazaná','success');}}
+function getSelectedIds(){return[...document.querySelectorAll('.idea-cb:checked')].map(cb=>parseInt(cb.value));}
+function updateBulkBar(){const ids=getSelectedIds();const bar=document.getElementById('bulk-bar');const allCb=document.getElementById('select-all');const total=document.querySelectorAll('.idea-cb').length;if(ids.length>0){bar.classList.add('visible');document.getElementById('bulk-count').textContent=`${ids.length} označených`;}else{bar.classList.remove('visible');}
+allCb.checked=total>0&&ids.length===total;allCb.indeterminate=ids.length>0&&ids.length<total;}
+function toggleSelectAll(){const allCb=document.getElementById('select-all');document.querySelectorAll('.idea-cb').forEach(cb=>cb.checked=allCb.checked);updateBulkBar();}
+function clearSelection(){document.querySelectorAll('.idea-cb').forEach(cb=>cb.checked=false);document.getElementById('select-all').checked=false;updateBulkBar();}
+async function bulkDelete(){const ids=getSelectedIds();if(!ids.length)return;if(!confirm(`Naozaj vymazať ${ids.length} nápad${ids.length === 1 ? '' : ids.length < 5 ? 'y' : 'ov'}? Táto akcia je nevratná.`))return;try{const r=await fetch('/api/ideas/bulk-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids})});if(r.ok){const d=await r.json();showToast(`Vymazaných ${d.deleted} nápadov`,'success');clearSelection();loadIdeas();}else{const d=await r.json();showToast(d.error||'Chyba pri mazaní','error');}}catch(e){showToast('Chyba: '+e.message,'error');}}
+async function bulkSetType(newType){const ids=getSelectedIds();if(!ids.length)return;const label=newType==='porada'?'Porada':'Nápad';if(!confirm(`Zmeniť typ pre ${ids.length} záznam${ids.length===1?'':ids.length<5?'y':'ov'} na "${label}"?`))return;try{const r=await fetch('/api/ideas/bulk-update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids,updates:{idea_type:newType}})});if(r.ok){const d=await r.json();showToast(`Typ zmenený pre ${d.updated} záznamov`,'success');clearSelection();loadIdeas();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}catch(e){showToast('Chyba: '+e.message,'error');}}
+function exportCSV(){const params=new URLSearchParams();const status=document.getElementById('f-status').value;const dept=document.getElementById('f-dept').value;const role=document.getElementById('f-role').value;const search=(document.getElementById('f-search').textContent||'').trim();if(status)params.set('status',status);if(dept)params.set('department',dept);if(role)params.set('role',role);if(search)params.set('search',search);window.location.href='/api/ideas/export-csv?'+params;}
+function openPasswordModal(){document.getElementById('pw-current').value='';document.getElementById('pw-new').value='';document.getElementById('pw-confirm').value='';document.getElementById('password-modal').classList.add('open');}
+async function changePassword(){const current=document.getElementById('pw-current').value;const newPw=document.getElementById('pw-new').value;const confirm=document.getElementById('pw-confirm').value;if(!current||!newPw){showToast('Vyplňte všetky polia','error');return;}
+if(newPw.length<6){showToast('Nové heslo musí mať aspoň 6 znakov','error');return;}
+if(newPw!==confirm){showToast('Heslá sa nezhodujú','error');return;}
+const r=await fetch('/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_password:current,new_password:newPw})});if(r.ok){showToast('Heslo úspešne zmenené','success');closeModal('password-modal');}else{const d=await r.json();showToast(d.error||'Chyba pri zmene hesla','error');}}
+let allUsersCache=null;async function getAllUsers(){if(allUsersCache)return allUsersCache;try{const r=await fetch('/api/users');if(r.ok){allUsersCache=await r.json();}else{allUsersCache=[];}}catch{allUsersCache=[];}
+return allUsersCache;}
+async function populateAssignedDropdown(selectedValue){const sel=document.getElementById('modal-assigned');sel.innerHTML='<option value="">— nepriradené —</option>';const users=await getAllUsers();for(const u of users){if(!u.active)continue;const opt=document.createElement('option');opt.value=u.display_name;opt.textContent=`${u.display_name} (${u.email})`;sel.appendChild(opt);}
+sel.value=selectedValue||'';}
+let addIdeaTab='text';let selectedFile=null;function openAddIdeaModal(){addIdeaTab='text';selectedFile=null;document.getElementById('add-text').value='';document.getElementById('add-file').value='';const fi=document.getElementById('file-info');if(fi)fi.style.display='none';switchAddTab('text');const deptSel=document.getElementById('add-dept');const roleSel=document.getElementById('add-role');const savedDept=localStorage.getItem('ridea_last_dept');const savedRole=localStorage.getItem('ridea_last_role');if(savedDept&&deptSel)deptSel.value=savedDept;else if(currentUser&&currentUser.department&&deptSel)deptSel.value=currentUser.department;if(savedRole&&roleSel)roleSel.value=savedRole;document.getElementById('add-idea-modal').classList.add('open');}
+function switchAddTab(tab){addIdeaTab=tab;document.getElementById('add-tab-text').style.display=tab==='text'?'':'none';document.getElementById('add-tab-doc').style.display=tab==='doc'?'':'none';document.getElementById('tab-text').style.background=tab==='text'?'var(--primary)':'var(--surface2)';document.getElementById('tab-text').style.color=tab==='text'?'white':'var(--muted)';document.getElementById('tab-text').style.border=tab==='text'?'none':'1px solid var(--border)';document.getElementById('tab-doc').style.background=tab==='doc'?'var(--primary)':'var(--surface2)';document.getElementById('tab-doc').style.color=tab==='doc'?'white':'var(--muted)';document.getElementById('tab-doc').style.border=tab==='doc'?'none':'1px solid var(--border)';document.getElementById('add-submit-btn').textContent=tab==='text'?'Pridať nápad':'Importovať dokument';}
+function handleFileSelect(input){if(input.files&&input.files[0]){selectedFile=input.files[0];document.getElementById('file-name').textContent=selectedFile.name+' ('+(selectedFile.size/1024).toFixed(1)+' KB)';document.getElementById('file-info').style.display='block';}}
+function handleDrop(event){event.preventDefault();event.currentTarget.style.borderColor='var(--border)';const files=event.dataTransfer.files;if(files&&files[0]){selectedFile=files[0];document.getElementById('add-file').files=files;document.getElementById('file-name').textContent=selectedFile.name+' ('+(selectedFile.size/1024).toFixed(1)+' KB)';document.getElementById('file-info').style.display='block';}}
+function clearFile(){selectedFile=null;document.getElementById('add-file').value='';document.getElementById('file-info').style.display='none';}
+async function submitIdea(){const dept=document.getElementById('add-dept').value;const role=document.getElementById('add-role').value;const visibility=document.getElementById('add-visibility').value;const btn=document.getElementById('add-submit-btn');localStorage.setItem('ridea_last_dept',dept);localStorage.setItem('ridea_last_role',role);if(addIdeaTab==='text'){const text=document.getElementById('add-text').value.trim();if(!text){showToast('Napíšte text nápadu','error');return;}
+btn.disabled=true;btn.textContent='Ukladám...';try{const r=await fetch('/api/ideas/text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,department:dept,role,visibility})});if(r.ok){showToast('Nápad pridaný','success');closeModal('add-idea-modal');loadIdeas();}else{const d=await r.json();showToast(d.error||'Chyba','error');}}catch(e){showToast('Chyba: '+e.message,'error');}
+btn.disabled=false;btn.textContent='Pridať nápad';}else{if(!selectedFile){showToast('Vyberte súbor','error');return;}
+btn.disabled=true;btn.textContent='Importujem...';try{const fd=new FormData();fd.append('document',selectedFile);fd.append('department',dept);fd.append('role',role);fd.append('visibility',visibility);const r=await fetch('/api/ideas/upload-document',{method:'POST',body:fd});if(r.ok){showToast('Dokument importovaný ako nápad','success');closeModal('add-idea-modal');loadIdeas();}else{const d=await r.json();showToast(d.error||'Chyba pri importe','error');}}catch(e){showToast('Chyba: '+e.message,'error');}
+btn.disabled=false;btn.textContent='Importovať dokument';}}
+init();</script>
 </body>
 </html>

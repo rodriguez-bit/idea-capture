@@ -1,1680 +1,197 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Ridea</title>
-  <link rel="stylesheet" href="/static/style.css">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="theme-color" content="#2563eb">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Ridea">
-  <link rel="apple-touch-icon" href="/static/icon-192.png">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ridea</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#512D6D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ridea">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#512d6d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px}#rec-screen{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;padding:18px 20px;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom));gap:10px;color:#f0e6f6;overflow-y:auto}.topbar{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}.uname{font-weight:600;font-size:15px}.btn-out{background:0;border:0;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px}.btn-out:hover{color:#ef4444}.sels{display:flex;gap:8px;flex-shrink:0}.sel{flex:1;padding:9px 10px;background:#3d1f54;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#f0e6f6;font-size:13px;outline:0;cursor:pointer;text-align:center}.sel option{background:#3d1f54;color:#f0e6f6}.sel:focus{border-color:rgba(255,255,255,0.4)}.vis-row{display:flex;gap:6px;flex-shrink:0}.vis-btn{flex:1;padding:7px 6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;transition:all .15s}.vis-btn.active{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#f0e6f6}.tab-row{display:flex;gap:0;flex-shrink:0;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.12)}.tab-btn{flex:1;padding:8px 6px;background:rgba(255,255,255,0.04);border:0;color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}.tab-btn.active{background:rgba(255,255,255,0.15);color:#f0e6f6}#voice-panel{display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;flex:1;min-height:0}#voice-panel.active{display:flex}#text-panel{display:none;flex-direction:column;gap:8px;flex:1;min-height:0}#text-panel.active{display:flex}.mid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}.rbtn{width:88px;height:88px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.08);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}.rbtn:hover{transform:scale(1.05)}.rbtn.on{border-color:#ef4444;animation:g 1.5s infinite}@keyframes g{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 14px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}.rdot{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.5);transition:all .15s}.rbtn.on .rdot{background:#ef4444;border-radius:7px;width:26px;height:26px}.rtime{font-size:30px;font-weight:700;letter-spacing:3px}.rhint{font-size:12px;color:rgba(255,255,255,0.4)}#visualizer{width:100%;max-width:280px;height:48px;border-radius:8px;display:none}#visualizer.active{display:block}.audio-info{font-size:11px;color:rgba(255,255,255,0.35);text-align:center;padding:2px 0}.audio-info .active-src{color:#4ade80}.txt-area{flex:1;min-height:100px;padding:12px;border-radius:8px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.15);color:#f0e6f6;font-size:14px;font-family:inherit;resize:none;outline:0}.txt-area::placeholder{color:rgba(255,255,255,0.3)}.txt-area:focus{border-color:rgba(255,255,255,0.4)}.txt-send{padding:12px;background:#fff;color:#512d6d;border:0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}.txt-send:hover{background:#f0e6f6}.txt-send:disabled{opacity:.5;cursor:not-allowed}.acts{display:flex;gap:10px;flex-shrink:0}.bsend{flex:1;padding:12px;background:#fff;color:#512d6d;border:0;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}.bsend:hover{background:#f0e6f6}.bsend:disabled{opacity:.5;cursor:not-allowed}.bx{padding:12px 15px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:10px;font-size:14px;cursor:pointer}.bx:hover{color:#f87171;border-color:#f87171}.bar{height:3px;background:rgba(255,255,255,0.12);border-radius:3px;flex-shrink:0}.bfill{height:100%;background:#d4a6f5;width:0;transition:width .3s;border-radius:3px}.smsg{font-size:12px;text-align:center;color:rgba(255,255,255,0.4);min-height:16px;flex-shrink:0}.smsg.ok{color:#4ade80}.smsg.err{color:#f87171}.smsg.inf{color:#d4a6f5}.adml{font-size:11px;color:rgba(255,255,255,0.3);text-align:center;cursor:pointer;flex-shrink:0;padding-bottom:4px}.adml:hover{color:#d4a6f5}.recent-section{flex-shrink:0;margin-top:4px}.recent-toggle{font-size:12px;color:rgba(255,255,255,0.5);text-align:center;cursor:pointer;padding:6px 0;transition:color .2s}.recent-toggle:hover{color:#d4a6f5}.recent-list{display:none;max-height:180px;overflow-y:auto;padding:0 4px}.recent-list.show{display:block}.recent-item{background:rgba(255,255,255,0.06);border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:background .2s}.recent-item:hover{background:rgba(255,255,255,0.12)}.recent-item .ri-top{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:3px}.recent-item .ri-id{font-weight:600;color:#d4a6f5}.recent-item .ri-text{font-size:12px;color:rgba(255,255,255,0.8);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.recent-item .ri-meta{display:flex;gap:8px;margin-top:3px;font-size:9px;color:rgba(255,255,255,0.3)}.recent-item .ri-badge{display:inline-block;padding:1px 5px;border-radius:4px;font-size:9px}.ri-badge.el{background:rgba(106,212,134,0.15);color:#6ad486}.ri-badge.wh{background:rgba(251,191,36,0.15);color:#fbbf24}#file-panel{display:none;flex-direction:column;gap:10px;flex:1;min-height:0;justify-content:center}#file-panel.active{display:flex}.file-upload-area{border:2px dashed rgba(255,255,255,0.2);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}.file-upload-area:hover,.file-upload-area.dragover{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05)}.file-icon{font-size:36px;margin-bottom:8px}.file-hint{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:4px}.file-formats{font-size:11px;color:rgba(255,255,255,0.3)}.file-selected{background:rgba(255,255,255,0.08);border-radius:10px;padding:12px}.file-name{font-size:14px;color:#f0e6f6;font-weight:600;word-break:break-all}.file-size{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px}#file-preview{border-radius:8px;margin-top:8px}.recent-toggle{font-size:12px;color:rgba(255,255,255,0.4);text-align:center;cursor:pointer;flex-shrink:0;padding:4px 0}.recent-toggle:hover{color:#d4a6f5}.recent-list{display:none;flex-direction:column;gap:6px;flex-shrink:0;max-height:220px;overflow-y:auto}.recent-list.open{display:flex}.recent-item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;cursor:default}.recent-item .ri-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.recent-item .ri-id{font-size:11px;font-weight:700;color:#d4a6f5}.recent-item .ri-time{font-size:10px;color:rgba(255,255,255,0.3)}.recent-item .ri-text{font-size:12px;color:rgba(255,255,255,0.6);margin-top:4px;line-height:1.4}.recent-item .ri-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.ri-badge{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}.ri-badge.new{background:rgba(74,222,128,0.15);color:#4ade80}.ri-badge.reviewed{background:rgba(96,165,250,0.15);color:#60a5fa}.ri-badge.implemented{background:rgba(167,139,250,0.15);color:#a78bfa}.ri-badge.rejected{background:rgba(248,113,113,0.15);color:#f87171}.ri-badge.dept{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)}.ri-badge.engine{background:rgba(212,166,245,0.12);color:#d4a6f5}.recent-empty{font-size:12px;color:rgba(255,255,255,0.3);text-align:center;padding:12px}.vault-banner{display:none;flex-shrink:0;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:8px 10px;cursor:pointer;transition:all .2s}.vault-banner.show{display:flex;align-items:center;gap:8px}.vault-banner:hover{background:rgba(248,113,113,0.18)}.vault-icon{font-size:18px}.vault-text{flex:1;font-size:12px;color:#f87171;font-weight:600}.vault-count{font-size:11px;color:rgba(255,255,255,0.4)}.vault-list{display:none;flex-direction:column;gap:6px;flex-shrink:0;max-height:260px;overflow-y:auto}.vault-list.open{display:flex}.vault-item{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px}.vault-item .vi-top{display:flex;justify-content:space-between;align-items:center}.vault-item .vi-info{font-size:11px;color:rgba(255,255,255,0.5)}.vault-item .vi-status{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}.vault-item .vi-status.pending{background:rgba(250,204,21,0.15);color:#facc15}.vault-item .vi-status.uploading{background:rgba(96,165,250,0.15);color:#60a5fa}.vault-item .vi-status.error{background:rgba(248,113,113,0.15);color:#f87171}.vault-item .vi-actions{display:flex;gap:6px;margin-top:6px}.vault-item .vi-btn{padding:5px 10px;border:0;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer}.vi-btn.retry{background:rgba(74,222,128,0.15);color:#4ade80}.vi-btn.retry:hover{background:rgba(74,222,128,0.25)}.vi-btn.download{background:rgba(96,165,250,0.15);color:#60a5fa}.vi-btn.download:hover{background:rgba(96,165,250,0.25)}.vi-btn.delete{background:rgba(248,113,113,0.1);color:rgba(248,113,113,0.6)}.vi-btn.delete:hover{background:rgba(248,113,113,0.2);color:#f87171}</style>
 </head>
-<body class="recorder-page">
+<body>
 
-  <!-- Top bar -->
-  <div class="recorder-topbar">
-    <div style="display:flex;align-items:center;gap:0.5rem;">
-      <i data-lucide="lightbulb" style="width:20px;height:20px;color:var(--blue-600);"></i>
-      <span style="font-weight:700;">Ridea</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:0.75rem;">
-      <span id="uname" class="text-sm font-medium">&#8212;</span>
-      <a href="/admin" class="btn btn-ghost btn-sm">
-        <i data-lucide="settings" style="width:16px;height:16px;"></i> Admin
-      </a>
-      <button class="btn btn-ghost btn-sm" onclick="doLogout()">
-        <i data-lucide="log-out" style="width:16px;height:16px;"></i> Odhlasit
-      </button>
-    </div>
+<div id="rec-screen">
+  <div class="topbar">
+    <span class="uname" id="uname">&#8212;</span>
+    <button class="btn-out" onclick="doLogout()">Odhl&#225;si&#357;</button>
+  </div>
+  <div class="sels">
+    <select class="sel" id="dept" onchange="localStorage.setItem('savedDept', this.value)">
+      <option value="">Oddelenie</option>
+      <option value="development">V&#253;voj</option>
+      <option value="marketing">Marketing</option>
+      <option value="production">Produkcia</option>
+      <option value="management">Mana&#382;ment</option>
+      <option value="other">In&#233;</option>
+    </select>
+    <select class="sel" id="role" onchange="localStorage.setItem('savedRole', this.value)">
+      <option value="">Rola</option>
+      <option value="c-level">C-level</option>
+      <option value="manager">Mana&#382;&#233;r</option>
+      <option value="employee">Zamestnanec</option>
+    </select>
+  </div>
+  <div class="vis-row">
+    <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">M&#244;j n&#225;pad</button>
+    <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre cel&#250; firmu</button>
   </div>
 
-  <!-- Main card -->
-  <div class="recorder-card">
-
-    <!-- Department + Role selects -->
-    <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
-      <select class="select" id="dept" onchange="localStorage.setItem('savedDept', this.value)">
-        <option value="">Oddelenie</option>
-        <option value="development">Vyvoj</option>
-        <option value="marketing">Marketing</option>
-        <option value="production">Produkcia</option>
-        <option value="management">Manazment</option>
-        <option value="other">Ine</option>
-      </select>
-      <select class="select" id="role" onchange="localStorage.setItem('savedRole', this.value)">
-        <option value="">Rola</option>
-        <option value="c-level">C-level</option>
-        <option value="manager">Manazer</option>
-        <option value="employee">Zamestnanec</option>
-      </select>
-    </div>
-
-    <!-- Visibility toggle -->
-    <div class="vis-row" style="margin-bottom:0.75rem;">
-      <button type="button" class="vis-btn" id="vis-personal" onclick="setVisibility('personal')">Moj napad</button>
-      <button type="button" class="vis-btn active" id="vis-company" onclick="setVisibility('company')">Pre celu firmu</button>
-    </div>
-
-    <!-- Tabs: Voice / Text / File -->
-    <div class="tab-row" style="margin-bottom:1rem;">
-      <button class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">
-        <i data-lucide="mic" style="width:14px;height:14px;"></i> Hlasovy
-      </button>
-      <button class="tab-btn" id="tab-text" onclick="switchTab('text')">
-        <i data-lucide="type" style="width:14px;height:14px;"></i> Textovy
-      </button>
-      <button class="tab-btn" id="tab-file" onclick="switchTab('file')">
-        <i data-lucide="paperclip" style="width:14px;height:14px;"></i> Subor
-      </button>
-    </div>
-
-    <!-- Vault banner -->
-    <div class="vault-banner" id="vault-banner" onclick="toggleVaultList()">
-      <i data-lucide="hard-drive" style="width:18px;height:18px;"></i>
-      <span style="flex:1;font-weight:600;">Neodoslane nahravky</span>
-      <span class="text-xs text-muted" id="vault-count"></span>
-    </div>
-    <div class="vault-list" id="vault-list"></div>
-
-    <!-- Voice panel -->
-    <div id="voice-panel" style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem 0;">
-      <canvas id="visualizer" style="width:100%;max-width:280px;height:48px;display:none;"></canvas>
-      <button class="rec-btn" id="rbtn" onclick="toggleRecord()">
-        <div class="rec-dot"></div>
-      </button>
-      <div class="rec-timer" id="rtime">&#8212;</div>
-      <div class="rec-hint" id="rhint">Klikni pre nahravanie</div>
-      <div class="text-xs text-muted" id="audio-info"></div>
-    </div>
-
-    <!-- Text panel -->
-    <div id="text-panel" style="display:none;flex-direction:column;gap:0.5rem;">
-      <textarea class="input" id="txtIdea" placeholder="Napiste svoj napad..." style="min-height:120px;"></textarea>
-      <button class="btn btn-primary w-full" id="txtSend" onclick="sendTextIdea()">Odoslat textovy napad</button>
-    </div>
-
-    <!-- File panel -->
-    <div id="file-panel" style="display:none;flex-direction:column;gap:0.625rem;">
-      <div class="file-upload-area" id="file-drop-area">
-        <div style="font-size:2.25rem;margin-bottom:0.5rem;">
-          <i data-lucide="upload-cloud" style="width:36px;height:36px;color:var(--gray-400);"></i>
-        </div>
-        <div style="color:var(--gray-600);">Kliknite alebo presunete audio subor</div>
-        <div class="text-xs text-muted">MP3, WAV, OGG, M4A, WebM, FLAC, OPUS</div>
-        <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.flac,.opus,.mp4,.mpeg" style="display:none" onchange="handleFileSelect(this)">
-      </div>
-      <div id="file-selected" style="display:none;background:var(--gray-50);border-radius:0.5rem;padding:0.75rem;">
-        <div id="file-name" class="font-medium"></div>
-        <div id="file-size" class="text-xs text-muted"></div>
-        <audio id="file-preview" controls style="width:100%;margin-top:0.5rem;"></audio>
-      </div>
-      <button class="btn btn-primary w-full" id="fileSend" onclick="sendFileIdea()" style="display:none">Odoslat audio napad</button>
-    </div>
-
-    <!-- Actions (after recording) -->
-    <div id="acts" style="display:none;gap:0.625rem;">
-      <button class="btn btn-secondary" onclick="discardRecording()">
-        <i data-lucide="x" style="width:16px;height:16px;"></i> Zahodit
-      </button>
-      <button class="btn btn-primary" id="bsend" onclick="submitIdea()" style="flex:1;">
-        <i data-lucide="send" style="width:16px;height:16px;"></i> Odoslat napad
-      </button>
-    </div>
-
-    <!-- Progress + Status -->
-    <div class="progress-bar" style="margin-top:0.75rem;">
-      <div class="progress-fill" id="bfill"></div>
-    </div>
-    <div class="status-msg" id="smsg"></div>
+  <div class="tab-row">
+    <button type="button" class="tab-btn active" id="tab-voice" onclick="switchTab('voice')">&#127908; Hlasov&#253;</button>
+    <button type="button" class="tab-btn" id="tab-text" onclick="switchTab('text')">&#9997; Textov&#253;</button>
+    <button type="button" class="tab-btn" id="tab-file" onclick="switchTab('file')">&#128206; S&#250;bor</button>
   </div>
 
-  <!-- Recent ideas section -->
-  <div style="max-width:40rem;margin:0 auto;padding:0 1.5rem;">
-    <div class="recent-section">
-      <div class="recent-toggle" id="recent-toggle" onclick="toggleRecent()">&#9662; Posledne napady</div>
-      <div class="recent-list" id="recent-list"></div>
-    </div>
+  <div class="vault-banner" id="vault-banner" onclick="toggleVaultList()">
+    <span class="vault-icon">&#128190;</span>
+    <span class="vault-text">Neodoslan&#233; nahr&#225;vky</span>
+    <span class="vault-count" id="vault-count"></span>
+  </div>
+  <div class="vault-list" id="vault-list"></div>
+
+  <div id="voice-panel" class="active">
+    <canvas id="visualizer"></canvas>
+    <button class="rbtn" id="rbtn" onclick="toggleRecord()"><div class="rdot"></div></button>
+    <div class="rtime" id="rtime">&#8212;</div>
+    <div class="rhint" id="rhint">Klikni pre nahr&#225;vanie</div>
+    <div class="audio-info" id="audio-info"></div>
   </div>
 
-<script>
-  /* =====================================================
-     CONSTANTS & GLOBALS
-     ===================================================== */
-  var API_BASE = window.API_BASE || '';
-
-  var mediaRecorder = null;
-  var audioChunks = [];
-  var audioBlob = null;
-  var timerInterval = null;
-  var seconds = 0;
-  var currentUser = null;
-  var currentVisibility = 'company';
-  var audioContext = null;
-  var analyser = null;
-  var animFrameId = null;
-  var activeStreams = [];
-  var mixedDestination = null;
-  var wakeLock = null;
-  var silentAudio = null;
-  var recordStartTime = null;
-  var selectedFile = null;
-  var _recentOpen = false;
-
-  /* =====================================================
-     AUDIO VAULT — IndexedDB
-     ===================================================== */
-  var _vaultDB = null;
-  var _vaultOpen = false;
-  var _vaultSyncing = false;
-  var _vaultSyncTimer = null;
-  var _vaultLiveId = null;
-  var _vaultLiveSaveTimer = null;
-
-  function openVaultDB() {
-    return new Promise(function(resolve, reject) {
-      if (_vaultDB) { resolve(_vaultDB); return; }
-      var req = indexedDB.open('RideaAudioVault', 2);
-      req.onupgradeneeded = function(e) {
-        var db = e.target.result;
-        if (!db.objectStoreNames.contains('recordings')) {
-          var store = db.createObjectStore('recordings', { keyPath: 'id', autoIncrement: true });
-          store.createIndex('status', 'status', { unique: false });
-        }
-      };
-      req.onsuccess = function(e) {
-        _vaultDB = e.target.result;
-        resolve(_vaultDB);
-      };
-      req.onerror = function() {
-        reject(new Error('IndexedDB unavailable'));
-      };
-    });
-  }
-
-  function vaultSave(blob, filename, dept, role, visibility) {
-    return openVaultDB().then(function(db) {
-      return new Promise(function(resolve, reject) {
-        var tx = db.transaction('recordings', 'readwrite');
-        var store = tx.objectStore('recordings');
-        var record = {
-          blob: blob,
-          filename: filename,
-          dept: dept,
-          role: role,
-          visibility: visibility,
-          created: new Date().toISOString(),
-          size: blob.size,
-          status: 'pending',
-          jobId: null,
-          errorMsg: null,
-          retries: 0,
-          nextRetryAt: 0
-        };
-        var req = store.add(record);
-        req.onsuccess = function() { resolve(req.result); };
-        req.onerror = function() { reject(new Error('Vault save failed')); };
-      });
-    });
-  }
-
-  function vaultUpdate(id, fields) {
-    return openVaultDB().then(function(db) {
-      return new Promise(function(resolve, reject) {
-        var tx = db.transaction('recordings', 'readwrite');
-        var store = tx.objectStore('recordings');
-        var getReq = store.get(id);
-        getReq.onsuccess = function() {
-          var rec = getReq.result;
-          if (!rec) { resolve(); return; }
-          Object.keys(fields).forEach(function(k) { rec[k] = fields[k]; });
-          store.put(rec);
-          resolve();
-        };
-        getReq.onerror = function() { reject(new Error('Vault update failed')); };
-      });
-    });
-  }
-
-  function vaultDelete(id) {
-    return openVaultDB().then(function(db) {
-      return new Promise(function(resolve, reject) {
-        var tx = db.transaction('recordings', 'readwrite');
-        tx.objectStore('recordings').delete(id);
-        tx.oncomplete = function() { resolve(); };
-        tx.onerror = function() { reject(); };
-      });
-    });
-  }
-
-  function vaultGetAll() {
-    return openVaultDB().then(function(db) {
-      return new Promise(function(resolve) {
-        var tx = db.transaction('recordings', 'readonly');
-        var store = tx.objectStore('recordings');
-        var req = store.getAll();
-        req.onsuccess = function() { resolve(req.result || []); };
-        req.onerror = function() { resolve([]); };
-      });
-    });
-  }
-
-  function vaultGet(id) {
-    return openVaultDB().then(function(db) {
-      return new Promise(function(resolve) {
-        var tx = db.transaction('recordings', 'readonly');
-        var req = tx.objectStore('recordings').get(id);
-        req.onsuccess = function() { resolve(req.result || null); };
-        req.onerror = function() { resolve(null); };
-      });
-    });
-  }
-
-  /* =====================================================
-     VAULT UI
-     ===================================================== */
-  function toggleVaultList() {
-    _vaultOpen = !_vaultOpen;
-    document.getElementById('vault-list').classList.toggle('open', _vaultOpen);
-  }
-
-  function refreshVaultUI() {
-    vaultGetAll().then(function(items) {
-      var pending = items.filter(function(i) {
-        return i.status !== 'done' && i.status !== 'live';
-      });
-      var banner = document.getElementById('vault-banner');
-      var list = document.getElementById('vault-list');
-
-      if (pending.length === 0) {
-        banner.classList.remove('show');
-        list.classList.remove('open');
-        list.innerHTML = '';
-        _vaultOpen = false;
-        return;
-      }
-
-      banner.classList.add('show');
-      document.getElementById('vault-count').textContent =
-        pending.length + ' zaznam' + (pending.length > 1 ? 'ov' : '');
-
-      var html = '';
-      pending.forEach(function(item) {
-        var d = new Date(item.created);
-        var time = d.getDate() + '.' + (d.getMonth() + 1) + '. ' +
-          d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
-        var sizeMB = (item.size / 1024 / 1024).toFixed(1);
-        var statusLabel = item.status === 'pending' ? 'Caka'
-          : item.status === 'uploading' ? 'Odosielam...' : 'Chyba';
-        var statusCls = item.status === 'pending' ? 'pending'
-          : item.status === 'uploading' ? 'uploading' : 'error';
-
-        html += '<div class="vault-item" id="vault-item-' + item.id + '">';
-        html += '<div class="vi-top"><span class="vi-info">' + time + ' &middot; ' + sizeMB + ' MB</span>';
-        html += '<span class="vi-status ' + statusCls + '">' + statusLabel + '</span></div>';
-        if (item.errorMsg) {
-          html += '<div style="font-size:10px;color:#f87171;margin-top:3px">' + item.errorMsg + '</div>';
-        }
-        html += '<div class="vi-actions">';
-        if (item.status !== 'uploading') {
-          html += '<button class="vi-btn retry" onclick="vaultRetry(' + item.id + ')">&#8635; Odoslat znova</button>';
-        }
-        html += '<button class="vi-btn download" onclick="vaultDownload(' + item.id + ')">&#11015; Stiahnut</button>';
-        html += '<button class="vi-btn delete" onclick="vaultRemove(' + item.id + ')">&#10005;</button>';
-        html += '</div></div>';
-      });
-      list.innerHTML = html;
-    });
-  }
-
-  function vaultDownload(id) {
-    vaultGet(id).then(function(rec) {
-      if (!rec) return;
-      var url = URL.createObjectURL(rec.blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = rec.filename || ('nahravka_' + id + '.webm');
-      a.click();
-      setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
-    });
-  }
-
-  function vaultRemove(id) {
-    if (!confirm('Naozaj vymazat nahravku? Tato akcia je nevratna.')) return;
-    vaultDelete(id).then(refreshVaultUI);
-  }
-
-  function vaultRetry(id) {
-    vaultGet(id).then(function(rec) {
-      if (!rec || !rec.blob) {
-        setMsg('Nahravka nenajdena', 'err');
-        return;
-      }
-      vaultUpdate(id, { status: 'uploading', errorMsg: null, retries: rec.retries + 1 })
-        .then(function() {
-          refreshVaultUI();
-          _doVaultUpload(id, rec.blob, rec.filename, rec.dept, rec.role, rec.visibility);
-        });
-    });
-  }
-
-  /* =====================================================
-     VAULT UPLOAD
-     ===================================================== */
-  function _doVaultUpload(vaultId, blob, filename, dept, role, visibility) {
-    if (blob.size < 5000) {
-      console.log('VaultUpload: skipping tiny recording (' + blob.size + ' bytes)');
-      vaultUpdate(vaultId, { status: 'error', errorMsg: 'Nahravka prilis kratka' })
-        .then(refreshVaultUI);
-      return;
-    }
-
-    var fill = document.getElementById('bfill');
-    fill.style.width = '15%';
-    var sizeMB = (blob.size / 1024 / 1024).toFixed(1);
-    setMsg('Odosielam zalohovanu nahravku (' + sizeMB + ' MB)...', 'inf');
-
-    var fd = new FormData();
-    fd.append('audio', blob, filename);
-    fd.append('department', dept);
-    fd.append('role', role);
-    fd.append('visibility', visibility);
-
-    var ctrl = new AbortController();
-    var tout = setTimeout(function() { ctrl.abort(); }, 300000);
-
-    fetch(API_BASE + '/api/ideas/upload', {
-      method: 'POST',
-      body: fd,
-      credentials: 'include',
-      signal: ctrl.signal
-    }).then(function(r) {
-      clearTimeout(tout);
-      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Chyba ' + r.status); });
-      return r.json();
-    }, function(e) {
-      clearTimeout(tout);
-      throw e;
-    }).then(function(data) {
-      if (data.job_id) {
-        setMsg('Prepisujem...', 'inf');
-        fill.style.width = '40%';
-        vaultUpdate(vaultId, { jobId: data.job_id });
-        return _pollVaultJob(vaultId, data.job_id, fill);
-      } else {
-        fill.style.width = '100%';
-        setMsg('Napad odoslany!', 'ok');
-        if (_recentOpen) loadRecentIdeas();
-        vaultUpdate(vaultId, { status: 'done' }).then(function() {
-          setTimeout(function() {
-            vaultDelete(vaultId).then(refreshVaultUI);
-            fill.style.width = '0%';
-            clearMsg();
-          }, 3000);
-        });
-      }
-    }).catch(function(err) {
-      fill.style.width = '0%';
-      setMsg('Chyba: ' + err.message + ' - nahravka ulozena lokalne', 'err');
-      vaultUpdate(vaultId, { status: 'error', errorMsg: err.message }).then(refreshVaultUI);
-    });
-  }
-
-  function _pollVaultJob(vaultId, jobId, fill) {
-    var attempts = 0;
-    function poll() {
-      if (attempts >= 200) {
-        setMsg('Timeout - nahravka ulozena lokalne, skus znova', 'err');
-        fill.style.width = '0%';
-        vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
-        return;
-      }
-      attempts++;
-
-      fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' })
-        .then(function(r) {
-          if (r.status === 202) {
-            fill.style.width = Math.min(40 + attempts, 95) + '%';
-            if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
-            setTimeout(poll, 3000);
-            return;
-          }
-          if (r.ok) {
-            fill.style.width = '100%';
-            setMsg('Napad odoslany!', 'ok');
-            if (_recentOpen) loadRecentIdeas();
-            vaultUpdate(vaultId, { status: 'done' }).then(function() {
-              setTimeout(function() {
-                vaultDelete(vaultId).then(refreshVaultUI);
-                fill.style.width = '0%';
-                clearMsg();
-              }, 3000);
-            });
-          } else if (r.status === 404) {
-            fetch(API_BASE + '/api/ideas/my-recent', { credentials: 'include' })
-              .then(function(mr) { return mr.ok ? mr.json() : []; })
-              .then(function(recent) {
-                var now = Date.now();
-                var found = (recent || []).some(function(idea) {
-                  return (now - new Date(idea.created_at).getTime()) < 120000;
-                });
-                if (found) {
-                  fill.style.width = '100%';
-                  setMsg('Napad odoslany!', 'ok');
-                  vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                    setTimeout(function() {
-                      vaultDelete(vaultId).then(refreshVaultUI);
-                      fill.style.width = '0%';
-                      clearMsg();
-                    }, 3000);
-                  });
-                } else {
-                  setMsg('Spracovanie prebieha...', 'inf');
-                  setTimeout(poll, 3000);
-                }
-              }).catch(function() { setTimeout(poll, 3000); });
-          } else {
-            r.json().catch(function() { return {}; }).then(function(d) {
-              setMsg(d.error || 'Chyba pri spracovani', 'err');
-              fill.style.width = '0%';
-              vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' })
-                .then(refreshVaultUI);
-            });
-          }
-        }).catch(function() { setTimeout(poll, 3000); });
-    }
-    setTimeout(poll, 3000);
-  }
-
-  /* =====================================================
-     VAULT LIVE SAVE (during recording)
-     ===================================================== */
-  function vaultStartLiveSave(dept, role, visibility) {
-    _vaultLiveId = null;
-    if (_vaultLiveSaveTimer) clearInterval(_vaultLiveSaveTimer);
-
-    _vaultLiveSaveTimer = setInterval(function() {
-      if (!audioChunks || audioChunks.length === 0) return;
-      var mime = 'audio/webm;codecs=opus';
-      var liveBlob = new Blob(audioChunks, { type: mime });
-
-      if (_vaultLiveId) {
-        vaultUpdate(_vaultLiveId, { blob: liveBlob, size: liveBlob.size }).catch(function() {});
-      } else {
-        openVaultDB().then(function(db) {
-          return new Promise(function(resolve) {
-            var tx = db.transaction('recordings', 'readwrite');
-            var store = tx.objectStore('recordings');
-            var record = {
-              blob: liveBlob,
-              filename: 'live_' + Date.now() + '.webm',
-              dept: dept,
-              role: role,
-              visibility: visibility,
-              created: new Date().toISOString(),
-              size: liveBlob.size,
-              status: 'live',
-              jobId: null,
-              errorMsg: null,
-              retries: 0,
-              nextRetryAt: 0
-            };
-            var req = store.add(record);
-            req.onsuccess = function() { _vaultLiveId = req.result; resolve(); };
-            req.onerror = function() { resolve(); };
-          });
-        }).catch(function() {});
-      }
-    }, 10000);
-  }
-
-  function vaultStopLiveSave() {
-    if (_vaultLiveSaveTimer) {
-      clearInterval(_vaultLiveSaveTimer);
-      _vaultLiveSaveTimer = null;
-    }
-    if (_vaultLiveId) {
-      var liveId = _vaultLiveId;
-      _vaultLiveId = null;
-      vaultDelete(liveId).catch(function() {});
-    }
-  }
-
-  function vaultPromoteLive() {
-    if (_vaultLiveSaveTimer) {
-      clearInterval(_vaultLiveSaveTimer);
-      _vaultLiveSaveTimer = null;
-    }
-    if (_vaultLiveId) {
-      var liveId = _vaultLiveId;
-      _vaultLiveId = null;
-      return vaultUpdate(liveId, {
-        status: 'pending',
-        filename: 'prerusena_' + Date.now() + '.webm'
-      }).then(function() {
-        refreshVaultUI();
-        return liveId;
-      });
-    }
-    return Promise.resolve(null);
-  }
-
-  /* =====================================================
-     VAULT AUTO-SYNC
-     ===================================================== */
-  function vaultAutoSync() {
-    if (_vaultSyncing) return;
-    if (!currentUser) return;
-
-    vaultGetAll().then(function(items) {
-      var now = Date.now();
-      var toUpload = items.filter(function(i) {
-        if (i.status === 'done' || i.status === 'live' || i.status === 'uploading') return false;
-        if (i.status === 'error' && i.nextRetryAt && now < i.nextRetryAt) return false;
-        return true;
-      });
-      if (toUpload.length === 0) return;
-
-      _vaultSyncing = true;
-      var item = toUpload[0];
-      console.log('VaultAutoSync: uploading id=' + item.id);
-
-      vaultUpdate(item.id, { status: 'uploading', errorMsg: null }).then(function() {
-        refreshVaultUI();
-        _doVaultUploadAsync(item.id, item.blob, item.filename, item.dept, item.role, item.visibility)
-          .finally(function() { _vaultSyncing = false; });
-      });
-    }).catch(function() { _vaultSyncing = false; });
-  }
-
-  function _doVaultUploadAsync(vaultId, blobData, filename, dept, role, visibility) {
-    var fd = new FormData();
-    fd.append('audio', blobData, filename);
-    fd.append('department', dept);
-    fd.append('role', role);
-    fd.append('visibility', visibility);
-
-    var ctrl = new AbortController();
-    var tout = setTimeout(function() { ctrl.abort(); }, 300000);
-
-    return fetch(API_BASE + '/api/ideas/upload', {
-      method: 'POST',
-      body: fd,
-      credentials: 'include',
-      signal: ctrl.signal
-    }).then(function(r) {
-      clearTimeout(tout);
-      return r;
-    }, function(e) {
-      clearTimeout(tout);
-      throw e;
-    }).then(function(r) {
-      if (!r.ok) return r.json().then(function(d) { throw new Error(d.error || 'Chyba ' + r.status); });
-      return r.json();
-    }).then(function(data) {
-      if (data.job_id) {
-        vaultUpdate(vaultId, { jobId: data.job_id });
-        return _pollVaultJobAsync(vaultId, data.job_id);
-      } else {
-        return vaultUpdate(vaultId, { status: 'done' }).then(function() {
-          setTimeout(function() {
-            vaultDelete(vaultId).then(refreshVaultUI);
-          }, 3000);
-        });
-      }
-    }).catch(function(err) {
-      return vaultGet(vaultId).then(function(rec) {
-        var retries = rec ? (rec.retries || 0) : 0;
-        var delaySec = Math.min(30 * Math.pow(2, retries), 300);
-        var nextRetry = Date.now() + delaySec * 1000;
-        return vaultUpdate(vaultId, {
-          status: 'error',
-          errorMsg: err.message,
-          retries: retries + 1,
-          nextRetryAt: nextRetry
-        });
-      }).then(refreshVaultUI);
-    });
-  }
-
-  function _pollVaultJobAsync(vaultId, jobId) {
-    return new Promise(function(resolve) {
-      var attempts = 0;
-      function poll() {
-        if (attempts >= 200) {
-          vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(function() {
-            refreshVaultUI();
-            resolve();
-          });
-          return;
-        }
-        attempts++;
-
-        fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' })
-          .then(function(r) {
-            if (r.status === 202) {
-              setTimeout(poll, 3000);
-              return;
-            }
-            if (r.ok) {
-              vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                setTimeout(function() {
-                  vaultDelete(vaultId).then(refreshVaultUI);
-                }, 3000);
-                resolve();
-              });
-            } else if (r.status === 404) {
-              fetch(API_BASE + '/api/ideas/my-recent', { credentials: 'include' })
-                .then(function(mr) { return mr.ok ? mr.json() : []; })
-                .then(function(recent) {
-                  var found = (recent || []).some(function(idea) {
-                    return (Date.now() - new Date(idea.created_at).getTime()) < 120000;
-                  });
-                  if (found) {
-                    vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                      setTimeout(function() {
-                        vaultDelete(vaultId).then(refreshVaultUI);
-                      }, 3000);
-                      resolve();
-                    });
-                  } else {
-                    setTimeout(poll, 3000);
-                  }
-                }).catch(function() { setTimeout(poll, 3000); });
-            } else {
-              r.json().catch(function() { return {}; }).then(function(d) {
-                vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' })
-                  .then(function() {
-                    refreshVaultUI();
-                    resolve();
-                  });
-              });
-            }
-          }).catch(function() { setTimeout(poll, 3000); });
-      }
-      setTimeout(poll, 3000);
-    });
-  }
-
-  function vaultStartAutoSync() {
-    if (_vaultSyncTimer) return;
-    setTimeout(vaultAutoSync, 3000);
-    _vaultSyncTimer = setInterval(vaultAutoSync, 30000);
-  }
-
-  /* =====================================================
-     NETWORK EVENTS
-     ===================================================== */
-  window.addEventListener('online', function() {
-    console.log('VaultAutoSync: Network restored');
-    setMsg('Pripojenie obnovene, odosielam nahravky...', 'inf');
-    setTimeout(vaultAutoSync, 2000);
-  });
-
-  window.addEventListener('offline', function() {
-    console.log('VaultAutoSync: Network lost');
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      setMsg('Bez pripojenia - nahravka sa ulozi lokalne', 'inf');
-    }
-  });
-
-  /* =====================================================
-     WAKE LOCK & SILENT AUDIO
-     ===================================================== */
-  async function requestWakeLock() {
-    if (!('wakeLock' in navigator)) return;
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', function() {
-        console.log('Wake Lock released');
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-          requestWakeLock();
-        }
-      });
-      console.log('Wake Lock acquired');
-    } catch (e) {
-      console.log('Wake Lock failed:', e.message);
-    }
-  }
-
-  function releaseWakeLock() {
-    if (wakeLock) {
-      wakeLock.release().catch(function() {});
-      wakeLock = null;
-    }
-  }
-
-  function startSilentAudio() {
-    try {
-      if (silentAudio) return;
-      silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
-      silentAudio.loop = true;
-      silentAudio.volume = 0.01;
-      silentAudio.play().catch(function() {});
-    } catch (e) {}
-  }
-
-  function stopSilentAudio() {
-    if (silentAudio) {
-      silentAudio.pause();
-      silentAudio.src = '';
-      silentAudio = null;
-    }
-  }
-
-  /* =====================================================
-     VISIBILITY CHANGE (Android lock-screen handling)
-     ===================================================== */
-  document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible' && mediaRecorder && mediaRecorder.state === 'recording') {
-      requestWakeLock();
-      if (recordStartTime) {
-        seconds = Math.floor((Date.now() - recordStartTime) / 1000);
-        var m = Math.floor(seconds / 60), s = seconds % 60;
-        document.getElementById('rtime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-      }
-    }
-
-    if (document.visibilityState === 'visible' && mediaRecorder &&
-        mediaRecorder.state === 'inactive' && recordStartTime) {
-      recordStartTime = null;
-      releaseWakeLock();
-      stopSilentAudio();
-      clearInterval(timerInterval);
-      document.getElementById('rbtn').classList.remove('recording');
-
-      if (audioChunks.length > 0) {
-        var mime = 'audio/webm';
-        audioBlob = new Blob(audioChunks, { type: mime });
-        document.getElementById('acts').style.display = 'flex';
-        document.getElementById('rhint').textContent = 'Nahravka prerusena (obrazovka zamknuta)';
-
-        vaultPromoteLive().then(function(promotedId) {
-          if (promotedId) {
-            setMsg('Prerusena nahravka zalohovana! Automaticky sa pokusi odoslat.', 'inf');
-          } else {
-            var dept = document.getElementById('dept').value;
-            var role = document.getElementById('role').value;
-            if (dept && role) {
-              vaultSave(audioBlob, 'prerusena_' + Date.now() + '.webm', dept, role, currentVisibility)
-                .then(function() {
-                  setMsg('Prerusena nahravka zalohovana!', 'inf');
-                  refreshVaultUI();
-                }).catch(function() {
-                  setMsg('Nahravanie prerusene. Odoslte co najskor.', 'err');
-                });
-            }
-          }
-        });
-      } else {
-        vaultPromoteLive();
-        document.getElementById('rhint').textContent = 'Nahravanie prerusene';
-        setMsg('Android zastavil nahravanie pri zamknuti obrazovky.', 'err');
-      }
-    }
-  });
-
-  /* =====================================================
-     TAB SWITCHING & VISIBILITY
-     ===================================================== */
-  function switchTab(tab) {
-    document.getElementById('tab-voice').classList.toggle('active', tab === 'voice');
-    document.getElementById('tab-text').classList.toggle('active', tab === 'text');
-    document.getElementById('tab-file').classList.toggle('active', tab === 'file');
-
-    document.getElementById('voice-panel').style.display = tab === 'voice' ? 'flex' : 'none';
-    document.getElementById('text-panel').style.display = tab === 'text' ? 'flex' : 'none';
-    document.getElementById('file-panel').style.display = tab === 'file' ? 'flex' : 'none';
-  }
-
-  function setVisibility(val) {
-    currentVisibility = val;
-    document.getElementById('vis-personal').classList.toggle('active', val === 'personal');
-    document.getElementById('vis-company').classList.toggle('active', val === 'company');
-  }
-
-  /* =====================================================
-     VISUALIZER
-     ===================================================== */
-  function stopVisualizer() {
-    if (animFrameId) {
-      cancelAnimationFrame(animFrameId);
-      animFrameId = null;
-    }
-    if (audioContext) {
-      audioContext.close().catch(function() {});
-      audioContext = null;
-    }
-    var canvas = document.getElementById('visualizer');
-    canvas.style.display = 'none';
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  /* =====================================================
-     RECORDING
-     ===================================================== */
-  async function toggleRecord() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      stopRecording();
-    } else {
-      await startRecording();
-    }
-  }
-
-  async function startRecording() {
-    var dept = document.getElementById('dept').value;
-    var role = document.getElementById('role').value;
-    if (!dept || !role) {
-      setMsg('Vyber oddelenie a rolu', 'err');
-      return;
-    }
-
-    var micStream = null;
-    var sources = [];
-    activeStreams = [];
-
-    try {
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      activeStreams.push(micStream);
-      sources.push('mikrofon');
-    } catch (e) {
-      setMsg(
-        e.name === 'NotAllowedError'
-          ? 'Povolte pristup k mikrofonu v nastaveniach prehliadaca'
-          : 'Chyba: ' + e.message,
-        'err'
-      );
-      return;
-    }
-
-    try {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      mixedDestination = audioContext.createMediaStreamDestination();
-      var micSource = audioContext.createMediaStreamSource(micStream);
-      micSource.connect(mixedDestination);
-
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 128;
-      micSource.connect(analyser);
-
-      var mixedStream = mixedDestination.stream;
-      var infoEl = document.getElementById('audio-info');
-      infoEl.innerHTML = '<span style="color:var(--green-500);">' + sources.join(' + ') + '</span>';
-
-      // Start visualizer
-      var canvas = document.getElementById('visualizer');
-      canvas.style.display = 'block';
-      var ctx = canvas.getContext('2d');
-      canvas.width = canvas.offsetWidth * 2;
-      canvas.height = canvas.offsetHeight * 2;
-      var bufLen = analyser.frequencyBinCount;
-      var data = new Uint8Array(bufLen);
-      var barW = canvas.width / bufLen;
-
-      function draw() {
-        animFrameId = requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(data);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (var i = 0; i < bufLen; i++) {
-          var v = data[i] / 255;
-          var h = v * canvas.height;
-          var x = i * barW;
-          var r = 37 + Math.round(v * 62);
-          var g = 99 + Math.round(v * 50);
-          var b = 235;
-          ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.5 + v * 0.5) + ')';
-          ctx.fillRect(x, canvas.height - h, barW - 1, h);
-        }
-      }
-      draw();
-
-      // Start MediaRecorder
-      audioChunks = [];
-      var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus' : 'audio/webm';
-
-      mediaRecorder = new MediaRecorder(mixedStream, {
-        mimeType: mime,
-        audioBitsPerSecond: 32000
-      });
-
-      mediaRecorder.ondataavailable = function(e) {
-        if (e.data.size > 0) audioChunks.push(e.data);
-      };
-
-      mediaRecorder.onstop = function() {
-        audioBlob = new Blob(audioChunks, { type: mime });
-        var sizeMB = (audioBlob.size / 1024 / 1024).toFixed(1);
-        stopAllStreams();
-        stopVisualizer();
-        document.getElementById('acts').style.display = 'flex';
-        document.getElementById('rhint').textContent = 'Nahravka pripravena';
-        document.getElementById('audio-info').innerHTML =
-          '<span style="color:var(--green-500);">' + sizeMB + ' MB</span>';
-      };
-
-      mediaRecorder.start(1000);
-      vaultStartLiveSave(dept, role, currentVisibility);
-      await requestWakeLock();
-      startSilentAudio();
-
-      if (/Android/i.test(navigator.userAgent)) {
-        setMsg('\u26a0 Nezasknavajte obrazovku - nahravanie sa zastavi', 'inf');
-      }
-
-      document.getElementById('rbtn').classList.add('recording');
-      document.getElementById('rhint').textContent = 'Nahravam... klikni pre zastavenie';
-      document.getElementById('acts').style.display = 'none';
-      seconds = 0;
-      recordStartTime = Date.now();
-      document.getElementById('rtime').textContent = '0:00';
-
-      timerInterval = setInterval(function() {
-        seconds = Math.floor((Date.now() - recordStartTime) / 1000);
-        var m = Math.floor(seconds / 60), s = seconds % 60;
-        document.getElementById('rtime').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-      }, 1000);
-
-      clearMsg();
-    } catch (e) {
-      stopAllStreams();
-      setMsg('Chyba: ' + e.message, 'err');
-    }
-  }
-
-  function stopAllStreams() {
-    activeStreams.forEach(function(s) {
-      s.getTracks().forEach(function(t) { t.stop(); });
-    });
-    activeStreams = [];
-  }
-
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-    clearInterval(timerInterval);
-    vaultStopLiveSave();
-    releaseWakeLock();
-    stopSilentAudio();
-    recordStartTime = null;
-    document.getElementById('rbtn').classList.remove('recording');
-  }
-
-  function discardRecording() {
-    audioBlob = null;
-    audioChunks = [];
-    stopAllStreams();
-    stopVisualizer();
-    vaultStopLiveSave();
-    releaseWakeLock();
-    stopSilentAudio();
-    recordStartTime = null;
-    document.getElementById('acts').style.display = 'none';
-    document.getElementById('rbtn').classList.remove('recording');
-    document.getElementById('rtime').textContent = '\u2014';
-    document.getElementById('rhint').textContent = 'Klikni pre nahravanie';
-    document.getElementById('audio-info').innerHTML = '';
-    clearMsg();
-  }
-
-  /* =====================================================
-     SUBMIT VOICE IDEA
-     ===================================================== */
-  async function submitIdea() {
-    if (!audioBlob) return;
-    if (audioBlob.size < 5000) {
-      setMsg('Nahravka je prilis kratka. Skuste nahrat dlhsiu nahravku (aspon 2 sekundy).', 'err');
-      return;
-    }
-
-    var dept = document.getElementById('dept').value;
-    var role = document.getElementById('role').value;
-    if (!dept || !role) {
-      setMsg('Vyber oddelenie a rolu', 'err');
-      return;
-    }
-
-    var btn = document.getElementById('bsend');
-    btn.disabled = true;
-    btn.textContent = 'Odosiela sa...';
-    var fill = document.getElementById('bfill');
-    fill.style.width = '5%';
-
-    var ext = audioBlob.type.indexOf('ogg') >= 0 ? 'ogg'
-      : audioBlob.type.indexOf('mp4') >= 0 ? 'mp4' : 'webm';
-    var filename = 'idea_' + Date.now() + '.' + ext;
-
-    var vaultId = null;
-    try {
-      vaultId = await vaultSave(audioBlob, filename, dept, role, currentVisibility);
-      setMsg('Nahravka zalohovana. Odosielam...', 'inf');
-      fill.style.width = '15%';
-      refreshVaultUI();
-    } catch (e) {
-      console.log('Vault save failed:', e);
-    }
-
-    try {
-      var fd = new FormData();
-      fd.append('audio', audioBlob, filename);
-      fd.append('department', dept);
-      fd.append('role', role);
-      fd.append('visibility', currentVisibility);
-
-      var uploadCtrl = new AbortController();
-      var uploadTout = setTimeout(function() { uploadCtrl.abort(); }, 300000);
-      var sizeMB = (audioBlob.size / 1024 / 1024).toFixed(1);
-      setMsg('Odosielam ' + sizeMB + ' MB...', 'inf');
-
-      var r;
-      try {
-        r = await fetch(API_BASE + '/api/ideas/upload', {
-          method: 'POST',
-          body: fd,
-          credentials: 'include',
-          signal: uploadCtrl.signal
-        });
-      } finally {
-        clearTimeout(uploadTout);
-      }
-
-      if (!r.ok) {
-        var d = await r.json().catch(function() { return {}; });
-        throw new Error(d.error || 'Chyba ' + r.status);
-      }
-
-      var data = await r.json();
-      if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
-
-      if (data.job_id) {
-        setMsg('Ukladam na server...', 'inf');
-        fill.style.width = '40%';
-        await pollJob(data.job_id, fill, btn, vaultId);
-      } else {
-        fill.style.width = '100%';
-        setMsg('Napad ulozeny!', 'ok');
-        if (_recentOpen) loadRecentIdeas();
-        if (vaultId) {
-          vaultUpdate(vaultId, { status: 'done' }).then(function() {
-            setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-          });
-        }
-        setTimeout(function() {
-          discardRecording();
-          fill.style.width = '0%';
-        }, 2500);
-        btn.disabled = false;
-        btn.textContent = 'Odoslat napad';
-      }
-    } catch (e) {
-      if (vaultId) {
-        setMsg('Odosielanie zlyhalo - skusam znova na pozadi...', 'inf');
-        vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(function() {
-          refreshVaultUI();
-          setTimeout(vaultAutoSync, 3000);
-        });
-        discardRecording();
-      } else {
-        setMsg('Chyba: ' + e.message, 'err');
-      }
-      btn.disabled = false;
-      btn.textContent = 'Odoslat napad';
-      fill.style.width = '0%';
-    }
-  }
-
-  /* =====================================================
-     POLL JOB (voice recording)
-     ===================================================== */
-  async function pollJob(jobId, fill, btn, vaultId) {
-    var attempts = 0;
-    while (attempts < 200) {
-      await new Promise(function(r) { setTimeout(r, 3000); });
-      attempts++;
-      try {
-        var r = await fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' });
-
-        if (r.status === 202) {
-          fill.style.width = Math.min(40 + attempts, 95) + '%';
-          if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
-          continue;
-        }
-
-        if (r.ok) {
-          var data = await r.json();
-          fill.style.width = '100%';
-          if (vaultId) {
-            vaultUpdate(vaultId, { status: 'done' }).then(function() {
-              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-            });
-          }
-          if (data.warning) {
-            setMsg(data.warning, 'err');
-            setTimeout(function() {
-              discardRecording();
-              fill.style.width = '0%';
-            }, 8000);
-          } else {
-            setMsg('Napad odoslany!', 'ok');
-            if (_recentOpen) loadRecentIdeas();
-            setTimeout(function() {
-              discardRecording();
-              fill.style.width = '0%';
-            }, 2500);
-          }
-        } else if (r.status === 404) {
-          try {
-            var mr = await fetch(API_BASE + '/api/ideas/my-recent', { credentials: 'include' });
-            var recent = mr.ok ? await mr.json() : [];
-            var now = Date.now();
-            var found = (recent || []).some(function(idea) {
-              return (now - new Date(idea.created_at).getTime()) < 120000;
-            });
-            if (found) {
-              fill.style.width = '100%';
-              setMsg('Napad odoslany!', 'ok');
-              if (_recentOpen) loadRecentIdeas();
-              if (vaultId) {
-                vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                  setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-                });
-              }
-              setTimeout(function() {
-                discardRecording();
-                fill.style.width = '0%';
-              }, 2500);
-            } else {
-              setMsg('Spracovanie prebieha...', 'inf');
-              continue;
-            }
-          } catch (e2) {
-            continue;
-          }
-        } else {
-          var d = await r.json().catch(function() { return {}; });
-          setMsg(d.error || 'Chyba pri spracovani', 'err');
-          fill.style.width = '0%';
-          if (vaultId) {
-            vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' })
-              .then(refreshVaultUI);
-          }
-        }
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (attempts >= 200) {
-      setMsg('Timeout - nahravka ulozena lokalne', 'err');
-      fill.style.width = '0%';
-      if (vaultId) {
-        vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
-      }
-    }
-    btn.disabled = false;
-    btn.textContent = 'Odoslat napad';
-  }
-
-  /* =====================================================
-     TEXT IDEA
-     ===================================================== */
-  async function sendTextIdea() {
-    var text = document.getElementById('txtIdea').value.trim();
-    if (!text) {
-      setMsg('Napiste text napadu', 'err');
-      return;
-    }
-    var dept = document.getElementById('dept').value;
-    var role = document.getElementById('role').value;
-    if (!dept || !role) {
-      setMsg('Vyber oddelenie a rolu', 'err');
-      return;
-    }
-
-    var btn = document.getElementById('txtSend');
-    btn.disabled = true;
-    btn.textContent = 'Odosiela sa...';
-    var fill = document.getElementById('bfill');
-    var w = 0;
-    var p = setInterval(function() {
-      w = Math.min(w + 5, 85);
-      fill.style.width = w + '%';
-      if (w >= 85) clearInterval(p);
-    }, 300);
-
-    try {
-      var r = await fetch(API_BASE + '/api/ideas/text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: text,
-          department: dept,
-          role: role,
-          visibility: currentVisibility
-        }),
-        credentials: 'include'
-      });
-      clearInterval(p);
-      fill.style.width = '100%';
-
-      if (r.ok) {
-        setMsg('Textovy napad odoslany!', 'ok');
-        document.getElementById('txtIdea').value = '';
-        setTimeout(function() {
-          fill.style.width = '0%';
-          clearMsg();
-        }, 2500);
-      } else {
-        var d = await r.json().catch(function() { return {}; });
-        setMsg(d.error || 'Chyba', 'err');
-      }
-    } catch (e) {
-      clearInterval(p);
-      setMsg('Chyba: ' + e.message, 'err');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Odoslat textovy napad';
-      setTimeout(function() { fill.style.width = '0%'; }, 2000);
-    }
-  }
-
-  /* =====================================================
-     FILE UPLOAD
-     ===================================================== */
-  document.addEventListener('DOMContentLoaded', function() {
-    var dropArea = document.getElementById('file-drop-area');
-    if (!dropArea) return;
-
-    dropArea.addEventListener('click', function() {
-      document.getElementById('fileInput').click();
-    });
-
-    dropArea.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      dropArea.classList.add('dragover');
-    });
-
-    dropArea.addEventListener('dragleave', function() {
-      dropArea.classList.remove('dragover');
-    });
-
-    dropArea.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dropArea.classList.remove('dragover');
-      if (e.dataTransfer.files.length > 0) {
-        processSelectedFile(e.dataTransfer.files[0]);
-      }
-    });
-  });
-
-  function handleFileSelect(input) {
-    if (input.files.length > 0) processSelectedFile(input.files[0]);
-  }
-
-  function processSelectedFile(file) {
-    var ext = file.name.split('.').pop().toLowerCase();
-    var allowed = ['mp3', 'wav', 'ogg', 'm4a', 'webm', 'flac', 'opus', 'mp4', 'mpeg', 'wma', 'aac'];
-    if (allowed.indexOf(ext) === -1 && !file.type.startsWith('audio/')) {
-      setMsg('Nepodporovany format. Pouzite audio subor.', 'err');
-      return;
-    }
-    if (file.size > 200 * 1024 * 1024) {
-      setMsg('Subor je prilis velky (max 200MB)', 'err');
-      return;
-    }
-
-    selectedFile = file;
-    document.getElementById('file-drop-area').style.display = 'none';
-    document.getElementById('file-selected').style.display = 'block';
-    document.getElementById('fileSend').style.display = 'block';
-    document.getElementById('file-name').textContent = file.name;
-    var sizeMB = (file.size / 1024 / 1024).toFixed(1);
-    document.getElementById('file-size').textContent = sizeMB + ' MB';
-    var preview = document.getElementById('file-preview');
-    preview.src = URL.createObjectURL(file);
-    clearMsg();
-  }
-
-  function resetFileUpload() {
-    selectedFile = null;
-    document.getElementById('file-drop-area').style.display = '';
-    document.getElementById('file-selected').style.display = 'none';
-    document.getElementById('fileSend').style.display = 'none';
-    document.getElementById('fileInput').value = '';
-    var preview = document.getElementById('file-preview');
-    if (preview.src) {
-      URL.revokeObjectURL(preview.src);
-      preview.src = '';
-    }
-  }
-
-  async function sendFileIdea() {
-    if (!selectedFile) return;
-    var dept = document.getElementById('dept').value;
-    var role = document.getElementById('role').value;
-    if (!dept || !role) {
-      setMsg('Vyber oddelenie a rolu', 'err');
-      return;
-    }
-
-    var btn = document.getElementById('fileSend');
-    btn.disabled = true;
-    btn.textContent = 'Odosiela sa...';
-    var fill = document.getElementById('bfill');
-    fill.style.width = '5%';
-
-    var vaultId = null;
-    try {
-      vaultId = await vaultSave(selectedFile, selectedFile.name, dept, role, currentVisibility);
-      setMsg('Subor zalohovany. Odosielam...', 'inf');
-      fill.style.width = '15%';
-      refreshVaultUI();
-    } catch (e) {
-      console.log('Vault save failed:', e);
-    }
-
-    try {
-      var fd = new FormData();
-      fd.append('audio', selectedFile, selectedFile.name);
-      fd.append('department', dept);
-      fd.append('role', role);
-      fd.append('visibility', currentVisibility);
-
-      var fCtrl = new AbortController();
-      var fTout = setTimeout(function() { fCtrl.abort(); }, 300000);
-      var fSizeMB = (selectedFile.size / 1024 / 1024).toFixed(1);
-      setMsg('Odosielam ' + fSizeMB + ' MB...', 'inf');
-
-      var r;
-      try {
-        r = await fetch(API_BASE + '/api/ideas/upload', {
-          method: 'POST',
-          body: fd,
-          credentials: 'include',
-          signal: fCtrl.signal
-        });
-      } finally {
-        clearTimeout(fTout);
-      }
-
-      if (!r.ok) {
-        var d = await r.json().catch(function() { return {}; });
-        throw new Error(d.error || 'Chyba ' + r.status);
-      }
-
-      var data = await r.json();
-      if (vaultId) await vaultUpdate(vaultId, { status: 'uploading', jobId: data.job_id || null });
-
-      if (data.job_id) {
-        setMsg('Ukladam na server...', 'inf');
-        fill.style.width = '40%';
-        await pollFileJob(data.job_id, fill, btn, vaultId);
-      } else {
-        fill.style.width = '100%';
-        setMsg('Napad odoslany!', 'ok');
-        if (_recentOpen) loadRecentIdeas();
-        if (vaultId) {
-          vaultUpdate(vaultId, { status: 'done' }).then(function() {
-            setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-          });
-        }
-        setTimeout(function() {
-          resetFileUpload();
-          fill.style.width = '0%';
-          clearMsg();
-        }, 2500);
-        btn.disabled = false;
-        btn.textContent = 'Odoslat audio napad';
-      }
-    } catch (e) {
-      if (vaultId) {
-        setMsg('Chyba: ' + e.message + ' \u2014 subor je ulozeny lokalne', 'err');
-        vaultUpdate(vaultId, { status: 'error', errorMsg: e.message }).then(refreshVaultUI);
-      } else {
-        setMsg('Chyba: ' + e.message, 'err');
-      }
-      btn.disabled = false;
-      btn.textContent = 'Odoslat audio napad';
-      fill.style.width = '0%';
-    }
-  }
-
-  /* =====================================================
-     POLL FILE JOB
-     ===================================================== */
-  async function pollFileJob(jobId, fill, btn, vaultId) {
-    var attempts = 0;
-    while (attempts < 200) {
-      await new Promise(function(r) { setTimeout(r, 3000); });
-      attempts++;
-      try {
-        var r = await fetch(API_BASE + '/api/ideas/job/' + jobId, { credentials: 'include' });
-
-        if (r.status === 202) {
-          fill.style.width = Math.min(40 + attempts, 95) + '%';
-          if (attempts % 10 === 0) setMsg('Prepisujem... este chvilu', 'inf');
-          continue;
-        }
-
-        if (r.ok) {
-          var data = await r.json();
-          fill.style.width = '100%';
-          if (vaultId) {
-            vaultUpdate(vaultId, { status: 'done' }).then(function() {
-              setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-            });
-          }
-          if (data.warning) {
-            setMsg(data.warning, 'err');
-            setTimeout(function() {
-              resetFileUpload();
-              fill.style.width = '0%';
-            }, 8000);
-          } else {
-            setMsg('Napad odoslany!', 'ok');
-            if (_recentOpen) loadRecentIdeas();
-            setTimeout(function() {
-              resetFileUpload();
-              fill.style.width = '0%';
-              clearMsg();
-            }, 2500);
-          }
-        } else if (r.status === 404) {
-          try {
-            var mr = await fetch(API_BASE + '/api/ideas/my-recent', { credentials: 'include' });
-            var recent = mr.ok ? await mr.json() : [];
-            var now = Date.now();
-            var found = (recent || []).some(function(idea) {
-              return (now - new Date(idea.created_at).getTime()) < 120000;
-            });
-            if (found) {
-              fill.style.width = '100%';
-              setMsg('Napad odoslany!', 'ok');
-              if (_recentOpen) loadRecentIdeas();
-              if (vaultId) {
-                vaultUpdate(vaultId, { status: 'done' }).then(function() {
-                  setTimeout(function() { vaultDelete(vaultId).then(refreshVaultUI); }, 5000);
-                });
-              }
-              setTimeout(function() {
-                resetFileUpload();
-                fill.style.width = '0%';
-                clearMsg();
-              }, 2500);
-            } else {
-              setMsg('Spracovanie prebieha...', 'inf');
-              continue;
-            }
-          } catch (e2) {
-            continue;
-          }
-        } else {
-          var d = await r.json().catch(function() { return {}; });
-          setMsg(d.error || 'Chyba pri spracovani', 'err');
-          fill.style.width = '0%';
-          if (vaultId) {
-            vaultUpdate(vaultId, { status: 'error', errorMsg: d.error || 'Server error' })
-              .then(refreshVaultUI);
-          }
-        }
-        break;
-      } catch (e) {
-        continue;
-      }
-    }
-
-    if (attempts >= 200) {
-      setMsg('Timeout - nahravka ulozena lokalne', 'err');
-      fill.style.width = '0%';
-      if (vaultId) {
-        vaultUpdate(vaultId, { status: 'error', errorMsg: 'Timeout' }).then(refreshVaultUI);
-      }
-    }
-    btn.disabled = false;
-    btn.textContent = 'Odoslat audio napad';
-  }
-
-  /* =====================================================
-     STATUS MESSAGES
-     ===================================================== */
-  function setMsg(t, c) {
-    var e = document.getElementById('smsg');
-    e.textContent = t;
-    e.className = 'status-msg ' + c;
-  }
-
-  function clearMsg() {
-    var e = document.getElementById('smsg');
-    e.textContent = '';
-    e.className = 'status-msg';
-  }
-
-  /* =====================================================
-     RECENT IDEAS
-     ===================================================== */
-  function toggleRecent() {
-    _recentOpen = !_recentOpen;
-    var list = document.getElementById('recent-list');
-    var toggle = document.getElementById('recent-toggle');
-    if (_recentOpen) {
-      list.classList.add('open');
-      toggle.innerHTML = '&#9652; Posledne napady';
-      loadRecentIdeas();
-    } else {
-      list.classList.remove('open');
-      toggle.innerHTML = '&#9662; Posledne napady';
-    }
-  }
-
-  async function loadRecentIdeas() {
-    var list = document.getElementById('recent-list');
-    list.innerHTML = '<div class="text-xs text-muted" style="text-align:center;padding:12px;">Nacitavam...</div>';
-
-    try {
-      var r = await fetch(API_BASE + '/api/ideas/my-recent', { credentials: 'include' });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      var data = await r.json();
-
-      if (!data.length) {
-        list.innerHTML = '<div class="text-xs text-muted" style="text-align:center;padding:12px;">Ziadne napady</div>';
-        return;
-      }
-
-      var html = '';
-      for (var i = 0; i < data.length; i++) {
-        var idea = data[i];
-        var date = idea.created_at
-          ? new Date(idea.created_at).toLocaleString('sk-SK', {
-              day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-            })
-          : '';
-        var badge = idea.stt_engine === 'elevenlabs'
-          ? '<span class="ri-badge el">EL</span>'
-          : idea.stt_engine === 'whisper'
-            ? '<span class="ri-badge wh">W</span>'
-            : '';
-        var dur = idea.duration ? Math.round(idea.duration) + 's' : '';
-        var vis = idea.visibility === 'company' ? '\uD83C\uDFE2' : '\uD83D\uDD12';
-
-        html += '<div class="recent-item" onclick="window.open(\'/admin#idea-' + idea.id + '\', \'_blank\')">';
-        html += '<div class="ri-top"><span class="ri-id">#' + idea.id + '</span><span>' + date + '</span></div>';
-        html += '<div class="ri-text">' + escapeHtml(idea.preview) + '</div>';
-        html += '<div class="ri-meta"><span>' + vis + ' ' + (idea.department || '') + '</span>';
-        if (dur) html += '<span>' + dur + '</span>';
-        html += badge + '</div></div>';
-      }
-      list.innerHTML = html;
-    } catch (e) {
-      list.innerHTML = '<div style="text-align:center;padding:12px;font-size:11px;color:#f87171;">Chyba: ' + e.message + '</div>';
-    }
-  }
-
-  function escapeHtml(t) {
-    var d = document.createElement('div');
-    d.textContent = t;
-    return d.innerHTML;
-  }
-
-  /* =====================================================
-     AUTH & INIT
-     ===================================================== */
-  async function init() {
-    try {
-      var r = await fetch(API_BASE + '/api/current-user', { credentials: 'include' });
-      if (!r.ok) {
-        window.location.href = '/login';
-        return;
-      }
-      currentUser = await r.json();
-      document.getElementById('uname').textContent = currentUser.name;
-      vaultStartAutoSync();
-
-      var savedDept = localStorage.getItem('savedDept') || currentUser.department || '';
-      var savedRole = localStorage.getItem('savedRole') || '';
-      if (savedDept) document.getElementById('dept').value = savedDept;
-      if (savedRole) document.getElementById('role').value = savedRole;
-    } catch (e) {
-      setMsg('Chyba pripojenia k serveru', 'err');
-    }
-  }
-
-  async function doLogout() {
-    try {
-      await fetch(API_BASE + '/api/logout', { method: 'POST', credentials: 'include' });
-    } catch (e) {}
-    window.location.href = '/login';
-  }
-
-  /* =====================================================
-     BOOTSTRAP
-     ===================================================== */
-  init();
-  refreshVaultUI();
-
-  // Lucide icons
-  document.addEventListener('DOMContentLoaded', function() {
-    if (window.lucide) lucide.createIcons();
-  });
-
-  // Service Worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function() {});
-    navigator.serviceWorker.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'SW_UPDATED') {
-        if (confirm('Dostupna nova verzia aplikacie. Obnovit teraz?')) {
-          window.location.reload();
-        }
-      }
-    });
-    navigator.serviceWorker.addEventListener('controllerchange', function() {
-      window.location.reload();
-    });
-  }
-</script>
+  <div id="text-panel">
+    <textarea class="txt-area" id="txtIdea" placeholder="Nap&#237;&#353;te svoj n&#225;pad..."></textarea>
+    <button class="txt-send" id="txtSend" onclick="sendTextIdea()">Odosla&#357; textov&#253; n&#225;pad</button>
+  </div>
+
+  <div id="file-panel">
+    <div class="file-upload-area" id="file-drop-area">
+      <div class="file-icon">&#127925;</div>
+      <div class="file-hint">Kliknite alebo presu&#328;te audio s&#250;bor</div>
+      <div class="file-formats">MP3, WAV, OGG, M4A, WebM, FLAC, OPUS</div>
+      <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.flac,.opus,.mp4,.mpeg" style="display:none" onchange="handleFileSelect(this)">
+    </div>
+    <div class="file-selected" id="file-selected" style="display:none">
+      <div class="file-name" id="file-name"></div>
+      <div class="file-size" id="file-size"></div>
+      <audio id="file-preview" controls style="width:100%;margin-top:8px;"></audio>
+    </div>
+    <button class="txt-send" id="fileSend" onclick="sendFileIdea()" style="display:none">Odosla&#357; audio n&#225;pad</button>
+  </div>
+
+  <div class="acts" id="acts" style="display:none">
+    <button class="bx" onclick="discardRecording()">&#10005;</button>
+    <button class="bsend" id="bsend" onclick="submitIdea()">Odosla&#357; n&#225;pad</button>
+  </div>
+  <div class="bar"><div class="bfill" id="bfill"></div></div>
+  <div class="smsg" id="smsg"></div>
+
+  <div class="recent-section">
+    <div class="recent-toggle" id="recent-toggle" onclick="toggleRecent()">&#9662; Posledné nápady</div>
+    <div class="recent-list" id="recent-list"></div>
+  </div>
+
+  <div class="adml" onclick="openAdmin()">&#9881; Admin konzola</div>
+</div>
+
+<script>var _vaultDB=null;var _vaultOpen=false;var _vaultSyncing=false;var _vaultSyncTimer=null;var _vaultLiveId=null;var _vaultLiveSaveTimer=null;function openVaultDB(){return new Promise(function(resolve,reject){if(_vaultDB){resolve(_vaultDB);return;}
+var req=indexedDB.open('RideaAudioVault',2);req.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('recordings')){var store=db.createObjectStore('recordings',{keyPath:'id',autoIncrement:true});store.createIndex('status','status',{unique:false});}};req.onsuccess=function(e){_vaultDB=e.target.result;resolve(_vaultDB);};req.onerror=function(){reject(new Error('IndexedDB unavailable'));};});}
+function vaultSave(blob,filename,dept,role,visibility){return openVaultDB().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('recordings','readwrite');var store=tx.objectStore('recordings');var record={blob:blob,filename:filename,dept:dept,role:role,visibility:visibility,created:new Date().toISOString(),size:blob.size,status:'pending',jobId:null,errorMsg:null,retries:0,nextRetryAt:0};var req=store.add(record);req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(new Error('Vault save failed'));};});});}
+function vaultUpdate(id,fields){return openVaultDB().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('recordings','readwrite');var store=tx.objectStore('recordings');var getReq=store.get(id);getReq.onsuccess=function(){var rec=getReq.result;if(!rec){resolve();return;}
+Object.keys(fields).forEach(function(k){rec[k]=fields[k];});store.put(rec);resolve();};getReq.onerror=function(){reject(new Error('Vault update failed'));};});});}
+function vaultDelete(id){return openVaultDB().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('recordings','readwrite');tx.objectStore('recordings').delete(id);tx.oncomplete=function(){resolve();};tx.onerror=function(){reject();};});});}
+function vaultGetAll(){return openVaultDB().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('recordings','readonly');var store=tx.objectStore('recordings');var req=store.getAll();req.onsuccess=function(){resolve(req.result||[]);};req.onerror=function(){resolve([]);};});});}
+function vaultGet(id){return openVaultDB().then(function(db){return new Promise(function(resolve,reject){var tx=db.transaction('recordings','readonly');var req=tx.objectStore('recordings').get(id);req.onsuccess=function(){resolve(req.result||null);};req.onerror=function(){resolve(null);};});});}
+function toggleVaultList(){_vaultOpen=!_vaultOpen;document.getElementById('vault-list').classList.toggle('open',_vaultOpen);}
+function refreshVaultUI(){vaultGetAll().then(function(items){var pending=items.filter(function(i){return i.status!=='done'&&i.status!=='live';});var banner=document.getElementById('vault-banner');var list=document.getElementById('vault-list');if(pending.length===0){banner.classList.remove('show');list.classList.remove('open');list.innerHTML='';_vaultOpen=false;return;}
+banner.classList.add('show');document.getElementById('vault-count').textContent=pending.length+' zaznam'+(pending.length>1?'ov':'');var html='';pending.forEach(function(item){var d=new Date(item.created);var time=d.getDate()+'.'+(d.getMonth()+1)+'. '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();var sizeMB=(item.size/1024/1024).toFixed(1);var statusLabel=item.status==='pending'?'Caka':item.status==='uploading'?'Odosielam...':'Chyba';var statusCls=item.status==='pending'?'pending':item.status==='uploading'?'uploading':'error';html+='<div class="vault-item" id="vault-item-'+item.id+'">';html+='<div class="vi-top"><span class="vi-info">'+time+' &middot; '+sizeMB+' MB</span>';html+='<span class="vi-status '+statusCls+'">'+statusLabel+'</span></div>';if(item.errorMsg)html+='<div style="font-size:10px;color:#f87171;margin-top:3px">'+item.errorMsg+'</div>';html+='<div class="vi-actions">';if(item.status!=='uploading'){html+='<button class="vi-btn retry" onclick="vaultRetry('+item.id+')">&#8635; Odoslat znova</button>';}
+html+='<button class="vi-btn download" onclick="vaultDownload('+item.id+')">&#11015; Stiahnut</button>';html+='<button class="vi-btn delete" onclick="vaultRemove('+item.id+')">&#10005;</button>';html+='</div></div>';});list.innerHTML=html;});}
+function vaultDownload(id){vaultGet(id).then(function(rec){if(!rec)return;var url=URL.createObjectURL(rec.blob);var a=document.createElement('a');a.href=url;a.download=rec.filename||('nahravka_'+id+'.webm');a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);});}
+function vaultRemove(id){if(!confirm('Naozaj vymazat nahravku? Tato akcia je nevratna.'))return;vaultDelete(id).then(refreshVaultUI);}
+function vaultRetry(id){vaultGet(id).then(function(rec){if(!rec||!rec.blob){setMsg('Nahravka nenajdena','err');return;}
+vaultUpdate(id,{status:'uploading',errorMsg:null,retries:rec.retries+1}).then(function(){refreshVaultUI();_doVaultUpload(id,rec.blob,rec.filename,rec.dept,rec.role,rec.visibility);});});}
+function _doVaultUpload(vaultId,blob,filename,dept,role,visibility){if(blob.size<5000){console.log('VaultUpload: skipping tiny recording ('+blob.size+' bytes)');vaultUpdate(vaultId,{status:'error',errorMsg:'Nahravka prilis kratka'}).then(refreshVaultUI);return;}var fill=document.getElementById('bfill');fill.style.width='15%';var sizeMB=(blob.size/1024/1024).toFixed(1);setMsg('Odosielam zalohovanu nahravku ('+sizeMB+' MB)...','inf');var fd=new FormData();fd.append('audio',blob,filename);fd.append('department',dept);fd.append('role',role);fd.append('visibility',visibility);var ctrl=new AbortController();var tout=setTimeout(function(){ctrl.abort();},300000);fetch(API_BASE+'/api/ideas/upload',{method:'POST',body:fd,credentials:'include',signal:ctrl.signal}).then(function(r){clearTimeout(tout);if(!r.ok)return r.json().then(function(d){throw new Error(d.error||'Chyba '+r.status);});return r.json();},function(e){clearTimeout(tout);throw e;}).then(function(data){if(data.job_id){setMsg('Prepisujem...','inf');fill.style.width='40%';vaultUpdate(vaultId,{jobId:data.job_id});return _pollVaultJob(vaultId,data.job_id,fill);}else{fill.style.width='100%';setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);fill.style.width='0%';clearMsg();},3000);});}}).catch(function(err){fill.style.width='0%';setMsg('Chyba: '+err.message+' - nahravka ulozena lokalne','err');vaultUpdate(vaultId,{status:'error',errorMsg:err.message}).then(refreshVaultUI);});}
+function _pollVaultJob(vaultId,jobId,fill){var attempts=0;function poll(){if(attempts>=200){setMsg('Timeout - nahravka ulozena lokalne, skus znova','err');fill.style.width='0%';vaultUpdate(vaultId,{status:'error',errorMsg:'Timeout'}).then(refreshVaultUI);return;}
+attempts++;fetch(API_BASE+'/api/ideas/job/'+jobId,{credentials:'include'}).then(function(r){if(r.status===202){fill.style.width=Math.min(40+attempts,95)+'%';if(attempts%10===0)setMsg('Prepisujem... este chvilu','inf');setTimeout(poll,3000);return;}
+if(r.ok){fill.style.width='100%';setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);fill.style.width='0%';clearMsg();},3000);});}else if(r.status===404){fetch(API_BASE+'/api/ideas/my-recent',{credentials:'include'}).then(function(mr){return mr.ok?mr.json():[];}).then(function(recent){var now=Date.now();var found=(recent||[]).some(function(idea){return(now-new Date(idea.created_at).getTime())<120000;});if(found){fill.style.width='100%';setMsg('Napad odoslany!','ok');vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);fill.style.width='0%';clearMsg();},3000);});}else{setMsg('Spracovanie prebieha...','inf');setTimeout(poll,3000);}}).catch(function(){setTimeout(poll,3000);});}else{r.json().catch(function(){return{};}).then(function(d){setMsg(d.error||'Chyba pri spracovani','err');fill.style.width='0%';vaultUpdate(vaultId,{status:'error',errorMsg:d.error||'Server error'}).then(refreshVaultUI);});}}).catch(function(){setTimeout(poll,3000);});}
+setTimeout(poll,3000);}
+function vaultStartLiveSave(dept,role,visibility){_vaultLiveId=null;if(_vaultLiveSaveTimer)clearInterval(_vaultLiveSaveTimer);_vaultLiveSaveTimer=setInterval(function(){if(!audioChunks||audioChunks.length===0)return;var mime='audio/webm;codecs=opus';var liveBlob=new Blob(audioChunks,{type:mime});if(_vaultLiveId){vaultUpdate(_vaultLiveId,{blob:liveBlob,size:liveBlob.size}).catch(function(){});}else{openVaultDB().then(function(db){return new Promise(function(resolve){var tx=db.transaction('recordings','readwrite');var store=tx.objectStore('recordings');var record={blob:liveBlob,filename:'live_'+Date.now()+'.webm',dept:dept,role:role,visibility:visibility,created:new Date().toISOString(),size:liveBlob.size,status:'live',jobId:null,errorMsg:null,retries:0,nextRetryAt:0};var req=store.add(record);req.onsuccess=function(){_vaultLiveId=req.result;resolve();};req.onerror=function(){resolve();};});}).catch(function(){});}},10000);}
+function vaultStopLiveSave(){if(_vaultLiveSaveTimer){clearInterval(_vaultLiveSaveTimer);_vaultLiveSaveTimer=null;}if(_vaultLiveId){var liveId=_vaultLiveId;_vaultLiveId=null;vaultDelete(liveId).catch(function(){});}}
+function vaultPromoteLive(){if(_vaultLiveSaveTimer){clearInterval(_vaultLiveSaveTimer);_vaultLiveSaveTimer=null;}if(_vaultLiveId){var liveId=_vaultLiveId;_vaultLiveId=null;return vaultUpdate(liveId,{status:'pending',filename:'prerusena_'+Date.now()+'.webm'}).then(function(){refreshVaultUI();return liveId;});}return Promise.resolve(null);}
+function vaultAutoSync(){if(_vaultSyncing)return;if(!currentUser)return;vaultGetAll().then(function(items){var now=Date.now();var toUpload=items.filter(function(i){if(i.status==='done'||i.status==='live'||i.status==='uploading')return false;if(i.status==='error'&&i.nextRetryAt&&now<i.nextRetryAt)return false;return true;});if(toUpload.length===0)return;_vaultSyncing=true;var item=toUpload[0];console.log('VaultAutoSync: uploading id='+item.id);vaultUpdate(item.id,{status:'uploading',errorMsg:null}).then(function(){refreshVaultUI();_doVaultUploadAsync(item.id,item.blob,item.filename,item.dept,item.role,item.visibility).finally(function(){_vaultSyncing=false;});});}).catch(function(){_vaultSyncing=false;});}
+function _doVaultUploadAsync(vaultId,blobData,filename,dept,role,visibility){var fd=new FormData();fd.append('audio',blobData,filename);fd.append('department',dept);fd.append('role',role);fd.append('visibility',visibility);var ctrl=new AbortController();var tout=setTimeout(function(){ctrl.abort();},300000);return fetch(API_BASE+'/api/ideas/upload',{method:'POST',body:fd,credentials:'include',signal:ctrl.signal}).then(function(r){clearTimeout(tout);return r;},function(e){clearTimeout(tout);throw e;}).then(function(r){if(!r.ok)return r.json().then(function(d){throw new Error(d.error||'Chyba '+r.status);});return r.json();}).then(function(data){if(data.job_id){vaultUpdate(vaultId,{jobId:data.job_id});return _pollVaultJobAsync(vaultId,data.job_id);}else{return vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},3000);});}}).catch(function(err){return vaultGet(vaultId).then(function(rec){var retries=rec?(rec.retries||0):0;var delaySec=Math.min(30*Math.pow(2,retries),300);var nextRetry=Date.now()+delaySec*1000;return vaultUpdate(vaultId,{status:'error',errorMsg:err.message,retries:retries+1,nextRetryAt:nextRetry});}).then(refreshVaultUI);});}
+function _pollVaultJobAsync(vaultId,jobId){return new Promise(function(resolve){var attempts=0;function poll(){if(attempts>=200){vaultUpdate(vaultId,{status:'error',errorMsg:'Timeout'}).then(function(){refreshVaultUI();resolve();});return;}attempts++;fetch(API_BASE+'/api/ideas/job/'+jobId,{credentials:'include'}).then(function(r){if(r.status===202){setTimeout(poll,3000);return;}if(r.ok){vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},3000);resolve();});}else if(r.status===404){fetch(API_BASE+'/api/ideas/my-recent',{credentials:'include'}).then(function(mr){return mr.ok?mr.json():[];}).then(function(recent){var found=(recent||[]).some(function(idea){return(Date.now()-new Date(idea.created_at).getTime())<120000;});if(found){vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},3000);resolve();});}else{setTimeout(poll,3000);}}).catch(function(){setTimeout(poll,3000);});}else{r.json().catch(function(){return{};}).then(function(d){vaultUpdate(vaultId,{status:'error',errorMsg:d.error||'Server error'}).then(function(){refreshVaultUI();resolve();});});}}).catch(function(){setTimeout(poll,3000);});}setTimeout(poll,3000);});}
+function vaultStartAutoSync(){if(_vaultSyncTimer)return;setTimeout(vaultAutoSync,3000);_vaultSyncTimer=setInterval(vaultAutoSync,30000);}
+window.addEventListener('online',function(){console.log('VaultAutoSync: Network restored');setMsg('Pripojenie obnovene, odosielam nahravky...','inf');setTimeout(vaultAutoSync,2000);});
+window.addEventListener('offline',function(){console.log('VaultAutoSync: Network lost');if(mediaRecorder&&mediaRecorder.state==='recording'){setMsg('Bez pripojenia - nahravka sa ulozi lokalne','inf');}});
+const API_BASE=window.API_BASE||'';let mediaRecorder=null;let audioChunks=[];let audioBlob=null;let timerInterval=null;let seconds=0;let currentUser=null;let currentVisibility='company';let audioContext=null;let analyser=null;let animFrameId=null;let activeStreams=[];let mixedDestination=null;let wakeLock=null;let silentAudio=null;let recordStartTime=null;async function requestWakeLock(){if(!('wakeLock'in navigator))return;try{wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',function(){console.log('Wake Lock released');if(mediaRecorder&&mediaRecorder.state==='recording'){requestWakeLock();}});console.log('Wake Lock acquired');}catch(e){console.log('Wake Lock failed:',e.message);}}
+function releaseWakeLock(){if(wakeLock){wakeLock.release().catch(function(){});wakeLock=null;}}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&mediaRecorder&&mediaRecorder.state==='recording'){requestWakeLock();if(recordStartTime){seconds=Math.floor((Date.now()-recordStartTime)/1000);var m=Math.floor(seconds/60),s=seconds%60;document.getElementById('rtime').textContent=m+':'+(s<10?'0':'')+s;}}
+if(document.visibilityState==='visible'&&mediaRecorder&&mediaRecorder.state==='inactive'&&recordStartTime){recordStartTime=null;releaseWakeLock();stopSilentAudio();clearInterval(timerInterval);document.getElementById('rbtn').classList.remove('on');if(audioChunks.length>0){var mime='audio/webm';audioBlob=new Blob(audioChunks,{type:mime});document.getElementById('acts').style.display='flex';document.getElementById('rhint').textContent='Nahravka prerusena (obrazovka zamknuta)';vaultPromoteLive().then(function(promotedId){if(promotedId){setMsg('Prerusena nahravka zalohovana! Automaticky sa pokusi odoslat.','inf');}else{var dept=document.getElementById('dept').value;var role=document.getElementById('role').value;if(dept&&role){vaultSave(audioBlob,'prerusena_'+Date.now()+'.webm',dept,role,currentVisibility).then(function(){setMsg('Prerusena nahravka zalohovana!','inf');refreshVaultUI();}).catch(function(){setMsg('Nahravanie prerusene. Odoslte co najskor.','err');});}}});}else{vaultPromoteLive();document.getElementById('rhint').textContent='Nahravanie prerusene';setMsg('Android zastavil nahravanie pri zamknuti obrazovky.','err');}}});function startSilentAudio(){try{if(silentAudio)return;silentAudio=new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');silentAudio.loop=true;silentAudio.volume=0.01;silentAudio.play().catch(function(){});}catch(e){}}
+function stopSilentAudio(){if(silentAudio){silentAudio.pause();silentAudio.src='';silentAudio=null;}}
+function switchTab(tab){document.getElementById('tab-voice').classList.toggle('active',tab==='voice');document.getElementById('tab-text').classList.toggle('active',tab==='text');document.getElementById('tab-file').classList.toggle('active',tab==='file');document.getElementById('voice-panel').classList.toggle('active',tab==='voice');document.getElementById('text-panel').classList.toggle('active',tab==='text');document.getElementById('file-panel').classList.toggle('active',tab==='file');}
+function setVisibility(val){currentVisibility=val;document.getElementById('vis-personal').classList.toggle('active',val==='personal');document.getElementById('vis-company').classList.toggle('active',val==='company');}
+async function init(){try{const r=await fetch(API_BASE+'/api/current-user',{credentials:'include'});if(!r.ok){window.location.href='/login';return;}
+currentUser=await r.json();document.getElementById('uname').textContent=currentUser.name;vaultStartAutoSync();var savedDept=localStorage.getItem('savedDept')||currentUser.department||'';var savedRole=localStorage.getItem('savedRole')||'';if(savedDept)document.getElementById('dept').value=savedDept;if(savedRole)document.getElementById('role').value=savedRole;}catch(e){setMsg('Chyba pripojenia k serveru','err');}}
+async function doLogout(){try{await fetch(API_BASE+'/api/logout',{method:'POST',credentials:'include'});}catch(e){}
+window.location.href='/login';}
+function openAdmin(){window.location.href='/admin';}
+var _recentOpen=false;function toggleRecent(){_recentOpen=!_recentOpen;var list=document.getElementById('recent-list');var toggle=document.getElementById('recent-toggle');if(_recentOpen){list.classList.add('show');toggle.innerHTML='&#9652; Posledn\u00e9 n\u00e1pady';loadRecentIdeas();}else{list.classList.remove('show');toggle.innerHTML='&#9662; Posledn\u00e9 n\u00e1pady';}}
+async function loadRecentIdeas(){var list=document.getElementById('recent-list');list.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:rgba(255,255,255,0.3)">Na\u010d\u00edtavam...</div>';try{var r=await fetch('/api/ideas/my-recent',{credentials:'include'});if(!r.ok)throw new Error('HTTP '+r.status);var data=await r.json();if(!data.length){list.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:rgba(255,255,255,0.3)">\u017diadne n\u00e1pady</div>';return;}
+var html='';for(var i=0;i<data.length;i++){var idea=data[i];var date=idea.created_at?new Date(idea.created_at).toLocaleString('sk-SK',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';var badge=idea.stt_engine==='elevenlabs'?'<span class="ri-badge el">EL</span>':idea.stt_engine==='whisper'?'<span class="ri-badge wh">W</span>':'';var dur=idea.duration?Math.round(idea.duration)+'s':'';var vis=idea.visibility==='company'?'\uD83C\uDFE2':'\uD83D\uDD12';html+='<div class="recent-item" onclick="window.open(\'/admin#idea-'+idea.id+'\', \'_blank\')">';html+='<div class="ri-top"><span class="ri-id">#'+idea.id+'</span><span>'+date+'</span></div>';html+='<div class="ri-text">'+escapeHtml(idea.preview)+'</div>';html+='<div class="ri-meta"><span>'+vis+' '+(idea.department||'')+'</span>'+(dur?'<span>'+dur+'</span>':'')+badge+'</div>';html+='</div>';}
+list.innerHTML=html;}catch(e){list.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:#f87171">Chyba: '+e.message+'</div>';}}
+function escapeHtml(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+function startVisualizer(stream){var canvas=document.getElementById('visualizer');canvas.classList.add('active');var ctx=canvas.getContext('2d');canvas.width=canvas.offsetWidth*2;canvas.height=canvas.offsetHeight*2;if(!audioContext||audioContext.state==='closed'){audioContext=new(window.AudioContext||window.webkitAudioContext)();}
+var source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=128;source.connect(analyser);var bufLen=analyser.frequencyBinCount;var data=new Uint8Array(bufLen);var barW=canvas.width/bufLen;function draw(){animFrameId=requestAnimationFrame(draw);analyser.getByteFrequencyData(data);ctx.clearRect(0,0,canvas.width,canvas.height);for(var i=0;i<bufLen;i++){var v=data[i]/255;var h=v*canvas.height;var x=i*barW;var r=180+Math.round(v*59);var g=75-Math.round(v*30);var b=213+Math.round(v*42);ctx.fillStyle='rgba('+r+','+g+','+b+','+(0.5+v*0.5)+')';ctx.fillRect(x,canvas.height-h,barW-1,h);}}
+draw();}
+function stopVisualizer(){if(animFrameId){cancelAnimationFrame(animFrameId);animFrameId=null;}
+if(audioContext){audioContext.close().catch(function(){});audioContext=null;}
+var canvas=document.getElementById('visualizer');canvas.classList.remove('active');var ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
+async function toggleRecord(){if(mediaRecorder&&mediaRecorder.state==='recording')stopRecording();else await startRecording();}
+async function startRecording(){var dept=document.getElementById('dept').value;var role=document.getElementById('role').value;if(!dept||!role){setMsg('Vyber oddelenie a rolu','err');return;}
+var micStream=null;var sources=[];activeStreams=[];try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});activeStreams.push(micStream);sources.push('mikrofon');}catch(e){setMsg(e.name==='NotAllowedError'?'Povolte pristup k mikrofonu v nastaveniach prehliadaca':'Chyba: '+e.message,'err');return;}
+try{audioContext=new(window.AudioContext||window.webkitAudioContext)();mixedDestination=audioContext.createMediaStreamDestination();var micSource=audioContext.createMediaStreamSource(micStream);micSource.connect(mixedDestination);
+analyser=audioContext.createAnalyser();analyser.fftSize=128;micSource.connect(analyser);
+var mixedStream=mixedDestination.stream;var infoEl=document.getElementById('audio-info');infoEl.innerHTML='<span class="active-src">'+sources.join(' + ')+'</span>';var canvas=document.getElementById('visualizer');canvas.classList.add('active');var ctx=canvas.getContext('2d');canvas.width=canvas.offsetWidth*2;canvas.height=canvas.offsetHeight*2;var bufLen=analyser.frequencyBinCount;var data=new Uint8Array(bufLen);var barW=canvas.width/bufLen;function draw(){animFrameId=requestAnimationFrame(draw);analyser.getByteFrequencyData(data);ctx.clearRect(0,0,canvas.width,canvas.height);for(var i=0;i<bufLen;i++){var v=data[i]/255;var h=v*canvas.height;var x=i*barW;var r=180+Math.round(v*59);var g=75-Math.round(v*30);var b=213+Math.round(v*42);ctx.fillStyle='rgba('+r+','+g+','+b+','+(0.5+v*0.5)+')';ctx.fillRect(x,canvas.height-h,barW-1,h);}}
+draw();audioChunks=[];var mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';mediaRecorder=new MediaRecorder(mixedStream,{mimeType:mime,audioBitsPerSecond:32000});mediaRecorder.ondataavailable=function(e){if(e.data.size>0)audioChunks.push(e.data);};mediaRecorder.onstop=function(){audioBlob=new Blob(audioChunks,{type:mime});var sizeMB=(audioBlob.size/1024/1024).toFixed(1);stopAllStreams();stopVisualizer();document.getElementById('acts').style.display='flex';document.getElementById('rhint').textContent='Nahravka pripravena';document.getElementById('audio-info').innerHTML='<span class="active-src">'+sizeMB+' MB</span>';};mediaRecorder.start(1000);vaultStartLiveSave(dept,role,currentVisibility);await requestWakeLock();startSilentAudio();if(/Android/i.test(navigator.userAgent)){setMsg('\u26a0 Neza\u0161kn\u00e1vajte obrazovku - nahr\u00e1vanie sa zastav\u00ed','inf');}
+document.getElementById('rbtn').classList.add('on');document.getElementById('rhint').textContent='Nahravam... klikni pre zastavenie';document.getElementById('acts').style.display='none';seconds=0;recordStartTime=Date.now();document.getElementById('rtime').textContent='0:00';timerInterval=setInterval(function(){seconds=Math.floor((Date.now()-recordStartTime)/1000);var m=Math.floor(seconds/60),s=seconds%60;document.getElementById('rtime').textContent=m+':'+(s<10?'0':'')+s;},1000);clearMsg();}catch(e){stopAllStreams();setMsg('Chyba: '+e.message,'err');}}
+function stopAllStreams(){activeStreams.forEach(function(s){s.getTracks().forEach(function(t){t.stop();});});activeStreams=[];}
+function stopRecording(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();clearInterval(timerInterval);vaultStopLiveSave();releaseWakeLock();stopSilentAudio();recordStartTime=null;document.getElementById('rbtn').classList.remove('on');}
+function discardRecording(){audioBlob=null;audioChunks=[];stopAllStreams();stopVisualizer();vaultStopLiveSave();releaseWakeLock();stopSilentAudio();recordStartTime=null;document.getElementById('acts').style.display='none';document.getElementById('rbtn').classList.remove('on');document.getElementById('rtime').textContent='\u2014';document.getElementById('rhint').textContent='Klikni pre nahravanie';document.getElementById('audio-info').innerHTML='';clearMsg();}
+async function submitIdea(){if(!audioBlob)return;if(audioBlob.size<5000){setMsg('Nahravka je prilis kratka. Skuste nahrat dlhsiu nahravku (aspon 2 sekundy).','err');return;}var dept=document.getElementById('dept').value;var role=document.getElementById('role').value;if(!dept||!role){setMsg('Vyber oddelenie a rolu','err');return;}
+var btn=document.getElementById('bsend');btn.disabled=true;btn.textContent='Odosiela sa...';var fill=document.getElementById('bfill');fill.style.width='5%';var ext=audioBlob.type.indexOf('ogg')>=0?'ogg':audioBlob.type.indexOf('mp4')>=0?'mp4':'webm';var filename='idea_'+Date.now()+'.'+ext;var vaultId=null;try{vaultId=await vaultSave(audioBlob,filename,dept,role,currentVisibility);setMsg('Nahravka zalohovana. Odosielam...','inf');fill.style.width='15%';refreshVaultUI();}catch(e){console.log('Vault save failed:',e);}
+try{var fd=new FormData();fd.append('audio',audioBlob,filename);fd.append('department',dept);fd.append('role',role);fd.append('visibility',currentVisibility);var uploadCtrl=new AbortController();var uploadTout=setTimeout(function(){uploadCtrl.abort();},300000);var sizeMB=(audioBlob.size/1024/1024).toFixed(1);setMsg('Odosielam '+sizeMB+' MB...','inf');var r;try{r=await fetch(API_BASE+'/api/ideas/upload',{method:'POST',body:fd,credentials:'include',signal:uploadCtrl.signal});}finally{clearTimeout(uploadTout);}if(!r.ok){var d=await r.json().catch(function(){return{};});throw new Error(d.error||'Chyba '+r.status);}
+var data=await r.json();if(vaultId)await vaultUpdate(vaultId,{status:'uploading',jobId:data.job_id||null});if(data.job_id){setMsg('Ukladam na server...','inf');fill.style.width='40%';await pollJob(data.job_id,fill,btn,vaultId);}else{fill.style.width='100%';setMsg('Napad ulozeny!','ok');if(_recentOpen)loadRecentIdeas();if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});setTimeout(function(){discardRecording();fill.style.width='0%';},2500);btn.disabled=false;btn.textContent='Odoslat napad';}}catch(e){if(vaultId){setMsg('Odosielanie zlyhalo - skusam znova na pozadi...','inf');vaultUpdate(vaultId,{status:'error',errorMsg:e.message}).then(function(){refreshVaultUI();setTimeout(vaultAutoSync,3000);});discardRecording();}else{setMsg('Chyba: '+e.message,'err');}
+btn.disabled=false;btn.textContent='Odoslat napad';fill.style.width='0%';}}
+async function sendTextIdea(){var text=document.getElementById('txtIdea').value.trim();if(!text){setMsg('Napiste text napadu','err');return;}
+var dept=document.getElementById('dept').value;var role=document.getElementById('role').value;if(!dept||!role){setMsg('Vyber oddelenie a rolu','err');return;}
+var btn=document.getElementById('txtSend');btn.disabled=true;btn.textContent='Odosiela sa...';var fill=document.getElementById('bfill');var w=0;var p=setInterval(function(){w=Math.min(w+5,85);fill.style.width=w+'%';if(w>=85)clearInterval(p);},300);try{var r=await fetch(API_BASE+'/api/ideas/text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,department:dept,role:role,visibility:currentVisibility}),credentials:'include'});clearInterval(p);fill.style.width='100%';if(r.ok){setMsg('Textovy napad odoslany!','ok');document.getElementById('txtIdea').value='';setTimeout(function(){fill.style.width='0%';clearMsg();},2500);}else{var d=await r.json().catch(function(){return{};});setMsg(d.error||'Chyba','err');}}catch(e){clearInterval(p);setMsg('Chyba: '+e.message,'err');}
+finally{btn.disabled=false;btn.textContent='Odoslat textovy napad';setTimeout(function(){fill.style.width='0%';},2000);}}
+async function pollJob(jobId,fill,btn,vaultId){var attempts=0;while(attempts<200){await new Promise(function(r){setTimeout(r,3000);});attempts++;try{var r=await fetch(API_BASE+'/api/ideas/job/'+jobId,{credentials:'include'});if(r.status===202){fill.style.width=Math.min(40+attempts,95)+'%';if(attempts%10===0)setMsg('Prepisujem... este chvilu','inf');continue;}
+if(r.ok){var data=await r.json();fill.style.width='100%';if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});if(data.warning){setMsg(data.warning,'err');setTimeout(function(){discardRecording();fill.style.width='0%';},8000);}else{setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();setTimeout(function(){discardRecording();fill.style.width='0%';},2500);}}else if(r.status===404){try{var mr=await fetch(API_BASE+'/api/ideas/my-recent',{credentials:'include'});var recent=mr.ok?await mr.json():[];var now=Date.now();var found=(recent||[]).some(function(idea){return(now-new Date(idea.created_at).getTime())<120000;});if(found){fill.style.width='100%';setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});setTimeout(function(){discardRecording();fill.style.width='0%';},2500);}else{setMsg('Spracovanie prebieha...','inf');continue;}}catch(e2){continue;}}else{var d=await r.json().catch(function(){return{};});setMsg(d.error||'Chyba pri spracovani','err');fill.style.width='0%';if(vaultId)vaultUpdate(vaultId,{status:'error',errorMsg:d.error||'Server error'}).then(refreshVaultUI);}
+break;}catch(e){continue;}}
+if(attempts>=200){setMsg('Timeout - nahravka ulozena lokalne','err');fill.style.width='0%';if(vaultId)vaultUpdate(vaultId,{status:'error',errorMsg:'Timeout'}).then(refreshVaultUI);}
+btn.disabled=false;btn.textContent='Odoslat napad';}
+function setMsg(t,c){var e=document.getElementById('smsg');e.textContent=t;e.className='smsg '+c;}
+function clearMsg(){var e=document.getElementById('smsg');e.textContent='';e.className='smsg';}
+var selectedFile=null;document.addEventListener('DOMContentLoaded',function(){var dropArea=document.getElementById('file-drop-area');if(!dropArea)return;dropArea.addEventListener('click',function(){document.getElementById('fileInput').click();});dropArea.addEventListener('dragover',function(e){e.preventDefault();dropArea.classList.add('dragover');});dropArea.addEventListener('dragleave',function(){dropArea.classList.remove('dragover');});dropArea.addEventListener('drop',function(e){e.preventDefault();dropArea.classList.remove('dragover');if(e.dataTransfer.files.length>0){processSelectedFile(e.dataTransfer.files[0]);}});});function handleFileSelect(input){if(input.files.length>0)processSelectedFile(input.files[0]);}
+function processSelectedFile(file){var ext=file.name.split('.').pop().toLowerCase();var allowed=['mp3','wav','ogg','m4a','webm','flac','opus','mp4','mpeg','wma','aac'];if(allowed.indexOf(ext)===-1&&!file.type.startsWith('audio/')){setMsg('Nepodporovany format. Pouzite audio subor.','err');return;}
+if(file.size>200*1024*1024){setMsg('Subor je prilis velky (max 200MB)','err');return;}
+selectedFile=file;document.getElementById('file-drop-area').style.display='none';document.getElementById('file-selected').style.display='block';document.getElementById('fileSend').style.display='block';document.getElementById('file-name').textContent=file.name;var sizeMB=(file.size/1024/1024).toFixed(1);document.getElementById('file-size').textContent=sizeMB+' MB';var preview=document.getElementById('file-preview');preview.src=URL.createObjectURL(file);clearMsg();}
+function resetFileUpload(){selectedFile=null;document.getElementById('file-drop-area').style.display='';document.getElementById('file-selected').style.display='none';document.getElementById('fileSend').style.display='none';document.getElementById('fileInput').value='';var preview=document.getElementById('file-preview');if(preview.src){URL.revokeObjectURL(preview.src);preview.src='';}}
+async function sendFileIdea(){if(!selectedFile)return;var dept=document.getElementById('dept').value;var role=document.getElementById('role').value;if(!dept||!role){setMsg('Vyber oddelenie a rolu','err');return;}
+var btn=document.getElementById('fileSend');btn.disabled=true;btn.textContent='Odosiela sa...';var fill=document.getElementById('bfill');fill.style.width='5%';var vaultId=null;try{vaultId=await vaultSave(selectedFile,selectedFile.name,dept,role,currentVisibility);setMsg('Subor zalohovany. Odosielam...','inf');fill.style.width='15%';refreshVaultUI();}catch(e){console.log('Vault save failed:',e);}
+try{var fd=new FormData();fd.append('audio',selectedFile,selectedFile.name);fd.append('department',dept);fd.append('role',role);fd.append('visibility',currentVisibility);var fCtrl=new AbortController();var fTout=setTimeout(function(){fCtrl.abort();},300000);var fSizeMB=(selectedFile.size/1024/1024).toFixed(1);setMsg('Odosielam '+fSizeMB+' MB...','inf');var r;try{r=await fetch(API_BASE+'/api/ideas/upload',{method:'POST',body:fd,credentials:'include',signal:fCtrl.signal});}finally{clearTimeout(fTout);}if(!r.ok){var d=await r.json().catch(function(){return{};});throw new Error(d.error||'Chyba '+r.status);}
+var data=await r.json();if(vaultId)await vaultUpdate(vaultId,{status:'uploading',jobId:data.job_id||null});if(data.job_id){setMsg('Ukladam na server...','inf');fill.style.width='40%';await pollFileJob(data.job_id,fill,btn,vaultId);}else{fill.style.width='100%';setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});setTimeout(function(){resetFileUpload();fill.style.width='0%';clearMsg();},2500);btn.disabled=false;btn.textContent='Odoslat audio napad';}}catch(e){if(vaultId){setMsg('Chyba: '+e.message+' \u2014 subor je ulozeny lokalne','err');vaultUpdate(vaultId,{status:'error',errorMsg:e.message}).then(refreshVaultUI);}else{setMsg('Chyba: '+e.message,'err');}
+btn.disabled=false;btn.textContent='Odoslat audio napad';fill.style.width='0%';}}
+async function pollFileJob(jobId,fill,btn,vaultId){var attempts=0;while(attempts<200){await new Promise(function(r){setTimeout(r,3000);});attempts++;try{var r=await fetch(API_BASE+'/api/ideas/job/'+jobId,{credentials:'include'});if(r.status===202){fill.style.width=Math.min(40+attempts,95)+'%';if(attempts%10===0)setMsg('Prepisujem... este chvilu','inf');continue;}
+if(r.ok){var data=await r.json();fill.style.width='100%';if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});if(data.warning){setMsg(data.warning,'err');setTimeout(function(){resetFileUpload();fill.style.width='0%';},8000);}else{setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();setTimeout(function(){resetFileUpload();fill.style.width='0%';clearMsg();},2500);}}else if(r.status===404){try{var mr=await fetch(API_BASE+'/api/ideas/my-recent',{credentials:'include'});var recent=mr.ok?await mr.json():[];var now=Date.now();var found=(recent||[]).some(function(idea){return(now-new Date(idea.created_at).getTime())<120000;});if(found){fill.style.width='100%';setMsg('Napad odoslany!','ok');if(_recentOpen)loadRecentIdeas();if(vaultId)vaultUpdate(vaultId,{status:'done'}).then(function(){setTimeout(function(){vaultDelete(vaultId).then(refreshVaultUI);},5000);});setTimeout(function(){resetFileUpload();fill.style.width='0%';clearMsg();},2500);}else{setMsg('Spracovanie prebieha...','inf');continue;}}catch(e2){continue;}}else{var d=await r.json().catch(function(){return{};});setMsg(d.error||'Chyba pri spracovani','err');fill.style.width='0%';if(vaultId)vaultUpdate(vaultId,{status:'error',errorMsg:d.error||'Server error'}).then(refreshVaultUI);}
+break;}catch(e){continue;}}
+if(attempts>=200){setMsg('Timeout - nahravka ulozena lokalne','err');fill.style.width='0%';if(vaultId)vaultUpdate(vaultId,{status:'error',errorMsg:'Timeout'}).then(refreshVaultUI);}
+btn.disabled=false;btn.textContent='Odoslat audio napad';}
+init();refreshVaultUI();if('serviceWorker'in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});navigator.serviceWorker.addEventListener('message',function(e){if(e.data&&e.data.type==='SW_UPDATED'){if(confirm('Dostupna nova verzia aplikacie. Obnovit teraz?'))window.location.reload();}});navigator.serviceWorker.addEventListener('controllerchange',function(){window.location.reload();});}</script>
 </body>
 </html>
