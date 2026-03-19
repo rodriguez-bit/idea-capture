@@ -1342,5 +1342,29 @@
     "transcribed_at": "2026-03-19T09:37:39.644028",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "82a8eb12-9dd8-441b-815c-050781830f4d.webm",
+    "duration_seconds": 3,
+    "transcript": "Haló, haló, haló, haló, haló, haló.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-19 12:45:26.605852+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-19T12:45:27.217675",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
