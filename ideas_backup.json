@@ -1534,5 +1534,29 @@
     "transcribed_at": "2026-03-21T14:42:42.432103",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "f26a1ff0-7f4f-46f7-9ca7-959883c1e9ec.webm",
+    "duration_seconds": 1,
+    "transcript": "sa aj vtedy robí, aby tam bola tá?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-21 15:52:59.94919+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-21T15:53:01.120320",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
