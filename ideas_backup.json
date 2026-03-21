@@ -1438,5 +1438,29 @@
     "transcribed_at": "2026-03-21T08:04:20.429859",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "4afb385b-597d-4e09-ab9c-255e06f8f540.webm",
+    "duration_seconds": 22,
+    "transcript": "-cia na to, že keď mám dobré nápady, šoférujem v aute, eh, alebo pre náš tím, ktorý proste normálne, že pracuje na projektoch, tak potrebujeme si zapísať veci a blbé je ich zapisovať niekde proste hocikde kade tade. Takže vlastne máme aplikáciu, eh, kde teraz len, eh, ju zapnem, nahrám",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-21 08:58:25.619343+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-21T08:58:27.147149",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
