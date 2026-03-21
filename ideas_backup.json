@@ -1462,5 +1462,29 @@
     "transcribed_at": "2026-03-21T08:58:27.147149",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "91c65ff2-234a-4caf-8c78-f2388e6e2733.webm",
+    "duration_seconds": 77,
+    "transcript": "É, chytiť tú silu nášho brandu na Slovensku už ako je uznateľný a vlastne využiť distribúciu iných kanálov, cez ktoré sa môže predávať rôzne produkty, nielen káble. Lebo problém našich kábelík je ten, že by sme ich nemali ako umiestniť do iných predajní. Ale my keď budeme mať produkt, ktorý vieme umiestniť do iných predajní, tak ten produkt sa, é, môže krásne normálne, že predávať. A toto, é, treba len zabezpečiť s týmto, kozmetikou alebo inými produktami a, é, normálne spraviť si analýzu, že kde by to dávalo najväčší zmysel. Lebo ty už raz vybuduješ nejaký brand. Aj to, že proste nemáš tú distribúciu, ťa dosť obmedzuje, aby si si zvolil na internete. To nás obmedzuje, ale my keby sme a máme využitú distribúciu v rôznych kanáloch cez rôzne kanály, tak toto nám môže instantne pomôcť",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-21 10:41:05.274789+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-21T10:41:10.553855",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
