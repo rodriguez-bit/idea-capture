@@ -1414,5 +1414,29 @@
     "transcribed_at": "2026-03-20T12:45:45.452666",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "09b52679-3420-46e7-9d7c-d8611987d1c3.webm",
+    "duration_seconds": 252,
+    "transcript": "Podiem si poskladať celú štruktúru, taký CEO terminál, eh, kde budem mať fixné náklady, variabil-- eh, teda koľko ideme vyrábať kabeliek, aká je retencia, eh, koľko je marketingový spend, eh, základné, základné údaje, proste povyťahované všetky tieto údaje do jednej toho CEO reportu, koľko ľudí sa naviaže na, eh, predajnú sumu v konkrétnom mesiaci. To znamená, že ja chcem vedieť, že koľko máme ľudí zamestnaných cez fixné náklady. Na to, koľko ľudí sa na to viaže, na tržbu, aká je retencia, aké je LTV lomeno CAC, koľko platíme do marketingu celkovo, koľko vyrábame denne, koľko vyrábame mesačne v období, aké sú, eh, ciele, kam sa potrebujeme dostať, eh, aby tá firma bola zdravá. Ako to celé proste nastaviť, eh, aby to fungovalo. Ako sa vyvíja kozmetika? Ako sa vyvíja Raul do Fuego? Ako sa vyvíja Diana Rodriguez ako kabelky? Plánovanie, aké tržby chceme dosahovať, koľko sme dosiahli, koľko sme nedosiahli, eh, aký typ výrobkov ideme vyrábať. Finančne, čo ja budem potrebovať, koľko peňazí máme požičaných. Proste všetky tieto ukazovatele potrebujem dať do jednej tabuľky. No a následne potrebujem mať tabuľku, ktorá spraví to, že ideme optimalizovať tú výrobu. To znamená, že ja si musím, eh, vytvoriť kompletný systém, ako funguje rozdeľovanie ľudí vo výrobe. Ja si musím pozrieť, ako tých ľudí rozkladáme v tej výrobe. To znamená, že kto kde je, kedy je, ako, aké má zručnosti, eh, čo vie robiť. Ja si vlastne tú tabuľku, tú optimalizáciu musím v princípe spraviť nanovo, lebo ja tam musím dať vlastne základné údaje, teda že stanoviská, čo sa robí na tých stanoviskách, aké úkony sa robia na tých stanoviskách, aké kabelky pa-patria k tým stanoviskám. Eh, ďalej potrebujem zamestnancov tam dať, koľko kto ako zarába, aké má príjmy, aké má, eh, akú má výkonnosť. Eh, potrebujem tam ponatiahovať dáta z výkonnostnej, eh, tabuľky. To zna-to znamená, že, eh, koľko má hodinovku, eh, koľko pre tú firmu odrobil. Proste všetky tie takéto údaje. Zároveň potrebujem, eh, že cez túto tabuľku budeme-- teraz skočím k retencii, ale, ale to isté má byť aj v tomto, že vlastne ja potrebujem tam spraviť umelú inteligenciu, ktorá bude mať, bude fungovať ako svoj projekt. To znamená, že ona si bude pamätať veci, čo sú tam uložené. Bude, eh, napríklad čisto pri retencii, že ja tam budem ukladať veci, ktoré sme riešili, ktoré, eh, aké dokumenty máme, aké memories, ako sa má správať, eh, tá umelá inteligencia. Eh, a to sa ho chcem normálne, že spýtať, že či toto bude, eh, vedieť normálne, že spraviť. Tak toto je taký základ.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-21 08:04:00.895832+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-21T08:04:20.429859",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
