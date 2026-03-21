@@ -1510,5 +1510,29 @@
     "transcribed_at": "2026-03-21T14:33:18.638847",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "management",
+    "role": "manager",
+    "audio_filename": "f382b7dd-a8e7-4fad-94b4-5bce76af2d43.webm",
+    "duration_seconds": 24,
+    "transcript": "Reálny. To nechce povedať. Neviem, nemám žiadny teraz nápad. Máš nápad? Chceme vyrobiť miešace stroje, ktoré dokážu vydržať aj päťdesiat rokov s nejakým pravidelným servisom. Dobre a ideš v aute a potrebuješ si toto zapísať, hej?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-21 14:42:41.01985+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-21T14:42:42.432103",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
