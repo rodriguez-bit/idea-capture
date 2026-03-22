@@ -1534,5 +1534,29 @@
     "transcribed_at": "2026-03-22T08:47:01.989550",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "68a5c9e0-2018-4a01-8422-090e645652d4.webm",
+    "duration_seconds": 265,
+    "transcript": "No takže. Čo idem, é, spraviť? Momentálne máme časť plánovaciu a výrobnú. Povedzme, že už v nejakej forme spravenú. A teraz potrebujeme pridať, é, časť optimalizačnú. To znamená, že kde ideme optimalizovať, é, ľudí vo výrobe, na ktorých stanoviskách majú pracovať. Momentálne to funguje tak, že každá kabelka má svoj výrobný proces. Prezentov výrobný proces je v základných, é, údajoch. Máme rôzne stanoviská, ktoré vlastne ešte nemáme natiahnuté v tomto systéme našom. Takže musíme sem dorobiť, é, do týchto základných, é, údajov musíme dorobiť, é, aj stanoviská. Následne tá kabelka ide teda cez stanoviská a musí niekto to vykonať, teda ľudia. No. Potrebujeme, aby sme pridali do základných údajov normálne ako ľudí, é, zamestnancov, kde vlastne budú vypísaní, budú vypísané ich, é, základné údaje, bude vypísané kto kde robí, ako, za aké peniaze, na akom, é, pracovisku, či v Bošanoch alebo Partizánske. Toto je veľmi dôležité. Máme dve miesta práce a to sú Bošany a Partizánske. Máme konkrétne modely, ktoré sa robia buď v Bošanoch alebo v Partizánskom. To vieš zo základných údajov sa pozrieť. Aj produkty sa vieš pozrieť. A teraz my vlastne budeme robiť to, že budeme každý deň sledovať, kde sa nachádzajú konkrétne, é, kabelky, na akom, é, stanovisku. A toto, keď my budeme sledovať, tak my potrebujeme optimalizovať na druhý deň, kde kto má ísť pracovať. No a my v kabelke, é, ktorá má výrobný proces, my vieme, čo za ňou nasleduje. Kam ide, na aké stanovisko. Máme ľudí, kde treba im doplniť zručnosti. To znamená, že každý človek má, é, by mal vedieť aspoň dve, tri zručnosti, ktoré percentuálne treba aj tam ako keby dať, že táto zručnosť je toľkoto percenta, tá je toľko. Proste tri zručnosti v percentách. No a následne, é, systém by mal vyhodnotiť, koho kde treba dať. Musia tam byť základné podmienky, že iba pri špeciálnych príležitostiach môže ísť niekto z Partizánskeho do Bošian a opačne. Ja musím určiť celú, é, tú cestu, že, é, v Bošanoch sa vyrábajú kabelky od prvého až po posledné stanovisko a v Partizánskom až od farbenia sa vyrábajú. Takže ja budem mať stanoviská tak určiť, é, aj v nich, že, é, či platia len pre jedno alebo pre obidve pracoviská, dať ich dennú výrobnú kapacitu. Tieto všetky údaje treba napojiť na ERP systém alebo na BigQuery alebo proste neviem na čo, é, ako sa to proste bude robiť. No a proste cieľ, kde sa potrebujeme dostať je, že po obede, keď sa skon-skončí práca, systém mi ukáže, kto kde má ísť pracovať na druhý deň, kde vypíše zmeny, ak niekto má ísť pracovať na iné sta-na inú stanicu, ako pracoval. A potrebujem postaviť celý proste tento systém.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-22 10:05:29.563847+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-22T10:05:48.349576",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
