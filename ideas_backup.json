@@ -1582,5 +1582,29 @@
     "transcribed_at": "2026-03-22T17:01:16.181863",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 7673,
+    "author_name": "Alena Anamarija Rehorovič",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "Vytvoriť darčekové balenia s chlapským dizajnom na produkty Raul Del Fuego",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-23 16:35:49.561561+00",
+    "visibility": "personal",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "",
+    "stt_engine": "",
+    "idea_type": "napad"
   }
 ]
