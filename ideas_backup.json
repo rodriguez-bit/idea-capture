@@ -1630,5 +1630,29 @@
     "transcribed_at": "2026-03-23T17:18:22.928597",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "ebf7cb99-e263-433c-bc5f-33714fabcfac.webm",
+    "duration_seconds": 4,
+    "transcript": "Čau Rolle, jak sa máš? Eh, mám sa dobre",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-23 19:38:40.138349+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-23T19:38:40.751689",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
