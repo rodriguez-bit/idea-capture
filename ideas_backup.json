@@ -1606,5 +1606,29 @@
     "transcribed_at": "",
     "stt_engine": "",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "5f581f43-3d8a-45d4-b7a1-e27842d57fb4.webm",
+    "duration_seconds": 16,
+    "transcript": "analyzovať všetku moju komunikáciu, všetky screenshoty, čo som spravil a z toho analyzovať, že, é, čo sa dá ešte vylepšiť",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-23 17:18:21.849172+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-23T17:18:22.928597",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
