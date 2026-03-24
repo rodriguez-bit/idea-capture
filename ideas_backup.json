@@ -1654,5 +1654,29 @@
     "transcribed_at": "2026-03-23T19:38:40.751689",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "a369bcad-a1d4-4d97-a0e3-4fdbeb8b1b94.webm",
+    "duration_seconds": 235,
+    "transcript": "No dobre. Takže čo ideme robiť? Máme projekt, ehh, kabelky s príbehom a tento projekt je o tom, že my ako Diana Rodriguez sme začali dávať kabelky rôznym silným ženám. To znamená, že, eh, my máme tie kabelky, kde sa dajú napísať príbehy žien. No a toto sme spravili tak, že máme tú technológiu, kde vieme vypáliť tieto texty. No a myšlienka. No a myšlienka je nasledovná. Pošleme jednej žene kabelku, tá označí ďalšie, eh, dve ženy. Tým dvom ženám to pošleme a každá z nich má možnosť označiť ďalšie dve ženy. My sme to tento projekt robili posledný rok a pol. V Exceli sú kompletné dáta k tomuto projektu a tieto dáta sú spravené štýlom, že je tam napísané, kto koho nominoval, aký má účet, aký má, eh, príbeh. Eh, náš tím vlastne robí to, že on hľadá, eh, on hľadá ich príbehy tých žien na Instagrame a vyberieme z jedného postu alebo z dvoch proste text a ten vložíme na tú, eh, kabelku. Toto potrebujeme cez aplikáciu nahradiť, že aplikácia to bude robiť sama, že, eh, dáme tam ženy, ktoré boli nominované. My tam vložíme, eh, ich texty alebo priamo sa to napojí na Instagram, kde si to bude hľadať ich profily a toto normálne, že, eh, nájde texty, ktoré sa zhodujú s ideou silných žien. To znamená, potrebujem tam spraviť priestor a miesto, kde zadefinujem, že čo je to sila ženy, kde zadefinujem, eh, aby sa to, aby to bolo proste v súlade s týmto brand-brandom Diana Rodriguez. Zároveň máme tam vyše tisíc žien, ktoré už takouto formou, eh, prešli, že to dostali a máme presne texty, ktoré sme im poslali. Takže ty si môžeš aj analyzovať, aké typy textov my posielame. No a my teda potrebujeme spraviť prostredie, kde budú, že každá tá žena bude mať svoj-svoju kartu. To znamená, že svoj Instagram, svoju veľkosť, či to zazdieľala, či to nezazdieľala. Potrebujeme mať list a zoznam, eh, týchto žien. Potrebujeme tam mať nejakú, nejaký strom napojenia, že vlastne uvidíme, že ktorá nominovala ktorú. Následne ich poprepájať. Eh, potrebujeme tam spraviť napojenia na reálne objednávky. Či kabelku už dostala, nedostala. To znamená napojiť sa na náš ERP systém. Eh, my tam vložíme číslo objednávky. Ďalej, eh, analyzuj si celý excelovský dokument, ktorý ti ja k tomu vložím so všetkými dátami, so všetkými stĺpcami. Eh, tento dokument fungoval a funguje vyše, eh, roka a pol. No a cieľ je, aby toto sme čo najviac optimalizovali a zautomatizovali tento celý proces. Drž sa presne pravidiel, ktoré ti dáme pri programovaní. Používaj veci, ktoré používame a dizajn, ktorý ti stanovíme. Vytvor mi návrh kompletnej funkčnej aplikácie.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-24 06:41:26.187477+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-24T06:41:44.811747",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
