@@ -1894,5 +1894,29 @@
     "transcribed_at": "2026-03-25T18:49:46.866901",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 6,
+    "author_name": "Veronika Víghová",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "b05de951-a0fa-4fd3-9c36-9302e0fd7628.webm",
+    "duration_seconds": 395,
+    "transcript": "Normálne že povedať. No ja dneska, jak som išiel do hĺbky tých procesov, áno? Tak som, som sa tam rozprával s jedným, čo robí emailing a ja som vlastne pochopil, že vlastne ako funguje emailing, že vlastne Bloomreach, Ecomail, všetky tieto fungujú na nejakých externých službách, čo sa volá, že ako keby že železo to volajú nejaké, že tvrdé železo alebo neviem jak to proste volajú ako také služby, ktoré zabepe-ktoré zabezpečujú posielanie tých mailov. A oni vytvárajú len prostredie, aby tebe sa dobre programovalo, aby tebe sa dobre proste upravovali, proste normálne, že tie automatizácia, takéto veci, áno? A. No jasné, jasné, majú aj akože A/B testovanie a tak ďalej, áno? Ale, uh, ty vieš v princípe toto celé ich prostredie skopírovať. A vieš. A teraz, ale čo vieš ty spraviť, čo napríklad nevie Bloomreach, vieš, že ty zoberieš všetky minulos-minulosť kampane, ktoré sme mali na Diana Rodriguez s vyhodnotením, áno? Emailové. Zoberieš napojenie na naše fotky, na naše kreatívy, na všetky veci. Napojíš tam email, ktorý bude zbierať normálne, že newslettery od firiem na zameranie fashion, jewellery, uh, uh, ja neviem, spodné prádlo, bla bla bla bla bla, áno? Kde bude denne chodiť proste päťdesiat do sedemdesiat sto mailov, hej? A ty spravíš normálne, že systém, kedy mu napíšeš, že budeš mať normálne spravené nejaké proste predšablóny a teraz normálne, že spravíš systém, kde vlastne ty, že prosím ťa, idem robiť na, potrebujem kreatívu na vianočnú zľavu bla bla bla, ktorá je takáto takáto bla bla bla bla bla, prosím ťa, daj mi tri scenáre alebo tri, ako by to malo vyzerať. On bude mať nastavené, uh, vlastne on použije ten nástroj, čo vlastne Dávid vytvoril to štúdio na tú úpravu fotiek, áno? A vlastne on ti vytvorí vlastne tri rôzne maily s tromi rôznymi normálne, že vecami, ktoré budú na komplet pripravené cez buď HTML, že povedzme, že ešte by sme nešli nahrádzať Bloomreach ako na posielanie, áno? Ale že vytvorí ti kompletne HTML, ktoré ty vieš vlastne skopírovať a vložiť do Bloomreachu. A to je to železo, to je to železo. To je to, áno, to je to, čo som pochopil, že vlastne, že oni všetci sa po-pripájajú na pár služieb, čo je vo svete, čo vlastne toto robia. A teraz si zober, že my platíme Bloomreach tisíc šesťsto, tisíc sedemsto eur alebo dve tisíc. Tisíc dvesto. No tak teraz zober, že hneď podľa mňa do dvoch týždňov až mesiaca si toto vieme vlastne reálne, že spraviť sami. To, to za-to znamená na tejto úrovni máš zober, že ušetrených sedemnásť tisíc za rok na fixných nákladoch. Áno. No. Áno, to, to, to znamená, že Maťo, že toto je napríklad projekt, na ktorom by fakt mal normálne, že Tomáš robiť, hej? A do toho, to by sme sa mali taktiež rozplánovať to vrchn, lebo toto je na úrovni, aby to bolo fakt kvalitne spravené, aby to robili ITčkári, vieš? Ale čo je že brutálna vec, že potom napríklad Veronika, čo robí mailing aj s Tomášom, oni do toho vedia vstupovať a robiť a upravovať proste normálne, že všetky featurey veci. A hlavne druhá vec, toto by mala byť súčasť toho dashboardu, ktorý vytvoril Dávid, lebo to všetky tie dáta budú takto prepojené aj s Motionom. Áno. Áno. No. No. No. No a, a teraz si zober ešte jednu vec, že, že dneska mi volal aj Peťo Mičuda, nie? A mi hovorí, že: \"Rado, do piči, že kurva, veľakrát normálne, že kokot, normálne, že kokotiny ako zajedeš. Ale že toto je, že ďakujem ti, že si ma trikrát prehováral, aby som to začal robiť.\" No. To je vjedbané, ale. Áno. Áno, to. No. No to Maťo, my sme išli do hĺbky jak kokot. A to my sme ešte akože tiež na povrchu. Ale preto už keď si zober, že nahradíme emailového, vieš, že prečo nahradíme emailového klienta, keď sme nahradili CMS softvér. Vieš, že tu, tu, tu nemáš limity. Áno. Áno. Áno. Takže vieš, že my im normálne, oni nie, že my, akože Tomáš s Veronikou postavia normálne, že klienta emailového, ktorý bude normálne, že všetko toto normálne, že robiť, čo som ti teraz popísal a bude to, že proste ujebaný systém, v ktorom normálne, že budeme, uh, sami si také maily generovať a tak všetko bude pripravené, že vlastne tá práca na emailingu bude že desaťnásobne menšia, čo sa týka vyklikávačiek a skôr to bude o tej kreatíve, o tom, o analyzovaní tých dát, o tom nastavovaní tých flows a týchto všetkých vecí. Dobre, deti. No čau.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 20:53:36.347138+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T20:54:10.747910",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
