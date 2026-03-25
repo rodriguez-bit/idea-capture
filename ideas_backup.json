@@ -1870,5 +1870,29 @@
     "transcribed_at": "2026-03-25T18:16:00.889332",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "72f0328a-8406-4187-b806-dd9f0625cdfc.webm",
+    "duration_seconds": 8,
+    "transcript": "Ja som si spravil takéto vlastné zariadenie, lebo som mal teraz spraviť, eh, som mal teraz zaplatiť dvestopäťdesiat eur, nie?",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 18:49:45.854814+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T18:49:46.866901",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
