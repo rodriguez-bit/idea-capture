@@ -1726,5 +1726,29 @@
     "transcribed_at": "2026-03-25T11:02:21.888855",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "947ec3f3-1ade-4bf9-8dd8-4caff3e71079.webm",
+    "duration_seconds": 35,
+    "transcript": "Veronika, ehm, úplne som mal včera myšlienku, že spraviť do tej aplikácie, ktorú ty ideš robiť na e-mailing, ehm, nejaké dva tri maily, do ktorého sa budú združovať maily od iných firiem a vlastne budem mať aplikáciu, ktorá bude vyhodnocovať ten e-mailing od iných firiem. Bude to porovnávať, bude dávať i grafiku, bude dávať, ehm, jakú majú štruktúru, z akých sú odvetví a proste normálne poprihlasujeme sa všade do rôznych týchto newsletterových odberov a budeme to zhrňať do jednej aplikácie.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 14:22:43.015158+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T14:22:46.411858",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
