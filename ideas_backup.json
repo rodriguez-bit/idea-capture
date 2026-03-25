@@ -1798,5 +1798,29 @@
     "transcribed_at": "2026-03-25T16:52:24.522547",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "1eb227e8-18e0-47b5-a940-91a85cb0169d.webm",
+    "duration_seconds": 115,
+    "transcript": "Nahrávanie je OK, OK. Tak jo, tak máme nápad, že vezmeš nápad a ten, že z toho uděláš přes ten DeepSeek nebo ten, ten nástroj od DeepSeeku, tak z něho uděláš video. Seek něco, něco- No, tak Seek něco. A udělá ti tři verze. No. No a ty budeš mít díky tomu inspirace, takže to vytvoří jako inspirativní video. Jo a data budú že e-mailing, ak bude treba, bude normálne, že tvoj nápad, budú screenshoty, videa z TikToku, videa z Instagramu, bude videa predošlé, čo robila napríklad naša firma alebo tie, tí vaši klienti. Budú videa, ktoré fungujú, ktoré videa nefungujú. Bude si to normálne, že sťahovať takéto dáta, vlastne celé to dať dokopy a z toho normálne, že spravíme ako kvázi takého, ééé, manažéra kreatívneho, ktorý vlastne bude vytvárať scenáre aj s videom, ako by to malo vyzerať a čo ideš natáčať. Jo, jo, jo, jo. A má to celý sloužit k tomu, abys ty na tom natáčení byl mnohem efektivnější a abys ty jako šéf, který chce vědět, co tam budou natáčet, tak abys ty viděl, co plánujou natáčet, abys ty to schválil. Že jako přesně takhle chci, aby to vypadalo. Nebo ne, takhle nechci, aby to vypadalo. Udělejte to jinak. Áno. Jo? Super. No, top. No a pôjdeme to robiť dve firmy dokopy. Budeme si to inšpirovať vzájomne a kód si budeme normálne, že zdieľať. A ja to dám, nech to postavia naši ITčkári normálne, že ako základ, nech je fakt, že kvalitný, dobrý a normálne vy, my tam, aj vy tam budete normálne už len pridá-pridávať normálne, že zmeny, ktoré by ste tam normálne, že chceli do toho pridať. Jo, jo, jo, jo. Vyskúšame to. Môže byť, môže byť. Let's go.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 17:13:14.528475+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T17:13:26.178647",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
