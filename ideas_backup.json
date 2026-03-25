@@ -1678,5 +1678,29 @@
     "transcribed_at": "2026-03-24T06:41:44.811747",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 20,
+    "author_name": "Tatiana Bieliková",
+    "department": "marketing",
+    "role": "employee",
+    "audio_filename": "",
+    "duration_seconds": 0,
+    "transcript": "Bolo by super keby máme podstránku na projekt silné ženy, kde by bol podrobne vysvetlený projekt s kabelkami s príbehom, konkrétne case studies žien, ktorým sa posielali kabelky s príbehom a prečo aj s videami a možno krátkym príbehom. V rámci tohto by sme tam potom zakomponovali aj kolekcie spoluprác - Bagarova, Mokry atď. Je to dosť veľká súčasť nášho marketingu ale na webe nám chýba nejaké ucelené predstavenie tohto projektu. Možno by sme tam mohli mať aj nejaký formulár, kde sa ženy vedia \"prihlásiť\" do tohto projektu, s tým že už na nás bude či to schválime alebo nie. Určite nám tam bude chodiť veľa žien ktoré majú málinko followerov, ale mohol by to byť zaujímavý engagement tool.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 10:41:02.867833+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "",
+    "stt_engine": "",
+    "idea_type": "napad"
   }
 ]
