@@ -1702,5 +1702,29 @@
     "transcribed_at": "",
     "stt_engine": "",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "production",
+    "role": "c-level",
+    "audio_filename": "64c7df62-0d7b-4a4f-8037-c043e3dc9601.webm",
+    "duration_seconds": 7,
+    "transcript": "Bla bla bla. Tak som si to normálne, že ponahrával normálne, že čo mi ten IT-čkar hovorí a ešte počas toho callu som si vlastne",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 11:02:20.878362+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T11:02:21.888855",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
