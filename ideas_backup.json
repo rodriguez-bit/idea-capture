@@ -1822,5 +1822,29 @@
     "transcribed_at": "2026-03-25T17:13:26.178647",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "d03e1aa0-257f-475a-9b20-0f231fd1dcb9.webm",
+    "duration_seconds": 7,
+    "transcript": "No akurát rozoberáme, ako treba spraviť, é, webovú, é, stránku na fotenie s rezervačným systémom",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-25 18:13:14.64351+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-25T18:13:15.500000",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
