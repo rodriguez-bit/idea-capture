@@ -1990,5 +1990,29 @@
     "transcribed_at": "2026-03-26T18:26:20.842550",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "3f5d3789-0837-4d9e-b159-14370c325229.webm",
+    "duration_seconds": 24,
+    "transcript": "Spravíme dneska tuto pred ľuďmi vlastnú webstránku- Dobre. Ako sme, é, prišli do Michaloviec. Uhm. S našimi fotkami. Dobre. Čo tam chceš mať. É, mňa, lebo to je na tom najzaujímavejšie. Dobre, dobre, dobre. Chceš ďalšie fotky. Dobre, dáme tam, že Ralfa Feuga, dáme tam môj LinkedIn, aby si ma ľudia pridali. Napríklad. A dáme fialovú farbu.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-26 19:28:31.095738+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-26T19:28:34.079986",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
