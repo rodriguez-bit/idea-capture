@@ -1966,5 +1966,29 @@
     "transcribed_at": "2026-03-26T08:55:43.618228",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "897021e7-74f6-418d-8734-15fb483c97ee.webm",
+    "duration_seconds": 70,
+    "transcript": "Webovú stránku, ktorá vás pozýva do Michaloviec na Ecommerce Bridge. Použi tam fotky mňa s hlavnými organizátormi. Zároveň sprav rezervačný systém, sprav recenzie. Daj to do fialovej farby. A téma mojej prednášky je: Ako amatér postavil webstránku v Michalovciach. Ako amatér z podomania postavil webstránku v Michalovciach. Taktiež tam sprav komplet profil mňa na LinkedIne a pozvi ľudí, aby ma začali sledovať.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-26 18:26:17.531551+00",
+    "visibility": "company",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-26T18:26:20.842550",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
