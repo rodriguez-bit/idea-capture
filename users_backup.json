@@ -2,7 +2,7 @@
   {
     "email": "admin@dajanarodriguez.com",
     "display_name": "Admin",
-    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
+    "password_hash": "scrypt:32768:8:1$cWyaZvWdxUy25vAw$4b8e0cfefe6f92e43fb157523c513c9e2addca67a63c85acead475f16444399ca98c67d48b2fd60afeab1269db3c6f67b1ba82440c6565e8ed7459ea449d06ed",
     "role": "admin",
     "department": "",
     "active": 1,
@@ -11,7 +11,7 @@
   {
     "email": "raul@dajanarodriguez.com",
     "display_name": "Raul",
-    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
+    "password_hash": "scrypt:32768:8:1$cWyaZvWdxUy25vAw$4b8e0cfefe6f92e43fb157523c513c9e2addca67a63c85acead475f16444399ca98c67d48b2fd60afeab1269db3c6f67b1ba82440c6565e8ed7459ea449d06ed",
     "role": "reviewer",
     "department": "management",
     "active": 1,
@@ -20,7 +20,7 @@
   {
     "email": "dajana@dajanarodriguez.com",
     "display_name": "Dajana",
-    "password_hash": "scrypt:32768:8:1$RJsMVnuDEBo9ns6M$62cdc180c38612f807a8e605d3f7d11e441e562696871ca51034c8727bae45640436c90449a63f144ed7958a915612c5fee76b9a5ee2a2fb5bb52a6f87722157",
+    "password_hash": "scrypt:32768:8:1$cWyaZvWdxUy25vAw$4b8e0cfefe6f92e43fb157523c513c9e2addca67a63c85acead475f16444399ca98c67d48b2fd60afeab1269db3c6f67b1ba82440c6565e8ed7459ea449d06ed",
     "role": "reviewer",
     "department": "management",
     "active": 1,
@@ -268,5 +268,14 @@
     "department": "production",
     "active": 1,
     "created_at": "2026-03-10 10:18:16.786237+00"
+  },
+  {
+    "email": "kondrot@dajanarodriguez.com",
+    "display_name": "Matej Kondrot",
+    "password_hash": "scrypt:32768:8:1$9Giecd1HmQsWAgSb$96933d238ef194eee6c00a57dfbbb1b0ea424cdb7b56ef45dac7420f2000d67d25ca93f56e6a16b053ac29c56d136c222da78f94e62a450c5e8d06450fec357f",
+    "role": "admin",
+    "department": "",
+    "active": 1,
+    "created_at": "2026-03-27 09:46:13.540966+00"
   }
 ]
