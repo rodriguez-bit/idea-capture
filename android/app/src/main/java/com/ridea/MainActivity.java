@@ -14,7 +14,7 @@ import android.webkit.PermissionRequest;
 public class MainActivity extends Activity {
 
     private WebView webView;
-    private static final String APP_URL = "https://ridea.onrender.com/recorder";
+    private static final String APP_URL = "https://ridea-dev.rodriguez-560.workers.dev/recorder";
     private static final int MIC_PERMISSION_CODE = 1;
 
     @Override
@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                if (url.startsWith("https://ridea.onrender.com")) {
+                if (url.startsWith("https://ridea-dev.rodriguez-560.workers.dev")) {
                     return false;
                 }
                 return true;

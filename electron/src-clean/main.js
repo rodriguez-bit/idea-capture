@@ -16,7 +16,7 @@ function _loadStore() {
 function storeGet(key, def) { _loadStore(); return _storeData[key] !== undefined ? _storeData[key] : def; }
 function storeSet(key, value) { _loadStore(); _storeData[key] = value; fs.writeFileSync(_storePath, JSON.stringify(_storeData)); }
 
-const API_BASE = storeGet('apiBase', 'https://ridea.onrender.com');
+const API_BASE = storeGet('apiBase', 'https://ridea-dev.rodriguez-560.workers.dev');
 
 let mainWindow = null;
 let tray = null;
