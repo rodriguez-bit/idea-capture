@@ -2086,5 +2086,29 @@
     "transcribed_at": "2026-03-27T03:30:43.884378",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "730ecf89-e64c-419e-b8ac-44cfb6127ae9.webm",
+    "duration_seconds": 306,
+    "transcript": "Ja som proste človek, ktorý, é, za jeden mesiac, é, dokázal spraviť CNC, é, stroj. É, teda akože CNC program. To sme vymysleli cez clouda. Spravil som si aplikáciu na nahrávanie hovorov. Spravil som si, é, aplikáciu na ovládanie výroby. Spravil som si aplikáciu na, é, marketing. Spravil som si aplikáciu na investovanie pre investorov a popritom za tento mesiac som sa neskutočne veľmi veľa vecí naučil. Ja si myslím, že to, že nie som IT-čkár mi dáva extrémnu výhodu, ako to viem reálne odprezentovať. Ja nie som vôbec žiaden expert, é, v AI. Ja nie som žiaden expert na to napisanie kódu, ale som dokázal implementovať cloud core novinky, ktorá tu je tak, aby reálne sme ju využili vo výrobe, aby reálne sme ju využili v marketingu, aby reálne sme ju využili v administratíve. To znamená, že ja viem veľmi veľa firmám pomôcť spraviť prvé kroky. Veľmi veľa ľuďom podľa mňa viem dať to, čo som sa ja naučil za ten mesiac, ako to stavať, ako som ja pokračoval, ako som ja, é, interagoval s tým. A toto, keď si ľudia zapíšu, možno sa posunú o mesiace dopredu a naučia sa možno chápať, ako s tým vlastne komunikovať, lebo toto je strašne dôležité. Ako komunikovať s AI, ako to promptovať a ako, é, dosiahnuť tie veci. A ja si myslím, že túto hodnotu ja ako osoba viem, é, dať. Viem to zazdieľať, viem to odovzdať. A ako šéf firmy, ktorá robí tri a pol milióna eur, viem sa pozrieť, é, ako máte svoje biznisy a kde to viete využiť a viem vám tam dať odporúčania. Takže chcem taký move si spraviť, že spravím si normálne, že workshop, é, ktorý bude stáť, é, stopäťdesiat eur. A tento workshop bude trvať tri, štyri hodiny, päť hodín, šesť hodín. Proste, é, nastavím nejakú hodinovku, že koľko to bude trvať reálne, pokiaľ sa všetci pýtajú, čo teraz s cloudom, že čo všetko, é, je tam, é, by tam bolo treba toho siahnúť. Bude to pre nejakých dvadsať ľudí. A ja im vysvetlím, ako s tým pracovať. Ja nemám veľa času, lebo mám inú robotu pri expanzii, pri riadení firmy. Kokso, ale mám strašnú normálne, že chuť tieto informácie dať von, lebo už dlho ma nič tak nezaujalo a už dlho som nemal v sebe taký pocit niečoho, ako je, é, tento White coding.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-27 03:50:47.698828+00",
+    "visibility": "personal",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-27T03:51:04.633623",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
