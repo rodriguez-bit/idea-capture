@@ -2062,5 +2062,29 @@
     "transcribed_at": "2026-03-27T03:26:06.646623",
     "stt_engine": "elevenlabs",
     "idea_type": "napad"
+  },
+  {
+    "author_id": 8,
+    "author_name": "Raul Rodriguez",
+    "department": "marketing",
+    "role": "manager",
+    "audio_filename": "e4ea3237-858c-4e32-b625-217c9c7d05f1.webm",
+    "duration_seconds": 239,
+    "transcript": "No. Potrebujem spraviť aplikáciu, ktorá bude slúžiť na to, že nahrám video, nahrám fotku. Nahrám, eh, kopnu text. A čo to má byť? A toto mi automaticky dá na LinkedIn, dá mi to na Instagram a na Facebook. A teraz. Potrebujem spraviť celkový systém na to, ktorý mi bude-- no, potrebujem tu mať vlastne vloženého AI, eh, normálne nejaký cloud, normálne, že pr-projekt, nahrávanie súborov, nahrávanie fotiek, vlastná memories, ktorá sa tam bude písať proste úplne, že totálne sa inšpiruj, eh, cloudom ako aplikáciou, ako má a ako funguje. No a keď ja keď budem pridávať príspevky, tak by si mal rozhodnúť, či mám si ich, eh, upravovať, eh, dopĺňať, mal by si, eh, z nich spraviť ako keby, že top. Posts z nich mal by si vyhodnocovať, eh, štatistiky, koľko, eh, bolo videní. Čo malo alebo nemalo, eh, úspech, eh, a tak ďalej a tak ďalej. No. Akože je to veľmi jednoducho napísaná aplikácia. Oveľa ťažšie bude to prevedenie, ale ja si myslím, že, eh, toto zvládneme. Eh, treba pozrieť na internete, vygoogliť a väčšinou tam niekto už niekde niekto robil, čo podľa mňa už sa muselo, eh, robiť, aby sme nevymýšľali koleso. A keď tieto informácie budú, eh, teda všetky pokope, tak, eh, normálne ty to zazdieľaš, prispôsobíš na konkrétnu časť. No a ešte teoretická jedna vec. Ja mám teraz spojenú takú víziu, že mám, eh, a to je, že chudnem. No a pri každých troch kilách ja spúšťam nový produkt. No a, eh, potom to zdieľam na sociálnych sieťach, tak možno by aj toto bolo dobré prepojiť, že akože aplikácia, kde ja vlastne zapisujem váhu, zapisujem veci, čo sa dejú, fotky, videá, koho som stretol na tej mojej ceste a tak ďalej a tak ďalej. No a toto by bolo prepojené s tým LinkedInom, pretože veľa, veľké množstvo informácií pôjde aj tudiaľto. Takže sprav kompletnú analýzu toho, čo potrebujeme vyriešiť, sprav kompletné plánovanie, eh, píska všetko a daj mi to normálne, že skontrolovať, pozrieť, aby sme sa pustili do práce.",
+    "status": "new",
+    "ai_score": 0,
+    "ai_analysis": "",
+    "reviewer_note": "",
+    "reviewed_by": "",
+    "reviewed_at": "",
+    "created_at": "2026-03-27 03:30:28.400236+00",
+    "visibility": "personal",
+    "tags": "[]",
+    "assigned_to": "",
+    "deadline": "",
+    "campaign_id": null,
+    "transcribed_at": "2026-03-27T03:30:43.884378",
+    "stt_engine": "elevenlabs",
+    "idea_type": "napad"
   }
 ]
